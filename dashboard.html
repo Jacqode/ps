@@ -16,7 +16,7 @@
   import { parseEvents } from './js/parser.js';
   import { groupByHour } from './js/aggregator.js';
 
-  const WORKER = "https://YOUR_WORKER_URL"; // sæt din worker URL her
+  const WORKER = "https://worker-backend.jakobhelkjaer.workers.dev"; // worker URL
 
   function computeMedian(arr) {
     const s = [...arr].sort((a,b)=>a-b);
