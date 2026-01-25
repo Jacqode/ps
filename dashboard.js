@@ -1,4 +1,4 @@
-// Hjælpefunktion: formater timestamp til menneskelig tid (bruges ikke i visning, men bevares til evt. senere brug)
+// Hjælpefunktion: formater timestamp til menneskelig tid (bruges ikke i visning, men kan være nyttig)
 function formatTime(ts) {
   const d = new Date(ts);
   return d.toLocaleString();
@@ -21,11 +21,9 @@ let ucl = null;
 let latest = null;
 
 if (intervals.length > 1) {
-  // Median
   const sorted = [...intervals].sort((a, b) => a - b);
   median = sorted[Math.floor(sorted.length / 2)];
 
-  // Moving Range (MR)
   const mr = [];
   for (let i = 1; i < intervals.length; i++) {
     mr.push(Math.abs(intervals[i] - intervals[i - 1]));
@@ -34,9 +32,7 @@ if (intervals.length > 1) {
   const mrSorted = [...mr].sort((a, b) => a - b);
   mrMedian = mrSorted[Math.floor(mrSorted.length / 2)];
 
-  // Upper Control Limit
   ucl = median + mrMedian / 1.128;
-
   latest = intervals[intervals.length - 1];
 
   const result = {
@@ -69,9 +65,7 @@ if (intervals.length > 1) {
     "Ikke nok data til SPC endnu.";
 }
 
-// -----------------------------
 // Graf (Sprint 3)
-// -----------------------------
 if (intervals.length > 0) {
   const ctx = document.getElementById("intervalChart").getContext("2d");
 
