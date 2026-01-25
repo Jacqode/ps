@@ -2,31 +2,20 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Plug & Pause – Dashboard</title>
-
-  <!-- Sprint 3: Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <script defer src="dashboard.js"></script>
+  <title>Plug & Pause</title>
+  <script defer src="widget.js"></script>
 </head>
 
-<body style="background:#f5f5f5; padding:20px; font-family:sans-serif;">
-  <h1>Plug & Pause – Dashboard</h1>
+<body style="font-family:sans-serif;">
 
-  <p>Her kan du se dine pauser og rytme som data over tid.</p>
+  <h1>Plug & Pause</h1>
 
-  <h2>Data</h2>
-  <pre id="raw"></pre>
+  <p>Registrer dine pauser her.</p>
 
-  <h2>Intervaller (minutter)</h2>
-  <pre id="intervals"></pre>
+  <button id="doneBtn" style="padding:10px 20px; font-size:16px;">Udført</button>
+  <button id="snoozeBtn" style="padding:10px 20px; font-size:16px; margin-left:10px;">Snooze</button>
 
-  <h2>SPC Resultat</h2>
-  <pre id="spc"></pre>
-
-  <!-- Sprint 3: Graf -->
-  <h2>Grafisk visning</h2>
-  <canvas id="intervalChart" width="600" height="300"></canvas>
+  <p id="status" style="margin-top:20px; font-weight:bold;"></p>
 
 </body>
 </html>
