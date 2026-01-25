@@ -1,45 +1,14 @@
-const activities = [
-  "15 squats",
-  "8 armstrækninger",
-  "30 sek vejrtrækning",
-  "50 skridt",
-  "20 sek nakke-stræk"
-];
+// Hent eksisterende events
+const events = JSON.parse(localStorage.getItem("events") || "[]");
 
-const pick = () =>
-  activities[Math.floor(Math.random() * activities.length)];
-
-const log = () => {
-  const e = JSON.parse(localStorage.getItem("events") || "[]");
-  e.push(Date.now());
-  localStorage.setItem("events", JSON.stringify(e));
+// Udført-knap
+document.getElementById("doneBtn").onclick = () => {
+  events.push(Date.now());
+  localStorage.setItem("events", JSON.stringify(events));
+  document.getElementById("status").textContent = "Pause registreret!";
 };
 
-function show() {
-  document.getElementById("activity-text").textContent =
-    "Din aktivitet: " + pick();
-
-  document.getElementById("pause-overlay").style.display = "block";
-  document.getElementById("status-text").style.display = "none";
-
-  log();
-}
-
-function hide() {
-  document.getElementById("pause-overlay").style.display = "none";
-  document.getElementById("status-text").style.display = "block";
-}
-
-document.getElementById("done-btn").onclick = hide;
-
-document.getElementById("snooze-btn").onclick = () => {
-  hide();
-  setTimeout(show, 5 * 60 * 1000);
+// Snooze-knap
+document.getElementById("snoozeBtn").onclick = () => {
+  document.getElementById("status").textContent = "Snoozet i 5 minutter.";
 };
-
-// Sprint 0 test-interval: 30 sek
-setInterval(show, 30 * 1000);
-
-// Manuel test i konsol
-window.showPlugPause = show;
-
