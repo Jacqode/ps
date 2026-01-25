@@ -16,6 +16,38 @@ for (let i = 1; i < events.length; i++) {
 document.getElementById("intervals").textContent =
   JSON.stringify(intervals, null, 2);
 
-// Midlertidig SPC-tekst (Step 3 kommer)
-document.getElementById("spc").textContent =
-  "SPC-beregning kommer i næste step.";
+// Anhøj-SPC: Median + MR/1.128
+if (intervals.length > 1) {
+  // Median
+  const sorted = [...intervals].sort((a, b) => a - b);
+  const median = sorted[Math.floor(sorted.length / 2)];
+
+  // Moving Range (MR)
+  const mr = [];
+  for (let i = 1; i < intervals.length; i++) {
+    mr.push(Math.abs(intervals[i] - intervals[i - 1]));
+  }
+
+  const mrSorted = [...mr].sort((a, b) => a - b);
+  const mrMedian = mrSorted[Math.floor(mrSorted.length / 2)];
+
+  // Upper Control Limit
+  const ucl = median + mrMedian / 1.128;
+
+  const latest = intervals[intervals.length - 1];
+
+  const result = {
+    median,
+    mrMedian,
+    ucl,
+    seneste_interval: latest,
+    status: latest > ucl ? "OUT OF CONTROL" : "IN CONTROL"
+  };
+
+  document.getElementById("spc").textContent =
+    JSON.stringify(result, null, 2);
+} else {
+  document.getElementById("spc").textContent =
+    "Ikke nok data til SPC endnu.";
+}
+
