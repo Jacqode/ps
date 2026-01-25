@@ -4,28 +4,27 @@
   <meta charset="utf-8">
   <title>Plug & Pause – Dashboard</title>
 
-  <!-- Chart.js til Sprint 3 -->
+  <!-- Chart.js til grafen -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+  <!-- Vores dashboard‑logik -->
   <script defer src="dashboard.js"></script>
 </head>
 
 <body style="background:#f5f5f5; padding:20px; font-family:sans-serif;">
+
   <h1>Plug & Pause – Dashboard</h1>
 
-  <p>Her kan du se dine pauser og rytme baseret på Anhøj-SPC.</p>
-
-  <h2>Seneste 10 registreringer</h2>
-  <pre id="raw"></pre>
-
-  <h2>Intervaller (minutter)</h2>
-  <pre id="intervals"></pre>
-
+  <!-- Kun dette skal være synligt -->
   <h2>SPC Resultat</h2>
   <pre id="spc"></pre>
 
   <h2>Grafisk visning</h2>
   <canvas id="intervalChart" width="600" height="300"></canvas>
 
+  <!-- Summary‑sektionen (Events, status, seneste/næste pause) -->
+  <div id="summary" style="margin-top:20px;"></div>
+
 </body>
 </html>
+
