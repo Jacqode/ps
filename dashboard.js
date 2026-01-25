@@ -46,6 +46,16 @@ if (intervals.length > 1) {
 
   document.getElementById("spc").textContent =
     JSON.stringify(result, null, 2);
+  
+  // Ekstra: vis en kort, menneskelig status
+const statusLine = document.createElement("p");
+statusLine.textContent =
+  result.status === "IN CONTROL"
+    ? "Rytmen er stabil."
+    : "Du har haft en længere pause end normalt.";
+
+document.body.appendChild(statusLine);
+
 } else {
   document.getElementById("spc").textContent =
     "Ikke nok data til SPC endnu.";
