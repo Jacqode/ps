@@ -1,35 +1,20 @@
-// Hjælpefunktion: formater timestamp til menneskelig tid
+// Hjælpefunktion: formater timestamp til menneskelig tid (bruges ikke i visning, men bevares til evt. senere brug)
 function formatTime(ts) {
   const d = new Date(ts);
-  return d.toLocaleString(); // dansk format
+  return d.toLocaleString();
 }
 
-// Hent events fra localStorage
+// Hent events
 const events = JSON.parse(localStorage.getItem("events") || "[]");
-
-// Vis kun de seneste 10 events i læsbart format
-const lastEvents = events.slice(-10).map(formatTime);
-document.getElementById("raw").textContent =
-  JSON.stringify(lastEvents, null, 2);
 
 // Beregn intervaller i minutter
 const intervals = [];
 for (let i = 1; i < events.length; i++) {
   const diffMs = events[i] - events[i - 1];
-  intervals.push(Math.round(diffMs / 60000)); // minutter
+  intervals.push(Math.round(diffMs / 60000));
 }
 
-// Vis intervaller
-document.getElementById("intervals").textContent =
-  JSON.stringify(intervals, null, 2);
-
-// Vis antal events og intervaller
-const counts = document.createElement("p");
-counts.textContent =
-  `Events: ${events.length} — Intervaller: ${intervals.length}`;
-document.body.appendChild(counts);
-
-// Anhøj-SPC: Median + MR/1.128
+// Anhøj-SPC
 let median = null;
 let mrMedian = null;
 let ucl = null;
@@ -62,49 +47,36 @@ if (intervals.length > 1) {
     status: latest > ucl ? "OUT OF CONTROL" : "IN CONTROL"
   };
 
+  // Vis SPC-resultat
   document.getElementById("spc").textContent =
     JSON.stringify(result, null, 2);
 
-  // Menneskelig status + farvekode
-  const statusLine = document.createElement("p");
-  statusLine.textContent =
-    result.status === "IN CONTROL"
-      ? "Rytmen er stabil."
-      : "Du har haft en længere pause end normalt.";
+  // Summary‑sektion
+  const summary = document.getElementById("summary");
 
-  statusLine.style.fontWeight = "bold";
-  statusLine.style.color =
-    result.status === "IN CONTROL" ? "green" : "red";
+  summary.innerHTML = `
+    <p><strong>Events:</strong> ${events.length} — <strong>Intervaller:</strong> ${intervals.length}</p>
 
-  document.body.appendChild(statusLine);
+    <p style="font-weight:bold; color:${result.status === "IN CONTROL" ? "green" : "red"};">
+      ${result.status === "IN CONTROL" ? "Rytmen er stabil." : "Du har haft en længere pause end normalt."}
+    </p>
 
-  // Seneste pause
-  const lastPause = document.createElement("p");
-  lastPause.textContent = `Seneste pause: ${latest} min siden`;
-  document.body.appendChild(lastPause);
-
-  // Næste pause (estimat)
-  const nextPause = document.createElement("p");
-  nextPause.textContent =
-    `Næste pause forventes inden for ${Math.round(ucl)} min`;
-  document.body.appendChild(nextPause);
-
+    <p>Seneste pause: ${latest} min siden</p>
+    <p>Næste pause forventes inden for ${Math.round(ucl)} min</p>
+  `;
 } else {
   document.getElementById("spc").textContent =
     "Ikke nok data til SPC endnu.";
 }
 
 // -----------------------------
-// Sprint 3: Graf med Chart.js
+// Graf (Sprint 3)
 // -----------------------------
 if (intervals.length > 0) {
   const ctx = document.getElementById("intervalChart").getContext("2d");
 
   const labels = intervals.map((_, i) => `#${i + 1}`);
-
-  const colors = intervals.map(v =>
-    ucl && v > ucl ? "red" : "green"
-  );
+  const colors = intervals.map(v => (ucl && v > ucl ? "red" : "green"));
 
   new Chart(ctx, {
     type: "line",
@@ -139,9 +111,7 @@ if (intervals.length > 0) {
     options: {
       responsive: false,
       scales: {
-        y: {
-          beginAtZero: true
-        }
+        y: { beginAtZero: true }
       }
     }
   });
