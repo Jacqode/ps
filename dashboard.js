@@ -1,9 +1,16 @@
+// Hjælpefunktion: formater timestamp til menneskelig tid
+function formatTime(ts) {
+  const d = new Date(ts);
+  return d.toLocaleString(); // dansk format
+}
+
 // Hent events fra localStorage
 const events = JSON.parse(localStorage.getItem("events") || "[]");
 
-// Vis rå data
+// Vis kun de seneste 10 events i læsbart format
+const lastEvents = events.slice(-10).map(formatTime);
 document.getElementById("raw").textContent =
-  JSON.stringify(events, null, 2);
+  JSON.stringify(lastEvents, null, 2);
 
 // Beregn intervaller i minutter
 const intervals = [];
@@ -16,7 +23,7 @@ for (let i = 1; i < events.length; i++) {
 document.getElementById("intervals").textContent =
   JSON.stringify(intervals, null, 2);
 
-// Sprint 2: Vis antal events og intervaller
+// Vis antal events og intervaller
 const counts = document.createElement("p");
 counts.textContent =
   `Events: ${events.length} — Intervaller: ${intervals.length}`;
@@ -58,7 +65,7 @@ if (intervals.length > 1) {
   document.getElementById("spc").textContent =
     JSON.stringify(result, null, 2);
 
-  // Sprint 2: Menneskelig status + farvekode
+  // Menneskelig status + farvekode
   const statusLine = document.createElement("p");
   statusLine.textContent =
     result.status === "IN CONTROL"
@@ -71,12 +78,12 @@ if (intervals.length > 1) {
 
   document.body.appendChild(statusLine);
 
-  // Sprint 2: Seneste pause
+  // Seneste pause
   const lastPause = document.createElement("p");
   lastPause.textContent = `Seneste pause: ${latest} min siden`;
   document.body.appendChild(lastPause);
 
-  // Sprint 2: Næste pause (estimat)
+  // Næste pause (estimat)
   const nextPause = document.createElement("p");
   nextPause.textContent =
     `Næste pause forventes inden for ${Math.round(ucl)} min`;
