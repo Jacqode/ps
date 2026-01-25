@@ -5,12 +5,22 @@
   <title>Plug & Pause</title>
   <script defer src="widget.js"></script>
 </head>
-<body>
-  <div id="pause-overlay" style="display:none">
+
+<body style="background:#f5f5f5; min-height:100vh; padding:20px;">
+
+  <!-- Overlay der vises ved pause -->
+  <div id="pause-overlay" style="display:none;">
     <h1>Plug & Pause</h1>
     <p id="activity-text"></p>
     <button id="done-btn">Udført</button>
     <button id="snooze-btn">Snooze 5 min</button>
   </div>
+
+  <!-- Status-tekst når overlay er skjult -->
+  <p id="status-text" style="margin-top:20px;">
+    Plug & Pause kører i baggrunden. Du får en ny aktivitet om lidt.
+  </p>
+
 </body>
 </html>
+
