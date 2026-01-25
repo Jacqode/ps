@@ -1,20 +1,16 @@
-// Hjælpefunktion: formater timestamp til menneskelig tid (bruges ikke i visning, men kan være nyttig)
 function formatTime(ts) {
   const d = new Date(ts);
   return d.toLocaleString();
 }
 
-// Hent events
 const events = JSON.parse(localStorage.getItem("events") || "[]");
 
-// Beregn intervaller i minutter
 const intervals = [];
 for (let i = 1; i < events.length; i++) {
   const diffMs = events[i] - events[i - 1];
   intervals.push(Math.round(diffMs / 60000));
 }
 
-// Anhøj-SPC
 let median = null;
 let mrMedian = null;
 let ucl = null;
@@ -43,11 +39,9 @@ if (intervals.length > 1) {
     status: latest > ucl ? "OUT OF CONTROL" : "IN CONTROL"
   };
 
-  // Vis SPC-resultat
   document.getElementById("spc").textContent =
     JSON.stringify(result, null, 2);
 
-  // Summary‑sektion
   const summary = document.getElementById("summary");
 
   summary.innerHTML = `
@@ -65,7 +59,6 @@ if (intervals.length > 1) {
     "Ikke nok data til SPC endnu.";
 }
 
-// Graf (Sprint 3)
 if (intervals.length > 0) {
   const ctx = document.getElementById("intervalChart").getContext("2d");
 
