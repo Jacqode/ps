@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "Plug & Pause",
+  "version": "1.0",
+  "description": "Registrerer pauser og viser tælling.",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": ["storage"]
+}
