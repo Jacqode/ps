@@ -16,7 +16,7 @@ for (let i = 1; i < events.length; i++) {
 document.getElementById("intervals").textContent =
   JSON.stringify(intervals, null, 2);
 
-// Step 5: Vis antal events og intervaller
+// Sprint 2: Vis antal events og intervaller
 const counts = document.createElement("p");
 counts.textContent =
   `Events: ${events.length} — Intervaller: ${intervals.length}`;
@@ -53,14 +53,29 @@ if (intervals.length > 1) {
   document.getElementById("spc").textContent =
     JSON.stringify(result, null, 2);
 
-  // Ekstra: vis en kort, menneskelig status
+  // Sprint 2: Menneskelig status + farvekode
   const statusLine = document.createElement("p");
   statusLine.textContent =
     result.status === "IN CONTROL"
       ? "Rytmen er stabil."
       : "Du har haft en længere pause end normalt.";
 
+  statusLine.style.fontWeight = "bold";
+  statusLine.style.color =
+    result.status === "IN CONTROL" ? "green" : "red";
+
   document.body.appendChild(statusLine);
+
+  // Sprint 2: Seneste pause
+  const lastPause = document.createElement("p");
+  lastPause.textContent = `Seneste pause: ${latest} min siden`;
+  document.body.appendChild(lastPause);
+
+  // Sprint 2: Næste pause (estimat)
+  const nextPause = document.createElement("p");
+  nextPause.textContent =
+    `Næste pause forventes inden for ${Math.round(ucl)} min`;
+  document.body.appendChild(nextPause);
 
 } else {
   document.getElementById("spc").textContent =
