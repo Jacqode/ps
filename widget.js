@@ -6,7 +6,8 @@ const activities = [
   "20 sek nakke-stræk"
 ];
 
-const pick = () => activities[Math.floor(Math.random() * activities.length)];
+const pick = () =>
+  activities[Math.floor(Math.random() * activities.length)];
 
 const log = () => {
   const e = JSON.parse(localStorage.getItem("events") || "[]");
@@ -15,16 +16,22 @@ const log = () => {
 };
 
 function show() {
-  document.getElementById("activity-text").textContent = "Din aktivitet: " + pick();
+  document.getElementById("activity-text").textContent =
+    "Din aktivitet: " + pick();
+
   document.getElementById("pause-overlay").style.display = "block";
+  document.getElementById("status-text").style.display = "none";
+
   log();
 }
 
 function hide() {
   document.getElementById("pause-overlay").style.display = "none";
+  document.getElementById("status-text").style.display = "block";
 }
 
 document.getElementById("done-btn").onclick = hide;
+
 document.getElementById("snooze-btn").onclick = () => {
   hide();
   setTimeout(show, 5 * 60 * 1000);
