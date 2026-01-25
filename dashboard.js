@@ -23,10 +23,15 @@ counts.textContent =
 document.body.appendChild(counts);
 
 // Anhøj-SPC: Median + MR/1.128
+let median = null;
+let mrMedian = null;
+let ucl = null;
+let latest = null;
+
 if (intervals.length > 1) {
   // Median
   const sorted = [...intervals].sort((a, b) => a - b);
-  const median = sorted[Math.floor(sorted.length / 2)];
+  median = sorted[Math.floor(sorted.length / 2)];
 
   // Moving Range (MR)
   const mr = [];
@@ -35,12 +40,12 @@ if (intervals.length > 1) {
   }
 
   const mrSorted = [...mr].sort((a, b) => a - b);
-  const mrMedian = mrSorted[Math.floor(mrSorted.length / 2)];
+  mrMedian = mrSorted[Math.floor(mrSorted.length / 2)];
 
   // Upper Control Limit
-  const ucl = median + mrMedian / 1.128;
+  ucl = median + mrMedian / 1.128;
 
-  const latest = intervals[intervals.length - 1];
+  latest = intervals[intervals.length - 1];
 
   const result = {
     median,
@@ -80,4 +85,57 @@ if (intervals.length > 1) {
 } else {
   document.getElementById("spc").textContent =
     "Ikke nok data til SPC endnu.";
+}
+
+// -----------------------------
+// Sprint 3: Graf med Chart.js
+// -----------------------------
+if (intervals.length > 0) {
+  const ctx = document.getElementById("intervalChart").getContext("2d");
+
+  const labels = intervals.map((_, i) => `#${i + 1}`);
+
+  const colors = intervals.map(v =>
+    ucl && v > ucl ? "red" : "green"
+  );
+
+  new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Intervaller (minutter)",
+          data: intervals,
+          borderColor: "#333",
+          backgroundColor: colors,
+          pointBackgroundColor: colors,
+          pointRadius: 5,
+          tension: 0.2
+        },
+        {
+          label: "Median",
+          data: intervals.map(() => median),
+          borderColor: "blue",
+          borderDash: [5, 5],
+          pointRadius: 0
+        },
+        {
+          label: "UCL",
+          data: intervals.map(() => ucl),
+          borderColor: "red",
+          borderDash: [5, 5],
+          pointRadius: 0
+        }
+      ]
+    },
+    options: {
+      responsive: false,
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
 }
