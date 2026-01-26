@@ -2,24 +2,22 @@
 <html lang="da">
 <head>
   <meta charset="utf-8">
-  <title>Plug & Pause – Dashboard</title>
-  <script defer src="dashboard.js"></script>
+  <title>Plug & Pause</title>
+  <script defer src="widget.js"></script>
 </head>
 
 <body>
 
-  <h1>📊 Pauseoversigt for ledere</h1>
+  <h1>Mit køkken</h1>
 
-  <p>Dette dashboard viser antal registrerede pauser pr. dag og vurderer variationen efter forbedringsmodellen.</p>
+  <p>Registrer dine pauser her.</p>
 
-  <h2>Daglige pauser</h2>
-  <canvas id="chart" width="800" height="300"></canvas>
+  <button id="doneBtn" class="pause-btn">Udført</button>
+  <p id="status" class="status-text"></p>
 
-  <h2>Vurdering</h2>
-  <p id="assessment"></p>
-
-  <h2>Data</h2>
-  <div id="dailyList"></div>
+  <a href="dashboard.html">
+    📊 Gå til dashboard
+  </a>
 
 </body>
 </html>
