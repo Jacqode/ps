@@ -8,7 +8,7 @@ export function median(values) {
     : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
-// Tegn graf
+// Tegn graf med Chart.js
 export function renderChart(dates, counts) {
   const ctx = document.getElementById("chart").getContext("2d");
 
