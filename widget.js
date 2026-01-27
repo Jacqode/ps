@@ -1,5 +1,33 @@
 // ---------------------------------------------------------
-// 1) DATA (skuffen med motionskort)
+// 1) Hent firma-ID fra script-URL
+// ---------------------------------------------------------
+
+function getCompanyId() {
+  try {
+    const url = new URL(import.meta.url);
+    return url.searchParams.get("companyId") || "UNKNOWN_COMPANY";
+  } catch {
+    return "UNKNOWN_COMPANY";
+  }
+}
+
+// ---------------------------------------------------------
+// 2) Generér eller hent anonymt user-ID
+// ---------------------------------------------------------
+
+function getOrCreateUserId() {
+  let userId = localStorage.getItem("pp_userId");
+
+  if (!userId) {
+    userId = "u_" + Math.random().toString(16).slice(2, 10);
+    localStorage.setItem("pp_userId", userId);
+  }
+
+  return userId;
+}
+
+// ---------------------------------------------------------
+// 3) DATA (skuffen med motionskort)
 // ---------------------------------------------------------
 
 const aktiviteter = [
@@ -11,20 +39,17 @@ const aktiviteter = [
   "Planke i 20 sekunder"
 ];
 
-
 // ---------------------------------------------------------
-// 2) FORRETNINGSLOGIK (terningen)
+// 4) FORRETNINGSLOGIK (terningen)
 // ---------------------------------------------------------
 
-// Træk en tilfældig aktivitet
 function rulTerning() {
   const index = Math.floor(Math.random() * aktiviteter.length);
   return aktiviteter[index];
 }
 
-
 // ---------------------------------------------------------
-// 3) API-KALD (elektrikeren sender besked til kælderen)
+// 5) API-KALD (sender pause til backend)
 // ---------------------------------------------------------
 
 async function sendPause(userId, companyId) {
@@ -39,19 +64,20 @@ async function sendPause(userId, companyId) {
   });
 }
 
-
 // ---------------------------------------------------------
-// 4) UI-HÅNDTERING (knapper, DOM, visning)
+// 6) UI-HÅNDTERING (knapper, DOM, visning)
 // ---------------------------------------------------------
 
-// Når brugeren ruller terningen
 document.getElementById("rollBtn").onclick = () => {
   const aktivitet = rulTerning();
   document.getElementById("aktivitet").textContent = aktivitet;
 };
 
-// Når brugeren er færdig og registrerer pausen
 document.getElementById("doneBtn").onclick = async () => {
-  await sendPause("JAKOB123", "TEST");
+  const companyId = getCompanyId();
+  const userId = getOrCreateUserId();
+
+  await sendPause(userId, companyId);
+
   document.getElementById("status").textContent = "Pause registreret!";
 };
