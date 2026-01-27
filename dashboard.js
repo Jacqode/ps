@@ -148,29 +148,9 @@ function drawChart(labels, values, med) {
   ctx.restore();
 }
 
-
-  // Medianlinje
-  ctx.strokeStyle = "red";
-  ctx.beginPath();
-  ctx.moveTo(0, canvas.height - med * scale);
-  ctx.lineTo(canvas.width, canvas.height - med * scale);
-  ctx.stroke();
-
-  // Datapunkter
-  ctx.strokeStyle = "black";
-  ctx.beginPath();
-  values.forEach((v, i) => {
-    const x = (canvas.width / (values.length - 1)) * i;
-    const y = canvas.height - v * scale;
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  });
-  ctx.stroke();
-}
-
 async function renderDashboard() {
   const stats = await loadStats();
-  const events = stats.allEvents; // Husk at tilføje dette i Worker
+  const events = stats.allEvents;
 
   const grouped = groupByDay(events);
   const labels = Object.keys(grouped);
