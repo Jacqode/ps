@@ -59,8 +59,95 @@ function drawChart(labels, values, med) {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  const padding = 50;
+  const w = canvas.width - padding * 2;
+  const h = canvas.height - padding * 2;
+
   const max = Math.max(...values, med);
-  const scale = (canvas.height - 20) / max;
+  const scaleY = h / max;
+  const stepX = w / (values.length - 1);
+
+  // --- GRIDLINES ---
+  ctx.strokeStyle = "#ddd";
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= max; i++) {
+    const y = canvas.height - padding - i * scaleY;
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
+    ctx.lineTo(canvas.width - padding, y);
+    ctx.stroke();
+  }
+
+  // --- Y-akse tal ---
+  ctx.fillStyle = "black";
+  ctx.textAlign = "right";
+  ctx.textBaseline = "middle";
+  for (let i = 0; i <= max; i++) {
+    const y = canvas.height - padding - i * scaleY;
+    ctx.fillText(i, padding - 10, y);
+  }
+
+  // --- X-akse labels (datoer) ---
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  labels.forEach((label, i) => {
+    const x = padding + i * stepX;
+    ctx.fillText(label, x, canvas.height - padding + 5);
+  });
+
+  // --- Medianlinje ---
+  const medianY = canvas.height - padding - med * scaleY;
+  ctx.strokeStyle = "red";
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.moveTo(padding, medianY);
+  ctx.lineTo(canvas.width - padding, medianY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Median label
+  ctx.fillStyle = "red";
+  ctx.textAlign = "left";
+  ctx.textBaseline = "bottom";
+  ctx.fillText(`Median: ${med}`, padding + 5, medianY - 5);
+
+  // --- Datakurve ---
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  values.forEach((v, i) => {
+    const x = padding + i * stepX;
+    const y = canvas.height - padding - v * scaleY;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // --- Punkter ---
+  ctx.fillStyle = "blue";
+  values.forEach((v, i) => {
+    const x = padding + i * stepX;
+    const y = canvas.height - padding - v * scaleY;
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // --- Aksetitler ---
+  ctx.fillStyle = "black";
+  ctx.textAlign = "center";
+
+  // X-akse titel
+  ctx.fillText("Dato", canvas.width / 2, canvas.height - 10);
+
+  // Y-akse titel (lodret)
+  ctx.save();
+  ctx.translate(15, canvas.height / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText("Antal pauser", 0, 0);
+  ctx.restore();
+}
+
 
   // Medianlinje
   ctx.strokeStyle = "red";
