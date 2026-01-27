@@ -27,7 +27,7 @@ function getOrCreateUserId() {
 }
 
 // ---------------------------------------------------------
-// 3) DATA (skuffen med motionskort)
+// 3) DATA (aktiviteter)
 // ---------------------------------------------------------
 
 const aktiviteter = [
@@ -40,7 +40,7 @@ const aktiviteter = [
 ];
 
 // ---------------------------------------------------------
-// 4) FORRETNINGSLOGIK (terningen)
+// 4) Forretningslogik (terning)
 // ---------------------------------------------------------
 
 function rulTerning() {
@@ -49,7 +49,7 @@ function rulTerning() {
 }
 
 // ---------------------------------------------------------
-// 5) API-KALD (sender pause til backend)
+// 5) API-kald
 // ---------------------------------------------------------
 
 async function sendPause(userId, companyId) {
@@ -65,7 +65,7 @@ async function sendPause(userId, companyId) {
 }
 
 // ---------------------------------------------------------
-// 6) UI-HÅNDTERING (knapper, DOM, visning)
+// 6) UI-håndtering
 // ---------------------------------------------------------
 
 document.getElementById("rollBtn").onclick = () => {
