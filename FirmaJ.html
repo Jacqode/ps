@@ -3,25 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <title>Plug & Pause – Firma J</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
+      max-width: 600px;
+      margin: auto;
     }
 
     #widget {
       border: 1px solid #ccc;
       padding: 20px;
-      width: 300px;
+      width: 100%;
       margin-bottom: 40px;
+      border-radius: 8px;
     }
 
     #feed div {
-      padding: 6px 0;
+      padding: 8px 0;
       border-bottom: 1px solid #eee;
+      font-size: 15px;
+    }
+
+    h2 {
+      margin-top: 40px;
     }
   </style>
 </head>
+
 <body>
 
   <h1>Plug & Pause – Firma J</h1>
@@ -69,6 +79,9 @@
 
     // Hent feed når siden loader
     loadFeed();
+
+    // Auto-refresh hvert 10. sekund
+    setInterval(loadFeed, 10000);
   </script>
 
 </body>
