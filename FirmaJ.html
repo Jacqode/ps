@@ -1,76 +1,212 @@
-// ---------------------------------------------------------
-// 1) Hent firma-ID fra script-URL
-// ---------------------------------------------------------
-export function getCompanyId() {
-  try {
-    const url = new URL(import.meta.url);
-    return url.searchParams.get("companyId") || "UNKNOWN_COMPANY";
-  } catch {
-    return "UNKNOWN_COMPANY";
-  }
-}
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8" />
+  <title>Plug & Pause – Firma J</title>
 
-// ---------------------------------------------------------
-// 2) Generér eller hent anonymt user-ID
-// ---------------------------------------------------------
-export function getOrCreateUserId() {
-  let userId = localStorage.getItem("pp_userId");
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
 
-  if (!userId) {
-    userId = "u_" + Math.random().toString(16).slice(2, 10);
-    localStorage.setItem("pp_userId", userId);
-  }
+    #widget {
+      border: 1px solid #ccc;
+      padding: 20px;
+      width: 100%;
+      margin-bottom: 40px;
+      border-radius: 8px;
+    }
 
-  return userId;
-}
+    #feed div {
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 15px;
+    }
 
-// ---------------------------------------------------------
-// 3) DATA (aktiviteter)
-// ---------------------------------------------------------
-export const aktiviteter = [
-  "Lav 10 squats",
-  "Hop 20 gange",
-  "Stræk armene i 30 sekunder",
-  "Gå en tur rundt om stolen",
-  "Lav 5 dybe vejrtrækninger",
-  "Planke i 20 sekunder"
-];
+    h2 {
+      margin-top: 40px;
+    }
 
-// ---------------------------------------------------------
-// 4) Forretningslogik (terning)
-// ---------------------------------------------------------
-export function rulTerning() {
-  const index = Math.floor(Math.random() * aktiviteter.length);
-  return aktiviteter[index];
-}
+    #toggleMuteBtn {
+      margin-top: 10px;
+    }
+  </style>
+</head>
 
-// ---------------------------------------------------------
-// 5) API-kald (Pause)
-// ---------------------------------------------------------
-export async function sendPause(userId, companyId) {
-  return fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/pause", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      userId,
-      companyId,
-      timestamp: Date.now()
-    })
-  });
-}
+<body>
 
-// ---------------------------------------------------------
-// 6) API-kald (Social Feature)
-// ---------------------------------------------------------
-export async function sendSocialEvent(groupId, userId, activity, name) {
-  return fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/api/register", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      groupId,
-      userId,
-      name,
-      activity
-    })
-  });
-}
+  <h1>Plug & Pause – Firma J</h1>
+
+  <!-- Widget container -->
+  <div id="widget">
+    <button id="rollBtn">Rul terning</button>
+    <p id="aktivitet">–</p>
+    <button id="doneBtn">Færdig</button>
+    <p id="status"></p>
+  </div>
+
+  <!-- Navn -->
+  <label for="username">Dit navn:</label>
+  <input id="username" type="text" placeholder="Skriv dit navn">
+  <button id="saveNameBtn">Gem navn</button>
+  <p id="nameStatus"></p>
+
+  <!-- Mute-knap -->
+  <button id="toggleMuteBtn">Slå påmindelser fra</button>
+  <p id="muteStatus"></p>
+
+  <!-- Socialt feed -->
+  <h2>Socialt feed</h2>
+  <div id="feed">Indlæser…</div>
+
+  <!-- Widget script -->
+  <script type="module">
+    import { sendSocialEvent, sendPause, getCompanyId, getOrCreateUserId, rulTerning } from "./widget.js";
+
+    // ---------------------------------------------------------
+    // NAVN
+    // ---------------------------------------------------------
+    const nameInput = document.getElementById("username");
+    const saveNameBtn = document.getElementById("saveNameBtn");
+    const nameStatus = document.getElementById("nameStatus");
+
+    const savedName = localStorage.getItem("pp_name");
+    if (savedName) {
+      nameInput.value = savedName;
+      nameStatus.textContent = "Navn gemt: " + savedName;
+    }
+
+    saveNameBtn.onclick = () => {
+      const name = nameInput.value.trim();
+      if (name.length < 2) {
+        nameStatus.textContent = "Navnet er for kort";
+        return;
+      }
+      localStorage.setItem("pp_name", name);
+      nameStatus.textContent = "Navn gemt: " + name;
+    };
+
+
+    // ---------------------------------------------------------
+    // FEED
+    // ---------------------------------------------------------
+    async function loadFeed() {
+      const companyId = "FIRMAJ";
+
+      const res = await fetch(
+        `https://plugandpause-backend.jakobhelkjaer.workers.dev/api/feed?groupId=${companyId}`
+      );
+
+      const events = await res.json();
+      const feedDiv = document.getElementById("feed");
+      feedDiv.innerHTML = "";
+
+      if (events.length === 0) {
+        feedDiv.textContent = "Ingen aktiviteter endnu.";
+        return;
+      }
+
+      events.forEach(ev => {
+        const displayName = ev.name || ev.userId;
+        const time = new Date(ev.timestamp).toLocaleTimeString("da-DK");
+        const item = document.createElement("div");
+        item.textContent = `${time} – ${displayName} lavede: ${ev.activity}`;
+        feedDiv.appendChild(item);
+      });
+    }
+
+    loadFeed();
+    setInterval(loadFeed, 10000);
+
+
+    // ---------------------------------------------------------
+    // PÅMINDELSER
+    // ---------------------------------------------------------
+    if (!localStorage.getItem("pp_mute")) {
+      localStorage.setItem("pp_mute", "false");
+    }
+
+    const morningReminder = { hour: 10, minute: 0 };
+    const afternoonReminder = { hour: 14, minute: 30 };
+
+    function resetDailyFlags() {
+      const today = new Date().toDateString();
+      const last = localStorage.getItem("pp_lastReminderDate");
+
+      if (today !== last) {
+        localStorage.setItem("pp_lastReminderDate", today);
+        localStorage.setItem("pp_morningDone", "false");
+        localStorage.setItem("pp_afternoonDone", "false");
+      }
+    }
+
+    resetDailyFlags();
+
+    f    function checkReminder(target, flagName) {
+      if (localStorage.getItem("pp_mute") === "true") return;
+
+      const now = new Date();
+      if (localStorage.getItem(flagName) === "true") return;
+
+      if (now.getHours() === target.hour && now.getMinutes() === target.minute) {
+        alert("Tid til en lille pause! Rul terningen 😊");
+        localStorage.setItem(flagName, "true");
+      }
+    }
+
+    setInterval(() => {
+      resetDailyFlags();
+      checkReminder(morningReminder, "pp_morningDone");
+      checkReminder(afternoonReminder, "pp_afternoonDone");
+    }, 60000);
+
+
+    // ---------------------------------------------------------
+    // MUTE-KNAP
+    // ---------------------------------------------------------
+    const muteBtn = document.getElementById("toggleMuteBtn");
+    const muteStatus = document.getElementById("muteStatus");
+
+    function updateMuteUI() {
+      const muted = localStorage.getItem("pp_mute") === "true";
+      muteBtn.textContent = muted ? "Slå påmindelser til" : "Slå påmindelser fra";
+      muteStatus.textContent = muted ? "Påmindelser er slået fra" : "Påmindelser er aktive";
+    }
+
+    muteBtn.onclick = () => {
+      const current = localStorage.getItem("pp_mute") === "true";
+      localStorage.setItem("pp_mute", current ? "false" : "true");
+      updateMuteUI();
+    };
+
+    updateMuteUI();
+
+
+    // ---------------------------------------------------------
+    // WIDGET-KNAPPER
+    // ---------------------------------------------------------
+    let currentActivity = null;
+
+    document.getElementById("rollBtn").onclick = () => {
+      currentActivity = rulTerning();
+      document.getElementById("aktivitet").textContent = currentActivity;
+    };
+
+    document.getElementById("doneBtn").onclick = async () => {
+      const companyId = getCompanyId();
+      const userId = getOrCreateUserId();
+      const name = localStorage.getItem("pp_name") || null;
+
+      await sendPause(userId, companyId);
+      await sendSocialEvent(companyId, userId, currentActivity, name);
+
+      document.getElementById("status").textContent = "Pause registreret!";
+    };
+  </script>
+
+</body>
+</html>
+
