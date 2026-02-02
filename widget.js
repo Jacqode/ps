@@ -1,8 +1,7 @@
 // ---------------------------------------------------------
 // 1) Hent firma-ID fra script-URL
 // ---------------------------------------------------------
-
-function getCompanyId() {
+export function getCompanyId() {
   try {
     const url = new URL(import.meta.url);
     return url.searchParams.get("companyId") || "UNKNOWN_COMPANY";
@@ -14,8 +13,7 @@ function getCompanyId() {
 // ---------------------------------------------------------
 // 2) Generér eller hent anonymt user-ID
 // ---------------------------------------------------------
-
-function getOrCreateUserId() {
+export function getOrCreateUserId() {
   let userId = localStorage.getItem("pp_userId");
 
   if (!userId) {
@@ -29,8 +27,7 @@ function getOrCreateUserId() {
 // ---------------------------------------------------------
 // 3) DATA (aktiviteter)
 // ---------------------------------------------------------
-
-const aktiviteter = [
+export const aktiviteter = [
   "Lav 10 squats",
   "Hop 20 gange",
   "Stræk armene i 30 sekunder",
@@ -42,17 +39,15 @@ const aktiviteter = [
 // ---------------------------------------------------------
 // 4) Forretningslogik (terning)
 // ---------------------------------------------------------
-
-function rulTerning() {
+export function rulTerning() {
   const index = Math.floor(Math.random() * aktiviteter.length);
   return aktiviteter[index];
 }
 
 // ---------------------------------------------------------
-// 5) API-kald (Firma J)
+// 5) API-kald (Pause)
 // ---------------------------------------------------------
-
-async function sendPause(userId, companyId) {
+export async function sendPause(userId, companyId) {
   return fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/pause", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -67,39 +62,15 @@ async function sendPause(userId, companyId) {
 // ---------------------------------------------------------
 // 6) API-kald (Social Feature)
 // ---------------------------------------------------------
-
-async function sendSocialEvent(groupId, userId, activity) {
+export async function sendSocialEvent(groupId, userId, activity, name) {
   return fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/api/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       groupId,
       userId,
+      name,
       activity
     })
   });
 }
-
-// ---------------------------------------------------------
-// 7) UI-håndtering
-// ---------------------------------------------------------
-
-let currentActivity = null;
-
-document.getElementById("rollBtn").onclick = () => {
-  currentActivity = rulTerning();
-  document.getElementById("aktivitet").textContent = currentActivity;
-};
-
-document.getElementById("doneBtn").onclick = async () => {
-  const companyId = getCompanyId();
-  const userId = getOrCreateUserId();
-
-  // Firma J registrering
-  await sendPause(userId, companyId);
-
-  // Social registrering
-  await sendSocialEvent(companyId, userId, currentActivity);
-
-  document.getElementById("status").textContent = "Pause registreret!";
-};
