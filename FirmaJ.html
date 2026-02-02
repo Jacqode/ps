@@ -1,27 +1,75 @@
 <!DOCTYPE html>
 <html lang="da">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8" />
   <title>Plug & Pause – Firma J</title>
-  <script type="module" src="widget.js?companyId=FIRMA_J"></script>
-</head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
 
+    #widget {
+      border: 1px solid #ccc;
+      padding: 20px;
+      width: 300px;
+      margin-bottom: 40px;
+    }
+
+    #feed div {
+      padding: 6px 0;
+      border-bottom: 1px solid #eee;
+    }
+  </style>
+</head>
 <body>
 
+  <h1>Plug & Pause – Firma J</h1>
+
+  <!-- Widget container -->
   <div id="widget">
-
-    <h2>Plug & Pause – Firma J</h2>
-
     <button id="rollBtn">Rul terning</button>
-
-    <div id="aktivitet" style="margin-top: 10px; font-weight: bold;"></div>
-
-    <button id="doneBtn" style="margin-top: 20px;">Færdig</button>
-
-    <div id="status" style="margin-top: 10px; color: green;"></div>
-
+    <p id="aktivitet">–</p>
+    <button id="doneBtn">Færdig</button>
+    <p id="status"></p>
   </div>
+
+  <!-- Socialt feed -->
+  <h2>Socialt feed</h2>
+  <div id="feed">Indlæser…</div>
+
+  <!-- Widget script -->
+  <script type="module" src="widget.js?companyId=FIRMAJ"></script>
+
+  <!-- Feed script -->
+  <script>
+    async function loadFeed() {
+      const companyId = "FIRMAJ";
+
+      const res = await fetch(
+        `https://plugandpause-backend.jakobhelkjaer.workers.dev/api/feed?groupId=${companyId}`
+      );
+
+      const events = await res.json();
+      const feedDiv = document.getElementById("feed");
+      feedDiv.innerHTML = "";
+
+      if (events.length === 0) {
+        feedDiv.textContent = "Ingen aktiviteter endnu.";
+        return;
+      }
+
+      events.forEach(ev => {
+        const item = document.createElement("div");
+        const time = new Date(ev.timestamp).toLocaleTimeString("da-DK");
+        item.textContent = `${time} – ${ev.userId} lavede: ${ev.activity}`;
+        feedDiv.appendChild(item);
+      });
+    }
+
+    // Hent feed når siden loader
+    loadFeed();
+  </script>
 
 </body>
 </html>
-
