@@ -29,6 +29,10 @@
     h2 {
       margin-top: 40px;
     }
+
+    #toggleMuteBtn {
+      margin-top: 10px;
+    }
   </style>
 </head>
 
@@ -44,6 +48,10 @@
     <p id="status"></p>
   </div>
 
+  <!-- Mute-knap -->
+  <button id="toggleMuteBtn">Slå påmindelser fra</button>
+  <p id="muteStatus"></p>
+
   <!-- Socialt feed -->
   <h2>Socialt feed</h2>
   <div id="feed">Indlæser…</div>
@@ -51,8 +59,11 @@
   <!-- Widget script -->
   <script type="module" src="widget.js?companyId=FIRMAJ"></script>
 
-  <!-- Feed script -->
+  <!-- Feed + Påmindelser script -->
   <script>
+    // ---------------------------------------------------------
+    // FEED
+    // ---------------------------------------------------------
     async function loadFeed() {
       const companyId = "FIRMAJ";
 
@@ -77,11 +88,73 @@
       });
     }
 
-    // Hent feed når siden loader
     loadFeed();
+    setInterval(loadFeed, 10000); // auto-refresh hvert 10. sekund
 
-    // Auto-refresh hvert 10. sekund
-    setInterval(loadFeed, 10000);
+
+    // ---------------------------------------------------------
+    // PÅMINDELSER (formiddag + eftermiddag)
+    // ---------------------------------------------------------
+
+    // Default: ikke muted
+    if (!localStorage.getItem("pp_mute")) {
+      localStorage.setItem("pp_mute", "false");
+    }
+
+    const morningReminder = { hour: 10, minute: 0 };
+    const afternoonReminder = { hour: 14, minute: 30 };
+
+    function resetDailyFlags() {
+      const today = new Date().toDateString();
+      const last = localStorage.getItem("pp_lastReminderDate");
+
+      if (today !== last) {
+        localStorage.setItem("pp_lastReminderDate", today);
+        localStorage.setItem("pp_morningDone", "false");
+        localStorage.setItem("pp_afternoonDone", "false");
+      }
+    }
+
+    resetDailyFlags();
+
+    function checkReminder(target, flagName) {
+      if (localStorage.getItem("pp_mute") === "true") return;
+
+      const now = new Date();
+      if (localStorage.getItem(flagName) === "true") return;
+
+      if (now.getHours() === target.hour && now.getMinutes() === target.minute) {
+        alert("Tid til en lille pause! Rul terningen 😊");
+        localStorage.setItem(flagName, "true");
+      }
+    }
+
+    setInterval(() => {
+      resetDailyFlags();
+      checkReminder(morningReminder, "pp_morningDone");
+      checkReminder(afternoonReminder, "pp_afternoonDone");
+    }, 60000); // tjek hvert minut
+
+
+    // ---------------------------------------------------------
+    // MUTE-KNAP
+    // ---------------------------------------------------------
+    const muteBtn = document.getElementById("toggleMuteBtn");
+    const muteStatus = document.getElementById("muteStatus");
+
+    function updateMuteUI() {
+      const muted = localStorage.getItem("pp_mute") === "true";
+      muteBtn.textContent = muted ? "Slå påmindelser til" : "Slå påmindelser fra";
+      muteStatus.textContent = muted ? "Påmindelser er slået fra" : "Påmindelser er aktive";
+    }
+
+    muteBtn.onclick = () => {
+      const current = localStorage.getItem("pp_mute") === "true";
+      localStorage.setItem("pp_mute", current ? "false" : "true");
+      updateMuteUI();
+    };
+
+    updateMuteUI();
   </script>
 
 </body>
