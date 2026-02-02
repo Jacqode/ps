@@ -48,6 +48,12 @@
     <p id="status"></p>
   </div>
 
+  <!-- Navn -->
+  <label for="username">Dit navn:</label>
+  <input id="username" type="text" placeholder="Skriv dit navn">
+  <button id="saveNameBtn">Gem navn</button>
+  <p id="nameStatus"></p>
+
   <!-- Mute-knap -->
   <button id="toggleMuteBtn">Slå påmindelser fra</button>
   <p id="muteStatus"></p>
@@ -59,8 +65,32 @@
   <!-- Widget script -->
   <script type="module" src="widget.js?companyId=FIRMAJ"></script>
 
-  <!-- Feed + Påmindelser script -->
+  <!-- Feed + Navn + Påmindelser script -->
   <script>
+    // ---------------------------------------------------------
+    // NAVN
+    // ---------------------------------------------------------
+    const nameInput = document.getElementById("username");
+    const saveNameBtn = document.getElementById("saveNameBtn");
+    const nameStatus = document.getElementById("nameStatus");
+
+    const savedName = localStorage.getItem("pp_name");
+    if (savedName) {
+      nameInput.value = savedName;
+      nameStatus.textContent = "Navn gemt: " + savedName;
+    }
+
+    saveNameBtn.onclick = () => {
+      const name = nameInput.value.trim();
+      if (name.length < 2) {
+        nameStatus.textContent = "Navnet er for kort";
+        return;
+      }
+      localStorage.setItem("pp_name", name);
+      nameStatus.textContent = "Navn gemt: " + name;
+    };
+
+
     // ---------------------------------------------------------
     // FEED
     // ---------------------------------------------------------
@@ -81,9 +111,10 @@
       }
 
       events.forEach(ev => {
-        const item = document.createElement("div");
+        const displayName = ev.name || ev.userId;
         const time = new Date(ev.timestamp).toLocaleTimeString("da-DK");
-        item.textContent = `${time} – ${ev.userId} lavede: ${ev.activity}`;
+        const item = document.createElement("div");
+        item.textContent = `${time} – ${displayName} lavede: ${ev.activity}`;
         feedDiv.appendChild(item);
       });
     }
@@ -93,10 +124,8 @@
 
 
     // ---------------------------------------------------------
-    // PÅMINDELSER (formiddag + eftermiddag)
+    // PÅMINDELSER
     // ---------------------------------------------------------
-
-    // Default: ikke muted
     if (!localStorage.getItem("pp_mute")) {
       localStorage.setItem("pp_mute", "false");
     }
@@ -133,7 +162,7 @@
       resetDailyFlags();
       checkReminder(morningReminder, "pp_morningDone");
       checkReminder(afternoonReminder, "pp_afternoonDone");
-    }, 60000); // tjek hvert minut
+    }, 60000);
 
 
     // ---------------------------------------------------------
