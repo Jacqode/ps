@@ -1,105 +1,30 @@
-// ---------------------------------------------------------
-// 1) Hent firma-ID fra script-URL
-// ---------------------------------------------------------
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <title>Plug & Pause</title>
+  <script defer src="widget.js"></script>
+</head>
 
-function getCompanyId() {
-  try {
-    const url = new URL(import.meta.url);
-    return url.searchParams.get("companyId") || "UNKNOWN_COMPANY";
-  } catch {
-    return "UNKNOWN_COMPANY";
-  }
-}
+<body>
 
-// ---------------------------------------------------------
-// 2) Generér eller hent anonymt user-ID
-// ---------------------------------------------------------
+  <div id="widget">
 
-function getOrCreateUserId() {
-  let userId = localStorage.getItem("pp_userId");
+    <h2>Plug & Pause</h2>
 
-  if (!userId) {
-    userId = "u_" + Math.random().toString(16).slice(2, 10);
-    localStorage.setItem("pp_userId", userId);
-  }
+    <!-- Terning-knap -->
+    <button id="rollBtn">Rul terning</button>
 
-  return userId;
-}
+    <!-- Aktivitet vises her -->
+    <div id="aktivitet" style="margin-top: 10px; font-weight: bold;"></div>
 
-// ---------------------------------------------------------
-// 3) DATA (aktiviteter)
-// ---------------------------------------------------------
+    <!-- Færdig-knap -->
+    <button id="doneBtn" style="margin-top: 20px;">Færdig</button>
 
-const aktiviteter = [
-  "Lav 10 squats",
-  "Hop 20 gange",
-  "Stræk armene i 30 sekunder",
-  "Gå en tur rundt om stolen",
-  "Lav 5 dybe vejrtrækninger",
-  "Planke i 20 sekunder"
-];
+    <!-- Status-besked -->
+    <div id="status" style="margin-top: 10px; color: green;"></div>
 
-// ---------------------------------------------------------
-// 4) Forretningslogik (terning)
-// ---------------------------------------------------------
+  </div>
 
-function rulTerning() {
-  const index = Math.floor(Math.random() * aktiviteter.length);
-  return aktiviteter[index];
-}
-
-// ---------------------------------------------------------
-// 5) API-kald (Firma J)
-// ---------------------------------------------------------
-
-async function sendPause(userId, companyId) {
-  return fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/pause", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      userId,
-      companyId,
-      timestamp: Date.now()
-    })
-  });
-}
-
-// ---------------------------------------------------------
-// 6) API-kald (Social Feature)
-// ---------------------------------------------------------
-
-async function sendSocialEvent(groupId, userId, activity) {
-  const name = localStorage.getItem("pp_name") || null;
-
-  return fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/api/register", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      groupId,
-      userId,
-      name,
-      activity
-    })
-  });
-}
-
-// ---------------------------------------------------------
-// 7) UI-håndtering
-// ---------------------------------------------------------
-
-let currentActivity = null;
-
-document.getElementById("rollBtn").onclick = () => {
-  currentActivity = rulTerning();
-  document.getElementById("aktivitet").textContent = currentActivity;
-};
-
-document.getElementById("doneBtn").onclick = async () => {
-  const companyId = getCompanyId();
-  const userId = getOrCreateUserId();
-
-  await sendPause(userId, companyId);
-  await sendSocialEvent(companyId, userId, currentActivity);
-
-  document.getElementById("status").textContent = "Pause registreret!";
-};
+</body>
+</html>
