@@ -6,7 +6,7 @@ export function getCompanyId() {
     const url = new URL(import.meta.url);
     return url.searchParams.get("companyId") || "UNKNOWN_COMPANY";
   } catch {
-    return "UNKNOWN_COMPANY";
+    return "FirmaJ";
   }
 }
 
