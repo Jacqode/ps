@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <title>Plug & Pause – Firma J</title>
-  <script type="module" src="widget.js?companyId=FIRMAJ&v=5"></script>
 
+  <!-- Loader widget.js med companyId -->
+  <script type="module" src="widget.js?companyId=FIRMAJ"></script>
 
   <style>
     body {
@@ -66,7 +67,13 @@
 
   <!-- Widget script -->
   <script type="module">
-    import { sendSocialEvent, sendPause, getCompanyId, getOrCreateUserId, rulTerning } from "./widget.js";
+    import {
+      sendSocialEvent,
+      sendPause,
+      getCompanyId,
+      getOrCreateUserId,
+      rulTerning
+    } from "./widget.js?companyId=FIRMAJ";
 
     // ---------------------------------------------------------
     // NAVN
@@ -200,7 +207,7 @@
     document.getElementById("doneBtn").onclick = async () => {
       const companyId = getCompanyId();
       const userId = getOrCreateUserId();
-      const name = localStorage.getItem("pp_name") || null;
+      const name = localStorage.getItem("pp_name");
 
       await sendPause(userId, companyId);
       await sendSocialEvent(companyId, userId, currentActivity, name);
@@ -211,4 +218,3 @@
 
 </body>
 </html>
-
