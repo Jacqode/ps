@@ -2,29 +2,86 @@
 <html lang="da">
 <head>
   <meta charset="utf-8">
-  <title>Plug & Pause</title>
-  <script defer src="widget.js"></script>
+  <title>Plug & Pause – Demo</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+      text-align: center;
+    }
+
+    #widget {
+      border: 1px solid #ccc;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 40px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #aktivitet {
+      font-size: 20px;
+      margin: 20px 0;
+      min-height: 30px;
+    }
+
+    #note {
+      margin-top: 30px;
+      font-size: 14px;
+      color: #666;
+    }
+  </style>
 </head>
 
 <body>
 
+  <h1>Plug & Pause – Demo</h1>
+
   <div id="widget">
-
-    <h2>Plug & Pause</h2>
-
-    <!-- Terning-knap -->
     <button id="rollBtn">Rul terning</button>
-
-    <!-- Aktivitet vises her -->
-    <div id="aktivitet" style="margin-top: 10px; font-weight: bold;"></div>
-
-    <!-- Færdig-knap -->
-    <button id="doneBtn" style="margin-top: 20px;">Færdig</button>
-
-    <!-- Status-besked -->
-    <div id="status" style="margin-top: 10px; color: green;"></div>
-
+    <p id="aktivitet">–</p>
+    <button id="doneBtn">Færdig</button>
+    <p id="status"></p>
   </div>
+
+  <p id="note">
+    Dette er en neutral demo. Ingen data gemmes, og ingen aktiviteter sendes til backend.
+  </p>
+
+  <script>
+    const aktiviteter = [
+      "Stræk armene i 20 sekunder",
+      "Rejs dig op og gå rundt om stolen",
+      "Tag 5 dybe vejrtrækninger",
+      "Rul skuldrene 10 gange",
+      "Drik et glas vand",
+      "Lav 10 tåhævninger"
+    ];
+
+    let currentActivity = null;
+
+    document.getElementById("rollBtn").onclick = () => {
+      const i = Math.floor(Math.random() * aktiviteter.length);
+      currentActivity = aktiviteter[i];
+      document.getElementById("aktivitet").textContent = currentActivity;
+    };
+
+    document.getElementById("doneBtn").onclick = () => {
+      if (!currentActivity) {
+        document.getElementById("status").textContent = "Rul terningen først.";
+        return;
+      }
+      document.getElementById("status").textContent = "Færdig! (Demo – intet gemt)";
+    };
+  </script>
 
 </body>
 </html>
