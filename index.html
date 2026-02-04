@@ -27,10 +27,17 @@
       cursor: pointer;
     }
 
+    #dice {
+      font-size: 40px;
+      margin: 20px 0;
+      min-height: 40px;
+    }
+
     #aktivitet {
       font-size: 20px;
       margin: 20px 0;
       min-height: 30px;
+      font-weight: bold;
     }
 
     #note {
@@ -47,7 +54,13 @@
 
   <div id="widget">
     <button id="rollBtn">Rul terning</button>
+
+    <!-- Terning-animation -->
+    <p id="dice">🎲</p>
+
+    <!-- Aktivitet -->
     <p id="aktivitet">–</p>
+
     <button id="doneBtn">Færdig</button>
     <p id="status"></p>
   </div>
@@ -67,11 +80,34 @@
     ];
 
     let currentActivity = null;
+    let rollInterval = null;
 
     document.getElementById("rollBtn").onclick = () => {
-      const i = Math.floor(Math.random() * aktiviteter.length);
-      currentActivity = aktiviteter[i];
-      document.getElementById("aktivitet").textContent = currentActivity;
+      const diceEl = document.getElementById("dice");
+      const aktivitetEl = document.getElementById("aktivitet");
+      const statusEl = document.getElementById("status");
+
+      aktivitetEl.textContent = "–";
+      statusEl.textContent = "";
+
+      // Start terning-animation
+      rollInterval = setInterval(() => {
+        const randomNumber = Math.floor(Math.random() * 100) + 1; // 1–100
+        diceEl.textContent = randomNumber;
+      }, 50);
+
+      // Stop efter 2 sekunder
+      setTimeout(() => {
+        clearInterval(rollInterval);
+
+        // Vælg aktivitet
+        const i = Math.floor(Math.random() * aktiviteter.length);
+        currentActivity = aktiviteter[i];
+        aktivitetEl.textContent = currentActivity;
+
+        // Vis et "færdigt" terningtal
+        diceEl.textContent = "🎲";
+      }, 2000);
     };
 
     document.getElementById("doneBtn").onclick = () => {
