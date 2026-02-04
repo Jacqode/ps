@@ -55,10 +55,8 @@
   <div id="widget">
     <button id="rollBtn">Rul terning</button>
 
-    <!-- Terning-animation -->
     <p id="dice">🎲</p>
 
-    <!-- Aktivitet -->
     <p id="aktivitet">–</p>
 
     <button id="doneBtn">Færdig</button>
@@ -90,9 +88,9 @@
       aktivitetEl.textContent = "–";
       statusEl.textContent = "";
 
-      // Start terning-animation
+      // Start animation
       rollInterval = setInterval(() => {
-        const randomNumber = Math.floor(Math.random() * 100) + 1; // 1–100
+        const randomNumber = Math.floor(Math.random() * 100) + 1;
         diceEl.textContent = randomNumber;
       }, 50);
 
@@ -100,12 +98,10 @@
       setTimeout(() => {
         clearInterval(rollInterval);
 
-        // Vælg aktivitet
         const i = Math.floor(Math.random() * aktiviteter.length);
         currentActivity = aktiviteter[i];
         aktivitetEl.textContent = currentActivity;
 
-        // Vis et "færdigt" terningtal
         diceEl.textContent = "🎲";
       }, 2000);
     };
