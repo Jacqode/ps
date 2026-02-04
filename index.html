@@ -55,8 +55,10 @@
   <div id="widget">
     <button id="rollBtn">Rul terning</button>
 
+    <!-- Rullende terning -->
     <p id="dice">🎲</p>
 
+    <!-- Aktivitet -->
     <p id="aktivitet">–</p>
 
     <button id="doneBtn">Færdig</button>
@@ -88,20 +90,26 @@
       aktivitetEl.textContent = "–";
       statusEl.textContent = "";
 
+      // Symboler der giver en rullende effekt
+      const frames = ["◐", "◓", "◑", "◒"];
+      let frameIndex = 0;
+
       // Start animation
       rollInterval = setInterval(() => {
-        const randomNumber = Math.floor(Math.random() * 100) + 1;
-        diceEl.textContent = randomNumber;
-      }, 50);
+        diceEl.textContent = frames[frameIndex];
+        frameIndex = (frameIndex + 1) % frames.length;
+      }, 100);
 
       // Stop efter 2 sekunder
       setTimeout(() => {
         clearInterval(rollInterval);
 
+        // Vælg aktivitet
         const i = Math.floor(Math.random() * aktiviteter.length);
         currentActivity = aktiviteter[i];
         aktivitetEl.textContent = currentActivity;
 
+        // Vis terning når den stopper
         diceEl.textContent = "🎲";
       }, 2000);
     };
