@@ -1,63 +1,56 @@
-const apiBase = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <title>Plug & Pause – Firma J</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      max-width: 500px;
+    }
+    button {
+      padding: 10px 15px;
+      margin: 5px 0;
+      width: 100%;
+      font-size: 16px;
+    }
+    #feed div {
+      padding: 6px 0;
+      border-bottom: 1px solid #ddd;
+    }
+    .section {
+      margin-top: 20px;
+    }
+  </style>
+</head>
 
-function getCompanyId() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get("companyId") || "FIRMAJ";
-}
+<body>
 
-async function getIdea() {
-  const res = await fetch(`${apiBase}/api/random?companyId=${getCompanyId()}`);
-  const data = await res.json();
-  return data.activity;
-}
+  <h2>Plug & Pause – Firma J</h2>
 
-async function markDone(activity) {
-  const name = localStorage.getItem("pp_name") || "Ukendt";
-  await fetch(`${apiBase}/api/submit`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      name,
-      activity,
-      companyId: getCompanyId()
-    })
-  });
-}
+  <button id="ideaBtn">Giv mig en idé til pausen</button>
 
-async function loadFeed() {
-  const feed = document.getElementById("feed");
-  feed.innerHTML = "Indlæser…";
+  <div id="currentIdea" style="margin: 10px 0; font-weight: bold;"></div>
 
-  const res = await fetch(`${apiBase}/api/feed?companyId=${getCompanyId()}`);
-  const list = await res.json();
+  <button id="doneBtn">Markér pausen som gennemført</button>
 
-  feed.innerHTML = "";
-  list.forEach(item => {
-    const div = document.createElement("div");
-    div.textContent = `${item.time} – ${item.name} lavede: ${item.activity}`;
-    feed.appendChild(div);
-  });
-}
+  <div class="section">
+    <h3>Hvad andre laver</h3>
+    <div id="feed">Indlæser…</div>
+  </div>
 
-document.getElementById("ideaBtn").onclick = async () => {
-  const idea = await getIdea();
-  document.getElementById("currentIdea").textContent = idea;
-};
+  <div class="section">
+    <label>Dit navn:</label><br>
+    <input id="nameInput" type="text" placeholder="Skriv dit navn" style="width: 100%; padding: 8px;">
+    <button id="saveName">Gem</button>
+  </div>
 
-document.getElementById("doneBtn").onclick = async () => {
-  const idea = document.getElementById("currentIdea").textContent;
-  if (!idea) return;
-  await markDone(idea);
-  loadFeed();
-};
+  <div class="section">
+    <a href="settings.html">Indstillinger</a>
+  </div>
 
-document.getElementById("saveName").onclick = () => {
-  const name = document.getElementById("nameInput").value.trim();
-  if (name) localStorage.setItem("pp_name", name);
-};
-
-window.onload = () => {
-  const saved = localStorage.getItem("pp_name");
-  if (saved) document.getElementById("nameInput").value = saved;
-  loadFeed();
-};
+  <script src="widget.js"></script>
+</body>
+</html>
