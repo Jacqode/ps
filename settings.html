@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8" />
+  <title>Plug & Pause – Indstillinger</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    section {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #eee;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    input[type="time"] {
+      padding: 6px 8px;
+      font-size: 14px;
+      margin-right: 6px;
+    }
+
+    button {
+      padding: 6px 12px;
+      font-size: 14px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      background-color: #f9fafb;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #f3f4f6;
+    }
+
+    #status {
+      margin-top: 8px;
+      min-height: 18px;
+      font-size: 14px;
+      color: #2563eb;
+    }
+
+    a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Indstillinger</h1>
+
+  <section>
+    <h2>Påmindelser</h2>
+
+    <label for="reminderTime">Tidspunkt for daglig påmindelse:</label>
+    <input type="time" id="reminderTime">
+
+    <button id="saveReminderBtn">Gem</button>
+
+    <p id="status"></p>
+  </section>
+
+  <a href="FirmaJ.html">Tilbage</a>
+
+  <script>
