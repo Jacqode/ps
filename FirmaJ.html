@@ -1,276 +1,63 @@
-<!DOCTYPE html>
-<html lang="da">
-<head>
-  <meta charset="UTF-8" />
-  <title>Plug & Pause – Firma J</title>
+const apiBase = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
 
-  <!-- Loader widget.js med companyId -->
-  <script type="module" src="widget.js?companyId=FIRMAJ"></script>
+function getCompanyId() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("companyId") || "FIRMAJ";
+}
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-    }
+async function getIdea() {
+  const res = await fetch(`${apiBase}/api/random?companyId=${getCompanyId()}`);
+  const data = await res.json();
+  return data.activity;
+}
 
-    h1 {
-      margin-bottom: 24px;
-    }
+async function markDone(activity) {
+  const name = localStorage.getItem("pp_name") || "Ukendt";
+  await fetch(`${apiBase}/api/submit`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name,
+      activity,
+      companyId: getCompanyId()
+    })
+  });
+}
 
-    #activity-section {
-      border: 1px solid #ccc;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 30px;
-    }
+async function loadFeed() {
+  const feed = document.getElementById("feed");
+  feed.innerHTML = "Indlæser…";
 
-    #primaryBtn {
-      display: inline-block;
-      padding: 10px 18px;
-      font-size: 16px;
-      border-radius: 6px;
-      border: none;
-      background-color: #2563eb;
-      color: white;
-      cursor: pointer;
-      margin-bottom: 12px;
-    }
+  const res = await fetch(`${apiBase}/api/feed?companyId=${getCompanyId()}`);
+  const list = await res.json();
 
-    #primaryBtn:hover {
-      background-color: #1d4ed8;
-    }
+  feed.innerHTML = "";
+  list.forEach(item => {
+    const div = document.createElement("div");
+    div.textContent = `${item.time} – ${item.name} lavede: ${item.activity}`;
+    feed.appendChild(div);
+  });
+}
 
-    #aktivitet {
-      min-height: 24px;
-      margin: 8px 0 12px;
-      font-size: 16px;
-      font-weight: 500;
-    }
+document.getElementById("ideaBtn").onclick = async () => {
+  const idea = await getIdea();
+  document.getElementById("currentIdea").textContent = idea;
+};
 
-    #completeBtn {
-      display: inline-block;
-      padding: 8px 14px;
-      font-size: 14px;
-      border-radius: 6px;
-      border: 1px solid #2563eb;
-      background-color: white;
-      color: #2563eb;
-      cursor: pointer;
-    }
+document.getElementById("doneBtn").onclick = async () => {
+  const idea = document.getElementById("currentIdea").textContent;
+  if (!idea) return;
+  await markDone(idea);
+  loadFeed();
+};
 
-    #completeBtn:hover {
-      background-color: #eff6ff;
-    }
+document.getElementById("saveName").onclick = () => {
+  const name = document.getElementById("nameInput").value.trim();
+  if (name) localStorage.setItem("pp_name", name);
+};
 
-    #status {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #16a34a;
-      min-height: 18px;
-    }
-
-    #feed-section {
-      margin-top: 30px;
-      margin-bottom: 30px;
-    }
-
-    #feed-section h2 {
-      margin-bottom: 10px;
-    }
-
-    #feed div {
-      padding: 6px 0;
-      border-bottom: 1px solid #eee;
-      font-size: 14px;
-    }
-
-    #name-section {
-      margin-top: 20px;
-      border-top: 1px solid #eee;
-      padding-top: 16px;
-      font-size: 14px;
-    }
-
-    #username {
-      padding: 6px 8px;
-      font-size: 14px;
-      margin-right: 6px;
-    }
-
-    #saveNameBtn {
-      padding: 6px 10px;
-      font-size: 14px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      background-color: #f9fafb;
-      cursor: pointer;
-    }
-
-    #saveNameBtn:hover {
-      background-color: #f3f4f6;
-    }
-
-    #nameStatus {
-      margin-top: 6px;
-      min-height: 18px;
-    }
-
-    footer {
-      margin-top: 30px;
-      font-size: 13px;
-      color: #6b7280;
-      border-top: 1px solid #eee;
-      padding-top: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    footer a {
-      color: #2563eb;
-      text-decoration: none;
-    }
-
-    footer a:hover {
-      text-decoration: underline;
-    }
-  </style>
-</head>
-
-<body>
-
-  <h1>Plug & Pause – Firma J</h1>
-
-  <!-- Sektion 1: Aktivitet -->
-  <section id="activity-section">
-    <button id="primaryBtn">Giv mig en idé til pausen</button>
-    <p id="aktivitet">–</p>
-    <button id="completeBtn">Markér pausen som gennemført</button>
-    <p id="status"></p>
-  </section>
-
-  <!-- Sektion 2: Socialt feed -->
-  <section id="feed-section">
-    <h2>Hvad andre laver</h2>
-    <div id="feed">Indlæser…</div>
-  </section>
-
-  <!-- Sektion 3: Navn -->
-  <section id="name-section">
-    <label for="username">Dit navn:</label>
-    <input id="username" type="text" placeholder="Skriv dit navn">
-    <button id="saveNameBtn">Gem</button>
-    <p id="nameStatus"></p>
-  </section>
-
-  <footer>
-    <span>Plug & Pause</span>
-    <a href="settings.html">Indstillinger</a>
-  </footer>
-
-  <!-- Script -->
-  <script type="module">
-    import {
-      sendSocialEvent,
-      sendPause,
-      getCompanyId,
-      getOrCreateUserId,
-      rulTerning
-    } from "./widget.js?companyId=FIRMAJ";
-
-    // ---------------------------------------------------------
-    // NAVN
-    // ---------------------------------------------------------
-    const nameInput = document.getElementById("username");
-    const saveNameBtn = document.getElementById("saveNameBtn");
-    const nameStatus = document.getElementById("nameStatus");
-
-    const savedName = localStorage.getItem("pp_name");
-    if (savedName) {
-      nameInput.value = savedName;
-      nameStatus.textContent = "Navn gemt: " + savedName;
-    }
-
-    saveNameBtn.onclick = () => {
-      const name = nameInput.value.trim();
-      if (name.length < 2) {
-        nameStatus.textContent = "Navnet er for kort";
-        return;
-      }
-      localStorage.setItem("pp_name", name);
-      nameStatus.textContent = "Navn gemt: " + name;
-    };
-
-    // ---------------------------------------------------------
-    // FEED
-    // ---------------------------------------------------------
-    async function loadFeed() {
-      const companyId = "FIRMAJ";
-
-      const res = await fetch(
-        `https://plugandpause-backend.jakobhelkjaer.workers.dev/api/feed?groupId=${companyId}`
-      );
-
-      const events = await res.json();
-      const feedDiv = document.getElementById("feed");
-      feedDiv.innerHTML = "";
-
-      if (!events || events.length === 0) {
-        feedDiv.textContent = "Ingen aktiviteter endnu.";
-        return;
-      }
-
-      const trimmed = events.slice(0, 7);
-
-      trimmed.forEach(ev => {
-        const displayName = ev.name || ev.userId;
-        const time = new Date(ev.timestamp).toLocaleTimeString("da-DK");
-        const item = document.createElement("div");
-        item.textContent = `${time} – ${displayName} lavede: ${ev.activity}`;
-        feedDiv.appendChild(item);
-      });
-    }
-
-    loadFeed();
-    setInterval(loadFeed, 10000);
-
-    // ---------------------------------------------------------
-    // AKTIVITET + PAUSEFLOW
-    // ---------------------------------------------------------
-    const primaryBtn = document.getElementById("primaryBtn");
-    const completeBtn = document.getElementById("completeBtn");
-    const aktivitetEl = document.getElementById("aktivitet");
-    const statusEl = document.getElementById("status");
-
-    let currentActivity = null;
-
-    primaryBtn.onclick = () => {
-      currentActivity = rulTerning();
-      aktivitetEl.textContent = currentActivity;
-      statusEl.textContent = "";
-    };
-
-    completeBtn.onclick = async () => {
-      if (!currentActivity) {
-        statusEl.textContent = "Vælg først en aktivitet til pausen.";
-        return;
-      }
-
-      const companyId = getCompanyId();
-      const userId = getOrCreateUserId();
-      const name = localStorage.getItem("pp_name");
-
-      await sendPause(userId, companyId);
-      await sendSocialEvent(companyId, userId, currentActivity, name);
-
-      statusEl.textContent = "Pausen er registreret som gennemført.";
-      currentActivity = null;
-      aktivitetEl.textContent = "–";
-      loadFeed();
-    };
-  </script>
-
-</body>
-</html>
+window.onload = () => {
+  const saved = localStorage.getItem("pp_name");
+  if (saved) document.getElementById("nameInput").value = saved;
+  loadFeed();
+};
