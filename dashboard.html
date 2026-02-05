@@ -1,30 +1,51 @@
 <!DOCTYPE html>
 <html lang="da">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8" />
   <title>Plug & Pause – Dashboard</title>
 
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    #charts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin-top: 20px;
+    }
+    .chart-box {
+      flex: 1 1 400px;
+      border: 1px solid #eee;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    canvas {
+      width: 100% !important;
+      height: 300px !important;
+    }
+  </style>
 
-  <!-- Dashboard som ES module -->
-  <script type="module" src="dashboard.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 
-  <h1>📊 Pauseoversigt for ledere</h1>
+  <h1>Plug & Pause – Dashboard</h1>
 
-  <p>Dette dashboard viser antal registrerede pauser pr. dag og vurderer variationen efter forbedringsmodellen.</p>
+  <div id="charts">
+    <div class="chart-box">
+      <h2>Pauser pr. dag</h2>
+      <canvas id="dailyChart"></canvas>
+    </div>
 
-  <h2>Daglige pauser</h2>
-  <canvas id="chart" width="800" height="300"></canvas>
-
-  <h2>Vurdering</h2>
-  <p id="assessment"></p>
-
-  <h2>Data</h2>
-  <div id="dailyList"></div>
-
-</body>
-</html>
+    <div class="chart-box">
+      <h2>Top aktiviteter</h2>
+      <canvas id="activityChart"></canvas>
+    </div>
