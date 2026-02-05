@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Plug & Pause Reminders",
+  "version": "1.0",
+  "description": "Sender automatiske Plug & Pause-påmindelser baseret på brugerens valgte tidspunkt.",
+  "permissions": [
+    "notifications",
+    "storage",
+    "alarms"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://jacqode.github.io/ps/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "icons": {
+    "128": "icon.png"
+  }
+}
