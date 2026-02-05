@@ -15,33 +15,126 @@
       margin: auto;
     }
 
-    #widget {
+    h1 {
+      margin-bottom: 24px;
+    }
+
+    #activity-section {
       border: 1px solid #ccc;
       padding: 20px;
-      width: 100%;
-      margin-bottom: 40px;
-      border-radius: 8px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+    }
+
+    #primaryBtn {
+      display: inline-block;
+      padding: 10px 18px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      background-color: #2563eb;
+      color: white;
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+
+    #primaryBtn:hover {
+      background-color: #1d4ed8;
+    }
+
+    #aktivitet {
+      min-height: 24px;
+      margin: 8px 0 12px;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    #completeBtn {
+      display: inline-block;
+      padding: 8px 14px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid #2563eb;
+      background-color: white;
+      color: #2563eb;
+      cursor: pointer;
+    }
+
+    #completeBtn:hover {
+      background-color: #eff6ff;
+    }
+
+    #status {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #16a34a;
+      min-height: 18px;
+    }
+
+    #feed-section {
+      margin-top: 30px;
+      margin-bottom: 30px;
+    }
+
+    #feed-section h2 {
+      margin-bottom: 10px;
     }
 
     #feed div {
-      padding: 8px 0;
+      padding: 6px 0;
       border-bottom: 1px solid #eee;
-      font-size: 15px;
+      font-size: 14px;
     }
 
-    h2 {
-      margin-top: 40px;
+    #name-section {
+      margin-top: 20px;
+      border-top: 1px solid #eee;
+      padding-top: 16px;
+      font-size: 14px;
     }
 
-    #toggleMuteBtn {
-      margin-top: 10px;
+    #username {
+      padding: 6px 8px;
+      font-size: 14px;
+      margin-right: 6px;
     }
 
-    #reminderBox {
+    #saveNameBtn {
+      padding: 6px 10px;
+      font-size: 14px;
+      border-radius: 4px;
       border: 1px solid #ccc;
-      padding: 15px;
-      border-radius: 8px;
+      background-color: #f9fafb;
+      cursor: pointer;
+    }
+
+    #saveNameBtn:hover {
+      background-color: #f3f4f6;
+    }
+
+    #nameStatus {
+      margin-top: 6px;
+      min-height: 18px;
+    }
+
+    footer {
       margin-top: 30px;
+      font-size: 13px;
+      color: #6b7280;
+      border-top: 1px solid #eee;
+      padding-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    footer a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
@@ -50,38 +143,34 @@
 
   <h1>Plug & Pause – Firma J</h1>
 
-  <!-- Widget container -->
-  <div id="widget">
-    <button id="rollBtn">Rul terning</button>
+  <!-- Sektion 1: Aktivitet -->
+  <section id="activity-section">
+    <button id="primaryBtn">Giv mig en idé til pausen</button>
     <p id="aktivitet">–</p>
-    <button id="doneBtn">Færdig</button>
+    <button id="completeBtn">Markér pausen som gennemført</button>
     <p id="status"></p>
-  </div>
+  </section>
 
-  <!-- Navn -->
-  <label for="username">Dit navn:</label>
-  <input id="username" type="text" placeholder="Skriv dit navn">
-  <button id="saveNameBtn">Gem navn</button>
-  <p id="nameStatus"></p>
+  <!-- Sektion 2: Socialt feed -->
+  <section id="feed-section">
+    <h2>Hvad andre laver</h2>
+    <div id="feed">Indlæser…</div>
+  </section>
 
-  <!-- Mute-knap -->
-  <button id="toggleMuteBtn">Slå påmindelser fra</button>
-  <p id="muteStatus"></p>
+  <!-- Sektion 3: Navn -->
+  <section id="name-section">
+    <label for="username">Dit navn:</label>
+    <input id="username" type="text" placeholder="Skriv dit navn">
+    <button id="saveNameBtn">Gem</button>
+    <p id="nameStatus"></p>
+  </section>
 
-  <!-- Reminder UI -->
-  <div id="reminderBox">
-    <h2>Påmindelse</h2>
-    <label for="reminderTime">Vælg tidspunkt:</label>
-    <input type="time" id="reminderTime">
-    <button id="saveReminderBtn">Gem påmindelse</button>
-    <p id="reminderStatus"></p>
-  </div>
+  <footer>
+    <span>Plug & Pause</span>
+    <a href="settings.html">Indstillinger</a>
+  </footer>
 
-  <!-- Socialt feed -->
-  <h2>Socialt feed</h2>
-  <div id="feed">Indlæser…</div>
-
-  <!-- Widget script -->
+  <!-- Script -->
   <script type="module">
     import {
       sendSocialEvent,
@@ -114,7 +203,6 @@
       nameStatus.textContent = "Navn gemt: " + name;
     };
 
-
     // ---------------------------------------------------------
     // FEED
     // ---------------------------------------------------------
@@ -129,12 +217,14 @@
       const feedDiv = document.getElementById("feed");
       feedDiv.innerHTML = "";
 
-      if (events.length === 0) {
+      if (!events || events.length === 0) {
         feedDiv.textContent = "Ingen aktiviteter endnu.";
         return;
       }
 
-      events.forEach(ev => {
+      const trimmed = events.slice(0, 7);
+
+      trimmed.forEach(ev => {
         const displayName = ev.name || ev.userId;
         const time = new Date(ev.timestamp).toLocaleTimeString("da-DK");
         const item = document.createElement("div");
@@ -146,67 +236,28 @@
     loadFeed();
     setInterval(loadFeed, 10000);
 
-
     // ---------------------------------------------------------
-    // MUTE-KNAP
+    // AKTIVITET + PAUSEFLOW
     // ---------------------------------------------------------
-    const muteBtn = document.getElementById("toggleMuteBtn");
-    const muteStatus = document.getElementById("muteStatus");
+    const primaryBtn = document.getElementById("primaryBtn");
+    const completeBtn = document.getElementById("completeBtn");
+    const aktivitetEl = document.getElementById("aktivitet");
+    const statusEl = document.getElementById("status");
 
-    function updateMuteUI() {
-      const muted = localStorage.getItem("pp_mute") === "true";
-      muteBtn.textContent = muted ? "Slå påmindelser til" : "Slå påmindelser fra";
-      muteStatus.textContent = muted ? "Påmindelser er slået fra" : "Påmindelser er aktive";
-    }
+    let currentActivity = null;
 
-    muteBtn.onclick = () => {
-      const current = localStorage.getItem("pp_mute") === "true";
-      localStorage.setItem("pp_mute", current ? "false" : "true");
-      updateMuteUI();
+    primaryBtn.onclick = () => {
+      currentActivity = rulTerning();
+      aktivitetEl.textContent = currentActivity;
+      statusEl.textContent = "";
     };
 
-    updateMuteUI();
-
-
-    // ---------------------------------------------------------
-    // REMINDER UI → EXTENSION
-    // ---------------------------------------------------------
-    const reminderInput = document.getElementById("reminderTime");
-    const saveReminderBtn = document.getElementById("saveReminderBtn");
-    const reminderStatus = document.getElementById("reminderStatus");
-
-    const savedTime = localStorage.getItem("reminderTime");
-    if (savedTime) reminderInput.value = savedTime;
-
-    saveReminderBtn.onclick = () => {
-      const time = reminderInput.value;
-      if (!time) {
-        reminderStatus.textContent = "Vælg et tidspunkt først";
+    completeBtn.onclick = async () => {
+      if (!currentActivity) {
+        statusEl.textContent = "Vælg først en aktivitet til pausen.";
         return;
       }
 
-      localStorage.setItem("reminderTime", time);
-      reminderStatus.textContent = "Påmindelse gemt: " + time;
-
-      chrome.runtime.sendMessage({
-        type: "SET_REMINDER",
-        time: time,
-        companyId: "FIRMAJ"
-      });
-    };
-
-
-    // ---------------------------------------------------------
-    // WIDGET-KNAPPER
-    // ---------------------------------------------------------
-    let currentActivity = null;
-
-    document.getElementById("rollBtn").onclick = () => {
-      currentActivity = rulTerning();
-      document.getElementById("aktivitet").textContent = currentActivity;
-    };
-
-    document.getElementById("doneBtn").onclick = async () => {
       const companyId = getCompanyId();
       const userId = getOrCreateUserId();
       const name = localStorage.getItem("pp_name");
@@ -214,7 +265,10 @@
       await sendPause(userId, companyId);
       await sendSocialEvent(companyId, userId, currentActivity, name);
 
-      document.getElementById("status").textContent = "Pause registreret!";
+      statusEl.textContent = "Pausen er registreret som gennemført.";
+      currentActivity = null;
+      aktivitetEl.textContent = "–";
+      loadFeed();
     };
   </script>
 
