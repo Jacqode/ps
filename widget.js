@@ -94,3 +94,22 @@ window.onload = () => {
   if (saved) document.getElementById("nameInput").value = saved;
   loadFeed();
 };
+
+// --- Plug & Pause påmindelser (ingen extension nødvendig) ---
+
+const REMINDER_INTERVAL_MINUTES = 15;
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+  }
+});
+
+setInterval(() => {
+  if (Notification.permission === "granted") {
+    new Notification("Plug & Pause", {
+      body: "Tid til en lille pause?",
+      icon: "https://jacqode.github.io/ps/icon.png"
+    });
+  }
+}, REMINDER_INTERVAL_MINUTES * 60 * 1000);
