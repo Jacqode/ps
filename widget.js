@@ -97,7 +97,7 @@ window.onload = () => {
 
 // --- Plug & Pause påmindelser (ingen extension nødvendig) ---
 
-const REMINDER_INTERVAL_MINUTES = 15;
+const REMINDER_INTERVAL_MINUTES = 2;
 
 document.addEventListener("DOMContentLoaded", () => {
   if (Notification.permission !== "granted") {
