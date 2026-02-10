@@ -37,9 +37,7 @@ async function markDone(activity) {
         activity
       })
     });
-  } catch (e) {
-    // Ignorer fejl stille og roligt
-  }
+  } catch (e) {}
 }
 
 /* --- Feed logik --- */
@@ -115,6 +113,24 @@ document.getElementById("showMoreBtn").onclick = () => {
   }
 };
 
+/* --- Personlig hilsen --- */
+
+function updateGreeting() {
+  const name = localStorage.getItem("pp_name");
+  const hasVisited = localStorage.getItem("pp_hasVisited") === "true";
+  const greeting = document.getElementById("greeting");
+
+  if (name && hasVisited) {
+    greeting.textContent = `Godt at se dig igen, ${name}`;
+  } else if (name) {
+    greeting.textContent = `Hej ${name}`;
+  } else {
+    greeting.textContent = "Hej";
+  }
+
+  localStorage.setItem("pp_hasVisited", "true");
+}
+
 /* --- UI handling --- */
 
 document.getElementById("ideaBtn").onclick = async () => {
@@ -131,12 +147,17 @@ document.getElementById("doneBtn").onclick = async () => {
 
 document.getElementById("saveName").onclick = () => {
   const name = document.getElementById("nameInput").value.trim();
-  if (name) localStorage.setItem("pp_name", name);
+  if (name) {
+    localStorage.setItem("pp_name", name);
+    updateGreeting();
+  }
 };
 
 window.onload = () => {
   const saved = localStorage.getItem("pp_name");
   if (saved) document.getElementById("nameInput").value = saved;
+
+  updateGreeting();
   loadFeed();
 };
 
@@ -158,4 +179,3 @@ setInterval(() => {
     });
   }
 }, REMINDER_INTERVAL_MINUTES * 60 * 1000);
-
