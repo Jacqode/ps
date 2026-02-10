@@ -42,35 +42,80 @@ async function markDone(activity) {
   }
 }
 
+/* --- Feed logik --- */
+
+const MAX_VISIBLE_ITEMS = 10;
+let fullFeedList = [];
+let currentEndIndex = MAX_VISIBLE_ITEMS;
+
 async function loadFeed() {
   const feed = document.getElementById("feed");
+  const showMoreBtn = document.getElementById("showMoreBtn");
+
   feed.innerHTML = "Indlæser…";
+  showMoreBtn.style.display = "none";
 
   try {
     const res = await fetch(`${apiBase}/api/feed?companyId=${getCompanyId()}`);
     if (!res.ok) throw new Error("Backend gav ikke OK");
     const list = await res.json();
 
-    if (!Array.isArray(list)) {
+    if (!Array.isArray(list) || list.length === 0) {
       feed.innerHTML = "Ingen data endnu – vær den første til at tage en pause.";
       return;
     }
 
-    feed.innerHTML = "";
-    if (list.length === 0) {
-      feed.innerHTML = "Ingen data endnu – vær den første til at tage en pause.";
-      return;
+    fullFeedList = list;
+    currentEndIndex = MAX_VISIBLE_ITEMS;
+
+    renderFeedSlice(0, MAX_VISIBLE_ITEMS);
+
+    if (fullFeedList.length > MAX_VISIBLE_ITEMS) {
+      showMoreBtn.style.display = "block";
     }
 
-    list.forEach(item => {
-      const div = document.createElement("div");
-      div.textContent = `${item.timestamp} – ${item.name} lavede: ${item.activity}`;
-      feed.appendChild(div);
-    });
   } catch (e) {
     feed.innerHTML = "Ingen data endnu – vær den første til at tage en pause.";
   }
 }
+
+function renderFeedSlice(start, end) {
+  const feed = document.getElementById("feed");
+  feed.innerHTML = "";
+
+  const slice = fullFeedList.slice(start, end);
+
+  slice.forEach((item, index) => {
+    const div = document.createElement("div");
+    div.textContent = `${item.timestamp} – ${item.name} lavede: ${item.activity}`;
+    div.classList.add("feed-item");
+
+    if (index === 0) {
+      div.classList.add("feed-item-pulse");
+      setTimeout(() => div.classList.remove("feed-item-pulse"), 1500);
+    }
+
+    feed.appendChild(div);
+  });
+
+  feed.parentElement.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+document.getElementById("showMoreBtn").onclick = () => {
+  const nextEnd = currentEndIndex + MAX_VISIBLE_ITEMS;
+
+  renderFeedSlice(0, Math.min(nextEnd, fullFeedList.length));
+  currentEndIndex = nextEnd;
+
+  if (currentEndIndex >= fullFeedList.length) {
+    document.getElementById("showMoreBtn").style.display = "none";
+  }
+};
+
+/* --- UI handling --- */
 
 document.getElementById("ideaBtn").onclick = async () => {
   const idea = await getIdea();
@@ -95,9 +140,9 @@ window.onload = () => {
   loadFeed();
 };
 
-// --- Plug & Pause påmindelser (ingen extension nødvendig) ---
+/* --- Plug & Pause påmindelser --- */
 
-const REMINDER_INTERVAL_MINUTES = 2;
+const REMINDER_INTERVAL_MINUTES = 15;
 
 document.addEventListener("DOMContentLoaded", () => {
   if (Notification.permission !== "granted") {
@@ -113,3 +158,4 @@ setInterval(() => {
     });
   }
 }, REMINDER_INTERVAL_MINUTES * 60 * 1000);
+
