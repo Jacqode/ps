@@ -105,15 +105,12 @@ function renderFeedSlice(start, end) {
 
 function updateGreeting() {
   const name = localStorage.getItem("pp_name");
-  const hasVisited = localStorage.getItem("pp_hasVisited") === "true";
   const greeting = document.getElementById("greeting");
 
-  if (name && hasVisited) {
-    greeting.textContent = `Godt at se dig igen, ${name}`;
-  } else if (name) {
-    greeting.textContent = `Hej ${name}`;
+  if (name) {
+    greeting.textContent = `Hej ${name} — tid til et øjeblik til dig selv.`;
   } else {
-    greeting.textContent = "Hej";
+    greeting.textContent = "Hej — tid til et øjeblik til dig selv.";
   }
 
   localStorage.setItem("pp_hasVisited", "true");
