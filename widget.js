@@ -1,5 +1,5 @@
 // -----------------------------
-// Plug & Pause – widget.js
+// Plug & Pause – widget.js (funktionel version)
 // -----------------------------
 
 // ØVELSER (målbruger-tilpasset)
@@ -21,26 +21,48 @@ const exercises = {
   ]
 };
 
+// UI-elementer
+let isRunning = false;
+let timerInterval = null;
+
 // -----------------------------
 // START ØVELSE
 // -----------------------------
 function startExercise(exerciseName) {
-  // Vis øvelsen
-  alert("Pause: " + exerciseName);
+  if (isRunning) return; // Bloker dobbeltklik
+  isRunning = true;
 
-  // Simuler 30 sek pause (du kan udskifte med rigtig timer)
-  setTimeout(() => {
-    onPauseCompleted(exerciseName);
-  }, 3000); // 3 sek for test – skift til 30000 for 30 sek
+  const display = document.getElementById("exerciseDisplay");
+  const timer = document.getElementById("timerDisplay");
+
+  display.textContent = "Pause: " + exerciseName;
+  timer.textContent = "30";
+
+  let timeLeft = 30;
+
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    timer.textContent = timeLeft;
+
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      onPauseCompleted(exerciseName);
+    }
+  }, 1000);
 }
 
 // -----------------------------
 // NÅR PAUSEN ER FÆRDIG
 // -----------------------------
 function onPauseCompleted(exerciseName) {
-  alert("Flot! Du passer på dig selv – en lille pause gør en stor forskel.");
+  isRunning = false;
 
-  // Log til feed
+  const display = document.getElementById("exerciseDisplay");
+  const timer = document.getElementById("timerDisplay");
+
+  display.textContent = "Flot! Du passer på dig selv.";
+  timer.textContent = "";
+
   addToFeed(exerciseName);
 }
 
@@ -51,7 +73,13 @@ function addToFeed(exerciseName) {
   const feed = document.getElementById("feed");
   const entry = document.createElement("div");
 
-  entry.textContent = "Tog en pause: " + exerciseName + " (" + new Date().toLocaleTimeString() + ")";
+  entry.textContent =
+    "Tog en pause: " +
+    exerciseName +
+    " (" +
+    new Date().toLocaleTimeString() +
+    ")";
+
   entry.style.padding = "8px 0";
   entry.style.borderBottom = "1px solid #ddd";
 
@@ -64,9 +92,12 @@ function addToFeed(exerciseName) {
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll(".pp-cat-btn").forEach(btn => {
     btn.addEventListener("click", () => {
+      if (isRunning) return;
+
       const cat = btn.dataset.category;
       const list = exercises[cat];
       const chosen = list[Math.floor(Math.random() * list.length)];
+
       startExercise(chosen);
     });
   });
