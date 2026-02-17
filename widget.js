@@ -46,16 +46,13 @@ async function markDone(activity) {
 
 /* --- Feed logik --- */
 
-const MAX_VISIBLE_ITEMS = 10;
+const MAX_VISIBLE_ITEMS = 6; // FAST feed på 6 aktiviteter
 let fullFeedList = [];
-let currentEndIndex = MAX_VISIBLE_ITEMS;
 
 async function loadFeed() {
   const feed = document.getElementById("feed");
-  const showMoreBtn = document.getElementById("showMoreBtn");
 
   feed.innerHTML = "Indlæser…";
-  showMoreBtn.style.display = "none";
 
   try {
     const res = await fetch(`${apiBase}/api/feed?companyId=${getCompanyId()}`);
@@ -68,13 +65,9 @@ async function loadFeed() {
     }
 
     fullFeedList = list;
-    currentEndIndex = MAX_VISIBLE_ITEMS;
 
+    // Vis kun de seneste 6
     renderFeedSlice(0, MAX_VISIBLE_ITEMS);
-
-    if (fullFeedList.length > MAX_VISIBLE_ITEMS) {
-      showMoreBtn.style.display = "block";
-    }
 
   } catch (e) {
     feed.innerHTML = "Ingen data endnu – vær den første til at tage en pause.";
@@ -89,9 +82,16 @@ function renderFeedSlice(start, end) {
 
   slice.forEach((item, index) => {
     const div = document.createElement("div");
-    div.textContent = `${item.timestamp} – ${item.name} lavede: ${item.activity}`;
+
+    // Formatér tidspunkt til HH:MM
+    const time = new Date(item.timestamp);
+    const hh = time.getHours().toString().padStart(2, "0");
+    const mm = time.getMinutes().toString().padStart(2, "0");
+
+    div.textContent = `${hh}:${mm} – ${item.name} lavede: ${item.activity}`;
     div.classList.add("feed-item");
 
+    // Pulse på nyeste
     if (index === 0) {
       div.classList.add("feed-item-pulse");
       setTimeout(() => div.classList.remove("feed-item-pulse"), 1500);
@@ -99,23 +99,7 @@ function renderFeedSlice(start, end) {
 
     feed.appendChild(div);
   });
-
-  feed.parentElement.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
 }
-
-document.getElementById("showMoreBtn").onclick = () => {
-  const nextEnd = currentEndIndex + MAX_VISIBLE_ITEMS;
-
-  renderFeedSlice(0, Math.min(nextEnd, fullFeedList.length));
-  currentEndIndex = nextEnd;
-
-  if (currentEndIndex >= fullFeedList.length) {
-    document.getElementById("showMoreBtn").style.display = "none";
-  }
-};
 
 /* --- Personlig hilsen --- */
 
@@ -149,37 +133,7 @@ document.getElementById("doneBtn").onclick = async () => {
   loadFeed();
 };
 
-document.getElementById("saveName").onclick = () => {
-  const name = document.getElementById("nameInput").value.trim();
-  if (name) {
-    localStorage.setItem("pp_name", name);
-    updateGreeting();
-  }
-};
-
 window.onload = () => {
-  const saved = localStorage.getItem("pp_name");
-  if (saved) document.getElementById("nameInput").value = saved;
-
   updateGreeting();
   loadFeed();
 };
-
-/* --- Plug & Pause påmindelser --- */
-
-const REMINDER_INTERVAL_MINUTES = 15;
-
-document.addEventListener("DOMContentLoaded", () => {
-  if (Notification.permission !== "granted") {
-    Notification.requestPermission();
-  }
-});
-
-setInterval(() => {
-  if (Notification.permission === "granted") {
-    new Notification("Plug & Pause", {
-      body: "Tid til en lille pause?",
-      icon: "https://jacqode.github.io/ps/icon.png"
-    });
-  }
-}, REMINDER_INTERVAL_MINUTES * 60 * 1000);
