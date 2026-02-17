@@ -1,144 +1,104 @@
-// -----------------------------
-// Plug & Pause – ORIGINAL FUNKTION (Option A)
-// -----------------------------
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <title>Plug & Pause – Firma J</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-const apiBase = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
-
-// 10 aktiviteter med korte beskrivelser
-const fallbackIdeas = [
-  "Stræk nakken i 30 sekunder – løsner spændinger og giver ro i øvre ryg og skuldre.",
-  "Tag 10 dybe vejrtrækninger – sænk tempoet og aktiver dit nervesystem.",
-  "Gå en kort tur væk fra skærmen – få blodcirkulationen i gang og giv øjnene en pause.",
-  "Drik et glas vand – et lille energiboost og en god vane i løbet af dagen.",
-  "Ryst skuldrene i 15 sekunder – slip spændinger fra stillesiddende arbejde.",
-  "Squat i 30 sekunder – aktiver ben og core og få et hurtigt energiboost.",
-  "Wall sit i 20–30 sekunder – en stærk, statisk øvelse der vækker benene.",
-  "Rul skuldrene 10 gange – store rolige cirkler der løsner nakke og øvre ryg.",
-  "Stræk lænden i 20 sekunder – læn dig let bagover og giv plads i ryggen.",
-  "Ryst armene i 15 sekunder – slip ophobet spænding og få en let, frisk følelse."
-];
-
-function getCompanyId() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get("companyId") || "FIRMAJ";
-}
-
-async function getIdea() {
-  try {
-    const res = await fetch(`${apiBase}/api/random?companyId=${getCompanyId()}`);
-    if (!res.ok) throw new Error("Backend gav ikke OK");
-    const data = await res.json();
-    if (!data || !data.activity) throw new Error("Ingen activity i svar");
-    return data.activity;
-  } catch (e) {
-    const i = Math.floor(Math.random() * fallbackIdeas.length);
-    return fallbackIdeas[i];
-  }
-}
-
-async function markDone(activity) {
-  const name = localStorage.getItem("pp_name") || "Ukendt";
-  try {
-    await fetch(`${apiBase}/api/submit?companyId=${getCompanyId()}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name,
-        activity
-      })
-    });
-  } catch (e) {}
-}
-
-/* --- Feed logik --- */
-
-const MAX_VISIBLE_ITEMS = 6; // Fast feed – 6 aktiviteter
-let fullFeedList = [];
-
-async function loadFeed() {
-  const feed = document.getElementById("feed");
-
-  feed.innerHTML = "Indlæser…";
-
-  try {
-    const res = await fetch(`${apiBase}/api/feed?companyId=${getCompanyId()}`);
-    if (!res.ok) throw new Error("Backend gav ikke OK");
-    const list = await res.json();
-
-    if (!Array.isArray(list) || list.length === 0) {
-      feed.innerHTML = "Ingen data endnu – vær den første til at tage en pause.";
-      return;
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      max-width: 500px;
     }
 
-    fullFeedList = list;
+    button {
+      padding: 10px 15px;
+      margin: 5px 0;
+      width: 100%;
+      font-size: 16px;
+      cursor: pointer;
+    }
 
-    // Vis kun de seneste 6
-    renderFeedSlice(0, MAX_VISIBLE_ITEMS);
+    .section {
+      margin-top: 20px;
+    }
 
-  } catch (e) {
-    feed.innerHTML = "Ingen data endnu – vær den første til at tage en pause.";
-  }
-}
+    /* Feed container */
+    #feedContainer {
+      background: #fafafa;
+      border: 1px solid #ddd;
+      padding: 5px;
+      border-radius: 4px;
+      overflow-y: hidden; /* Fast feed – ingen scroll */
+    }
 
-function renderFeedSlice(start, end) {
-  const feed = document.getElementById("feed");
-  feed.innerHTML = "";
+    /* Feed items */
+    .feed-item {
+      padding: 6px 0;
+      border-bottom: 1px solid #ddd;
+    }
 
-  const slice = fullFeedList.slice(start, end);
+    .feed-item:last-child {
+      border-bottom: none;
+    }
 
-  slice.forEach((item) => {
-    const div = document.createElement("div");
+    /* Mikro-feedback */
+    #microFeedback {
+      display: none;
+      background: #e6ffe6;
+      border: 1px solid #b2ffb2;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 4px;
+      color: #2d7a2d;
+      font-weight: bold;
+    }
 
-    // Formatér tidspunkt til HH:MM
-    const time = new Date(item.timestamp);
-    const hh = time.getHours().toString().padStart(2, "0");
-    const mm = time.getMinutes().toString().padStart(2, "0");
+    a {
+      color: #2563eb;
+      text-decoration: none;
+    }
 
-    div.textContent = `${hh}:${mm} – ${item.name} lavede: ${item.activity}`;
-    div.classList.add("feed-item");
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
 
-    feed.appendChild(div);
-  });
-}
+<body>
 
-/* --- Personlig hilsen --- */
+  <!-- Omsorgsfuld hilsen -->
+  <h2 id="greeting"></h2>
 
-function updateGreeting() {
-  const name = localStorage.getItem("pp_name");
-  const greeting = document.getElementById("greeting");
+  <h3>Plug & Pause – Firma J</h3>
 
-  if (name) {
-    greeting.textContent = `Hej ${name} — tid til et øjeblik til dig selv.`;
-  } else {
-    greeting.textContent = "Hej — tid til et øjeblik til dig selv.";
-  }
+  <!-- Aktivitet -->
+  <button id="ideaBtn">Klik her for din aktivitet</button>
 
-  localStorage.setItem("pp_hasVisited", "true");
-}
+  <div id="currentIdea" style="margin: 10px 0; font-weight: bold;"></div>
 
-/* --- UI handling --- */
+  <button id="doneBtn">Markér pausen som gennemført</button>
 
-document.getElementById("ideaBtn").onclick = async () => {
-  const idea = await getIdea();
-  document.getElementById("currentIdea").textContent = idea;
-};
+  <!-- Mikro-feedback -->
+  <div id="microFeedback">Godt gået! Du tog en pause.</div>
 
-document.getElementById("doneBtn").onclick = async () => {
-  const idea = document.getElementById("currentIdea").textContent;
-  if (!idea) return;
+  <!-- Feed -->
+  <div class="section">
+    <h3>Hvad andre laver</h3>
 
-  await markDone(idea);
-  loadFeed();
+    <div id="feedContainer">
+      <div id="feed">Indlæser…</div>
+    </div>
+  </div>
 
-  // Mikro-feedback
-  const box = document.getElementById("microFeedback");
-  box.style.display = "block";
-  setTimeout(() => {
-    box.style.display = "none";
-  }, 1500);
-};
+  <!-- Indstillinger -->
+  <div class="section">
+    <a href="settings.html">Indstillinger</a>
+  </div>
 
-window.onload = () => {
-  updateGreeting();
-  loadFeed();
-};
+  <!-- Cache-busting så du altid får nyeste widget.js -->
+  <script src="widget.js?v=7"></script>
+
+</body>
+</html>
