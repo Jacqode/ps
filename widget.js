@@ -4,19 +4,19 @@
 
 const apiBase = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
 
+// 10 aktiviteter med korte beskrivelser
 const fallbackIdeas = [
-  "Stræk nakken i 30 sekunder",
-  "Tag 10 dybe vejrtrækninger",
-  "Gå en kort tur væk fra skærmen",
-  "Drik et glas vand",
-  "Ryst skuldrene i 15 sekunder",
-  "Squat i 30 sekunder",
-  "Wall sit i 20–30 sekunder",
-  "Rul skuldrene 10 gange",
-  "Stræk lænden i 20 sekunder",
-  "Ryst armene i 15 sekunder"
+  "Stræk nakken i 30 sekunder – løsner spændinger og giver ro i øvre ryg og skuldre.",
+  "Tag 10 dybe vejrtrækninger – sænk tempoet og aktiver dit nervesystem.",
+  "Gå en kort tur væk fra skærmen – få blodcirkulationen i gang og giv øjnene en pause.",
+  "Drik et glas vand – et lille energiboost og en god vane i løbet af dagen.",
+  "Ryst skuldrene i 15 sekunder – slip spændinger fra stillesiddende arbejde.",
+  "Squat i 30 sekunder – aktiver ben og core og få et hurtigt energiboost.",
+  "Wall sit i 20–30 sekunder – en stærk, statisk øvelse der vækker benene.",
+  "Rul skuldrene 10 gange – store rolige cirkler der løsner nakke og øvre ryg.",
+  "Stræk lænden i 20 sekunder – læn dig let bagover og giv plads i ryggen.",
+  "Ryst armene i 15 sekunder – slip ophobet spænding og få en let, frisk følelse."
 ];
-
 
 function getCompanyId() {
   const params = new URLSearchParams(window.location.search);
