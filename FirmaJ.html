@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Plug & Pause – Firma J</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -17,7 +16,6 @@
       margin: 5px 0;
       width: 100%;
       font-size: 16px;
-      cursor: pointer;
     }
 
     .section {
@@ -53,21 +51,6 @@
       0% { background-color: #e0f7ff; }
       100% { background-color: transparent; }
     }
-
-    /* Øvelse + timer */
-    #currentIdea {
-      margin: 10px 0;
-      font-weight: bold;
-      font-size: 1.2rem;
-    }
-
-    #timerDisplay {
-      font-size: 2rem;
-      font-weight: bold;
-      margin-top: 10px;
-      text-align: center;
-      min-height: 40px;
-    }
   </style>
 </head>
 
@@ -76,14 +59,9 @@
   <h2 id="greeting"></h2>
   <h3>Plug & Pause – Firma J</h3>
 
-  <!-- Kategori-knapper -->
-  <button class="pp-cat-btn" data-category="siddende">Siddende pauser</button>
-  <button class="pp-cat-btn" data-category="nakke">Nakke & skuldre</button>
-  <button class="pp-cat-btn" data-category="karate">Karate-inspireret</button>
+  <button id="ideaBtn">Klik her for din aktivitet</button>
 
-  <!-- Øvelse + timer -->
-  <div id="currentIdea"></div>
-  <div id="timerDisplay"></div>
+  <div id="currentIdea" style="margin: 10px 0; font-weight: bold;"></div>
 
   <button id="doneBtn">Markér pausen som gennemført</button>
 
