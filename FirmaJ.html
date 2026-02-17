@@ -30,10 +30,9 @@
       border: 1px solid #ddd;
       padding: 5px;
       border-radius: 4px;
-      overflow-y: hidden; /* Fast feed – ingen scroll */
+      overflow-y: hidden;
     }
 
-    /* Feed items */
     .feed-item {
       padding: 6px 0;
       border-bottom: 1px solid #ddd;
@@ -55,13 +54,13 @@
       font-weight: bold;
     }
 
-    a {
-      color: #2563eb;
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
+    /* Logo */
+    #logo {
+      margin-top: 25px;
+      text-align: center;
+      opacity: 0.7;
+      font-size: 14px;
+      letter-spacing: 0.5px;
     }
   </style>
 </head>
@@ -71,8 +70,6 @@
   <!-- Omsorgsfuld hilsen -->
   <h2 id="greeting"></h2>
 
-  <h3>Plug & Pause – Firma J</h3>
-
   <!-- Aktivitet -->
   <button id="ideaBtn">Klik her for din aktivitet</button>
 
@@ -81,24 +78,3 @@
   <button id="doneBtn">Markér pausen som gennemført</button>
 
   <!-- Mikro-feedback -->
-  <div id="microFeedback">Godt gået! Du tog en pause.</div>
-
-  <!-- Feed -->
-  <div class="section">
-    <h3>Hvad andre laver</h3>
-
-    <div id="feedContainer">
-      <div id="feed">Indlæser…</div>
-    </div>
-  </div>
-
-  <!-- Indstillinger -->
-  <div class="section">
-    <a href="settings.html">Indstillinger</a>
-  </div>
-
-  <!-- Cache-busting så du altid får nyeste widget.js -->
-  <script src="widget.js?v=7"></script>
-
-</body>
-</html>
