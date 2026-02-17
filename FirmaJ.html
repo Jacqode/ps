@@ -1,92 +1,122 @@
 <!DOCTYPE html>
 <html lang="da">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Plug & Pause – Firma J</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
-      max-width: 500px;
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+      background: #f5f5f0;
     }
 
-    button {
-      padding: 10px 15px;
-      margin: 5px 0;
-      width: 100%;
-      font-size: 16px;
+    /* Header-stil */
+    .pp-header {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: #123b5d;
     }
 
-    .section {
-      margin-top: 20px;
+    .pp-header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
     }
 
-    /* Feed container */
-    #feedContainer {
-      max-height: 250px;
-      overflow-y: auto;
-      border: 1px solid #ddd;
-      padding: 5px;
-      border-radius: 4px;
-      background: #fafafa;
+    .pp-header p {
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
     }
 
-    /* Feed items */
-    .feed-item {
-      padding: 6px 0;
-      border-bottom: 1px solid #ddd;
+    .pp-main-btn {
+      background: #2f7f7b;
+      color: #fff;
+      border: none;
+      padding: 0.9rem 1.8rem;
+      border-radius: 999px;
+      font-size: 1rem;
+      cursor: pointer;
     }
 
-    .feed-item:last-child {
-      border-bottom: none;
+    .pp-main-btn:hover {
+      background: #25635f;
     }
 
-    /* Pulse animation for new items */
-    .feed-item-pulse {
-      animation: feedPulse 1.5s ease-out;
+    /* Kategorier */
+    .pp-categories {
+      text-align: center;
+      padding: 1.5rem 1rem;
     }
 
-    @keyframes feedPulse {
-      0% { background-color: #e0f7ff; }
-      100% { background-color: transparent; }
+    .pp-category-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+
+    .pp-cat-btn {
+      background: #ffffff;
+      border: 1px solid #d0d7de;
+      border-radius: 999px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .pp-cat-btn:hover {
+      border-color: #2f7f7b;
+      color: #2f7f7b;
+    }
+
+    /* Feed */
+    .pp-feed {
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .pp-feed-sub {
+      color: #555;
+      margin-bottom: 1rem;
     }
   </style>
 </head>
 
 <body>
 
-  <h2 id="greeting"></h2>
-  <h3>Plug & Pause – Firma J</h3>
+  <!-- HEADER -->
+  <header class="pp-header">
+    <h1>Små pauser. Stor forskel.</h1>
+    <p>For dig, der sidder meget og gør en vigtig forskel hver dag.</p>
 
-  <button id="ideaBtn">Klik her for din aktivitet</button>
+    <a href="FirmaJ.html">
+      <button class="pp-main-btn">Start en 30 sekunders pause</button>
+    </a>
+  </header>
 
-  <div id="currentIdea" style="margin: 10px 0; font-weight: bold;"></div>
-
-  <button id="doneBtn">Markér pausen som gennemført</button>
-
-  <div class="section">
-    <h3>Hvad andre laver</h3>
-
-    <div id="feedContainer">
-      <div id="feed">Indlæser…</div>
+  <!-- KATEGORIER -->
+  <section class="pp-categories">
+    <h2>Vælg en pause, der passer til dig</h2>
+    <div class="pp-category-list">
+      <button class="pp-cat-btn" data-category="siddende">Siddende pauser (30 sek)</button>
+      <button class="pp-cat-btn" data-category="nakke">Nakke & skuldre</button>
+      <button class="pp-cat-btn" data-category="karate">Karate‑inspireret</button>
     </div>
+  </section>
 
-    <button id="showMoreBtn" style="display:none; margin-top:10px;">
-      Vis flere
-    </button>
-  </div>
+  <!-- FEED INTRO -->
+  <section class="pp-feed">
+    <h2>Du er ikke alene</h2>
+    <p class="pp-feed-sub">Se hvad andre gør for at passe på sig selv i løbet af dagen.</p>
+  </section>
 
-  <div class="section">
-    <label>Dit navn:</label><br>
-    <input id="nameInput" type="text" placeholder="Skriv dit navn" style="width: 100%; padding: 8px;">
-    <button id="saveName">Ændre navn</button>
-  </div>
+  <!-- HER KOMMER DIT EKSISTERENDE FEED -->
+  <div id="feed"></div>
 
-  <div class="section">
-    <a href="settings.html">Indstillinger</a>
-  </div>
-
+  <!-- SCRIPT -->
   <script src="widget.js"></script>
+
 </body>
 </html>
