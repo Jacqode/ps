@@ -1,10 +1,10 @@
 // -----------------------------
-// Plug & Pause – ORIGINAL FUNKTION (Option A)
+// Plug & Pause – Option A
 // -----------------------------
 
 const apiBase = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
 
-// 10 aktiviteter med korte beskrivelser
+// 10 aktiviteter med beskrivelser
 const fallbackIdeas = [
   "Stræk nakken i 30 sekunder – løsner spændinger og giver ro i øvre ryg og skuldre.",
   "Tag 10 dybe vejrtrækninger – sænk tempoet og aktiver dit nervesystem.",
@@ -42,22 +42,18 @@ async function markDone(activity) {
     await fetch(`${apiBase}/api/submit?companyId=${getCompanyId()}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name,
-        activity
-      })
+      body: JSON.stringify({ name, activity })
     });
   } catch (e) {}
 }
 
 /* --- Feed logik --- */
 
-const MAX_VISIBLE_ITEMS = 6; // Fast feed – 6 aktiviteter
+const MAX_VISIBLE_ITEMS = 6;
 let fullFeedList = [];
 
 async function loadFeed() {
   const feed = document.getElementById("feed");
-
   feed.innerHTML = "Indlæser…";
 
   try {
@@ -71,8 +67,6 @@ async function loadFeed() {
     }
 
     fullFeedList = list;
-
-    // Vis kun de seneste 6
     renderFeedSlice(0, MAX_VISIBLE_ITEMS);
 
   } catch (e) {
@@ -89,13 +83,11 @@ function renderFeedSlice(start, end) {
   slice.forEach((item) => {
     const div = document.createElement("div");
 
-    // Formatér tidspunkt til HH:MM
     const time = new Date(item.timestamp);
-    const hh = time.getHours().toString().padStart(2, "0");
-    const mm = time.getMinutes().toString().padStart(2, "0");
+    const dd = time.getDate().toString().padStart(2, "0");
+    const mm = (time.getMonth() + 1).toString().padStart(2, "0");
 
-    // Konsistent sprog: "tog en pause med bevægelse"
-    div.textContent = `${hh}:${mm} – ${item.name} tog en pause med bevægelse: ${item.activity}`;
+    div.textContent = `${dd}/${mm} – ${item.name}: ${item.activity}`;
     div.classList.add("feed-item");
 
     feed.appendChild(div);
@@ -109,9 +101,9 @@ function updateGreeting() {
   const greeting = document.getElementById("greeting");
 
   if (name) {
-    greeting.textContent = `Hej ${name} — klar til en pause med bevægelse?`;
+    greeting.innerHTML = `Hej ${name}<br>klar til en pause med bevægelse?`;
   } else {
-    greeting.textContent = "Hej — klar til en pause med bevægelse?";
+    greeting.innerHTML = `Hej<br>klar til en pause med bevægelse?`;
   }
 
   localStorage.setItem("pp_hasVisited", "true");
@@ -119,34 +111,23 @@ function updateGreeting() {
 
 /* --- UI handling --- */
 
-// Knap: start en pause med bevægelse (henter en aktivitet)
 document.getElementById("ideaBtn").onclick = async () => {
   const idea = await getIdea();
-  // Vis som "Din pause med bevægelse"
-  document.getElementById("currentIdea").textContent = `Din pause med bevægelse: ${idea}`;
+  document.getElementById("currentIdea").textContent = idea;
 };
 
-// Knap: bekræft at pause med bevægelse er gennemført
 document.getElementById("doneBtn").onclick = async () => {
-  const currentText = document.getElementById("currentIdea").textContent;
-  if (!currentText) return;
+  const idea = document.getElementById("currentIdea").textContent;
+  if (!idea) return;
 
-  // Træk selve aktiviteten ud (efter "Din pause med bevægelse: ")
-  const prefix = "Din pause med bevægelse: ";
-  const activity = currentText.startsWith(prefix) ? currentText.slice(prefix.length) : currentText;
-
-  await markDone(activity);
+  await markDone(idea);
   loadFeed();
 
-  // Mikro-feedback (konsekvent sprog)
   const box = document.getElementById("microFeedback");
   box.textContent = "Godt gået — pause med bevægelse gennemført.";
   box.style.display = "block";
-  setTimeout(() => {
-    box.style.display = "none";
-  }, 1500);
+  setTimeout(() => { box.style.display = "none"; }, 1500);
 
-  // Ryd den viste pause
   document.getElementById("currentIdea").textContent = "";
 };
 
