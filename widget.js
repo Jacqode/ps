@@ -1,3 +1,7 @@
+// -----------------------------
+// Plug & Pause – ORIGINAL FUNKTION (Option A)
+// -----------------------------
+
 const apiBase = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
 
 const fallbackIdeas = [
