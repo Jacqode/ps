@@ -1,104 +1,181 @@
-// -----------------------------
-// Plug & Pause – widget.js (funktionel version)
-// -----------------------------
+const apiBase = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
 
-// ØVELSER (målbruger-tilpasset)
-const exercises = {
-  siddende: [
-    "Siddende nakkerulning – 20 sek",
-    "Siddende skulderløft – 15 sek",
-    "Siddende åndedrag – 30 sek"
-  ],
-  nakke: [
-    "Nakke stræk – 20 sek",
-    "Skulderblade klem – 15 sek",
-    "Blød sidebøjning – 20 sek"
-  ],
-  karate: [
-    "Karate-åndedrag – 10 sek",
-    "Stå-stærkt-stilling – 15 sek",
-    "Blød armcirkel – 20 sek"
-  ]
+const fallbackIdeas = [
+  "Stræk nakken i 30 sekunder",
+  "Tag 10 dybe vejrtrækninger",
+  "Gå en kort tur væk fra skærmen",
+  "Drik et glas vand",
+  "Ryst skuldrene i 15 sekunder"
+];
+
+function getCompanyId() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("companyId") || "FIRMAJ";
+}
+
+async function getIdea() {
+  try {
+    const res = await fetch(`${apiBase}/api/random?companyId=${getCompanyId()}`);
+    if (!res.ok) throw new Error("Backend gav ikke OK");
+    const data = await res.json();
+    if (!data || !data.activity) throw new Error("Ingen activity i svar");
+    return data.activity;
+  } catch (e) {
+    const i = Math.floor(Math.random() * fallbackIdeas.length);
+    return fallbackIdeas[i];
+  }
+}
+
+async function markDone(activity) {
+  const name = localStorage.getItem("pp_name") || "Ukendt";
+  try {
+    await fetch(`${apiBase}/api/submit?companyId=${getCompanyId()}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name,
+        activity
+      })
+    });
+  } catch (e) {}
+}
+
+/* --- Feed logik --- */
+
+const MAX_VISIBLE_ITEMS = 10;
+let fullFeedList = [];
+let currentEndIndex = MAX_VISIBLE_ITEMS;
+
+async function loadFeed() {
+  const feed = document.getElementById("feed");
+  const showMoreBtn = document.getElementById("showMoreBtn");
+
+  feed.innerHTML = "Indlæser…";
+  showMoreBtn.style.display = "none";
+
+  try {
+    const res = await fetch(`${apiBase}/api/feed?companyId=${getCompanyId()}`);
+    if (!res.ok) throw new Error("Backend gav ikke OK");
+    const list = await res.json();
+
+    if (!Array.isArray(list) || list.length === 0) {
+      feed.innerHTML = "Ingen data endnu – vær den første til at tage en pause.";
+      return;
+    }
+
+    fullFeedList = list;
+    currentEndIndex = MAX_VISIBLE_ITEMS;
+
+    renderFeedSlice(0, MAX_VISIBLE_ITEMS);
+
+    if (fullFeedList.length > MAX_VISIBLE_ITEMS) {
+      showMoreBtn.style.display = "block";
+    }
+
+  } catch (e) {
+    feed.innerHTML = "Ingen data endnu – vær den første til at tage en pause.";
+  }
+}
+
+function renderFeedSlice(start, end) {
+  const feed = document.getElementById("feed");
+  feed.innerHTML = "";
+
+  const slice = fullFeedList.slice(start, end);
+
+  slice.forEach((item, index) => {
+    const div = document.createElement("div");
+    div.textContent = `${item.timestamp} – ${item.name} lavede: ${item.activity}`;
+    div.classList.add("feed-item");
+
+    if (index === 0) {
+      div.classList.add("feed-item-pulse");
+      setTimeout(() => div.classList.remove("feed-item-pulse"), 1500);
+    }
+
+    feed.appendChild(div);
+  });
+
+  feed.parentElement.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+document.getElementById("showMoreBtn").onclick = () => {
+  const nextEnd = currentEndIndex + MAX_VISIBLE_ITEMS;
+
+  renderFeedSlice(0, Math.min(nextEnd, fullFeedList.length));
+  currentEndIndex = nextEnd;
+
+  if (currentEndIndex >= fullFeedList.length) {
+    document.getElementById("showMoreBtn").style.display = "none";
+  }
 };
 
-// UI-elementer
-let isRunning = false;
-let timerInterval = null;
+/* --- Personlig hilsen --- */
 
-// -----------------------------
-// START ØVELSE
-// -----------------------------
-function startExercise(exerciseName) {
-  if (isRunning) return; // Bloker dobbeltklik
-  isRunning = true;
+function updateGreeting() {
+  const name = localStorage.getItem("pp_name");
+  const hasVisited = localStorage.getItem("pp_hasVisited") === "true";
+  const greeting = document.getElementById("greeting");
 
-  const display = document.getElementById("exerciseDisplay");
-  const timer = document.getElementById("timerDisplay");
+  if (name && hasVisited) {
+    greeting.textContent = `Godt at se dig igen, ${name}`;
+  } else if (name) {
+    greeting.textContent = `Hej ${name}`;
+  } else {
+    greeting.textContent = "Hej";
+  }
 
-  display.textContent = "Pause: " + exerciseName;
-  timer.textContent = "30";
-
-  let timeLeft = 30;
-
-  timerInterval = setInterval(() => {
-    timeLeft--;
-    timer.textContent = timeLeft;
-
-    if (timeLeft <= 0) {
-      clearInterval(timerInterval);
-      onPauseCompleted(exerciseName);
-    }
-  }, 1000);
+  localStorage.setItem("pp_hasVisited", "true");
 }
 
-// -----------------------------
-// NÅR PAUSEN ER FÆRDIG
-// -----------------------------
-function onPauseCompleted(exerciseName) {
-  isRunning = false;
+/* --- UI handling --- */
 
-  const display = document.getElementById("exerciseDisplay");
-  const timer = document.getElementById("timerDisplay");
+document.getElementById("ideaBtn").onclick = async () => {
+  const idea = await getIdea();
+  document.getElementById("currentIdea").textContent = idea;
+};
 
-  display.textContent = "Flot! Du passer på dig selv.";
-  timer.textContent = "";
+document.getElementById("doneBtn").onclick = async () => {
+  const idea = document.getElementById("currentIdea").textContent;
+  if (!idea) return;
+  await markDone(idea);
+  loadFeed();
+};
 
-  addToFeed(exerciseName);
-}
+document.getElementById("saveName").onclick = () => {
+  const name = document.getElementById("nameInput").value.trim();
+  if (name) {
+    localStorage.setItem("pp_name", name);
+    updateGreeting();
+  }
+};
 
-// -----------------------------
-// FEED FUNKTION
-// -----------------------------
-function addToFeed(exerciseName) {
-  const feed = document.getElementById("feed");
-  const entry = document.createElement("div");
+window.onload = () => {
+  const saved = localStorage.getItem("pp_name");
+  if (saved) document.getElementById("nameInput").value = saved;
 
-  entry.textContent =
-    "Tog en pause: " +
-    exerciseName +
-    " (" +
-    new Date().toLocaleTimeString() +
-    ")";
+  updateGreeting();
+  loadFeed();
+};
 
-  entry.style.padding = "8px 0";
-  entry.style.borderBottom = "1px solid #ddd";
+/* --- Plug & Pause påmindelser --- */
 
-  feed.prepend(entry);
-}
+const REMINDER_INTERVAL_MINUTES = 15;
 
-// -----------------------------
-// KATEGORI-KNAPPER
-// -----------------------------
 document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".pp-cat-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      if (isRunning) return;
-
-      const cat = btn.dataset.category;
-      const list = exercises[cat];
-      const chosen = list[Math.floor(Math.random() * list.length)];
-
-      startExercise(chosen);
-    });
-  });
+  if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+  }
 });
+
+setInterval(() => {
+  if (Notification.permission === "granted") {
+    new Notification("Plug & Pause", {
+      body: "Tid til en lille pause?",
+      icon: "https://jacqode.github.io/ps/icon.png"
+    });
+  }
+}, REMINDER_INTERVAL_MINUTES * 60 * 1000);
