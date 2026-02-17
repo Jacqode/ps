@@ -89,7 +89,7 @@ function renderFeedSlice(start, end) {
     const mm = time.getMinutes().toString().padStart(2, "0");
 
     div.textContent = `${hh}:${mm} – ${item.name} lavede: ${item.activity}`;
-    div.classList.add("feed-item", "feed-fade-in");
+    div.classList.add("feed-item");
 
     feed.appendChild(div);
   });
@@ -123,8 +123,16 @@ document.getElementById("ideaBtn").onclick = async () => {
 document.getElementById("doneBtn").onclick = async () => {
   const idea = document.getElementById("currentIdea").textContent;
   if (!idea) return;
+
   await markDone(idea);
   loadFeed();
+
+  // Mikro-feedback
+  const box = document.getElementById("microFeedback");
+  box.style.display = "block";
+  setTimeout(() => {
+    box.style.display = "none";
+  }, 1500);
 };
 
 window.onload = () => {
