@@ -62,6 +62,15 @@
       font-size: 14px;
       letter-spacing: 0.5px;
     }
+
+    a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 
@@ -78,3 +87,29 @@
   <button id="doneBtn">Markér pausen som gennemført</button>
 
   <!-- Mikro-feedback -->
+  <div id="microFeedback">Godt gået! Du tog en pause.</div>
+
+  <!-- Feed -->
+  <div class="section">
+    <h3>Hvad andre laver</h3>
+
+    <div id="feedContainer">
+      <div id="feed">Indlæser…</div>
+    </div>
+  </div>
+
+  <!-- Lille logo -->
+  <div id="logo">
+    Plug ’n’ Pause
+  </div>
+
+  <!-- Indstillinger -->
+  <div class="section">
+    <a href="settings.html">Indstillinger</a>
+  </div>
+
+  <!-- Cache-busting så du altid får nyeste widget.js -->
+  <script src="widget.js?v=8"></script>
+
+</body>
+</html>
