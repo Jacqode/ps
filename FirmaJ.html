@@ -24,7 +24,6 @@
       margin-top: 20px;
     }
 
-    /* Feed container */
     #feedContainer {
       background: #fafafa;
       border: 1px solid #ddd;
@@ -42,7 +41,6 @@
       border-bottom: none;
     }
 
-    /* Mikro-feedback */
     #microFeedback {
       display: none;
       background: #e6ffe6;
@@ -54,7 +52,6 @@
       font-weight: bold;
     }
 
-    /* Logo */
     #logo {
       margin-top: 25px;
       text-align: center;
@@ -62,54 +59,35 @@
       font-size: 14px;
       letter-spacing: 0.5px;
     }
-
-    a {
-      color: #2563eb;
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
   </style>
 </head>
 
 <body>
 
-  <!-- Omsorgsfuld hilsen -->
   <h2 id="greeting"></h2>
 
-  <!-- Aktivitet -->
-  <button id="ideaBtn">Klik her for din aktivitet</button>
+  <button id="ideaBtn">Klik her for en pause‑idé</button>
 
   <div id="currentIdea" style="margin: 10px 0; font-weight: bold;"></div>
 
-  <button id="doneBtn">Markér pausen som gennemført</button>
+  <button id="doneBtn">Jeg har gennemført pausen</button>
 
-  <!-- Mikro-feedback -->
-  <div id="microFeedback">Godt gået! Du tog en pause.</div>
+  <div id="microFeedback">Godt gået — pause med bevægelse gennemført.</div>
 
-  <!-- Feed -->
   <div class="section">
-    <h3>Hvad andre laver</h3>
-
+    <h3>Andres pauser med bevægelse</h3>
     <div id="feedContainer">
       <div id="feed">Indlæser…</div>
     </div>
   </div>
 
-  <!-- Lille logo -->
-  <div id="logo">
-    Plug ’n’ Pause
-  </div>
+  <div id="logo">Plug ’n’ Pause</div>
 
-  <!-- Indstillinger -->
   <div class="section">
     <a href="settings.html">Indstillinger</a>
   </div>
 
-  <!-- Cache-busting så du altid får nyeste widget.js -->
-  <script src="widget.js?v=8"></script>
+  <script src="widget.js?v=10"></script>
 
 </body>
 </html>
