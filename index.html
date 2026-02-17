@@ -4,16 +4,6 @@
   <meta charset="UTF-8" />
   <title>Plug & Pause</title>
 
-<header class="pp-header">
-  <h1>Små pauser. Stor forskel.</h1>
-  <p>For dig, der sidder meget og gør en vigtig forskel hver dag.</p>
-
-  <a href="FirmaJ.html">
-    <button class="pp-main-btn">Start en 30 sekunders pause</button>
-  </a>
-</header>
-  
-  
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -21,13 +11,42 @@
       max-width: 600px;
       margin: auto;
       text-align: center;
+      background: #f5f5f0;
     }
 
-    h1 {
-      margin-bottom: 30px;
+    /* Header-stil */
+    .pp-header {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: #123b5d;
     }
 
-    a {
+    .pp-header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .pp-header p {
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .pp-main-btn {
+      background: #2f7f7b;
+      color: #fff;
+      border: none;
+      padding: 0.9rem 1.8rem;
+      border-radius: 999px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .pp-main-btn:hover {
+      background: #25635f;
+    }
+
+    /* Links til Firma J, Firma T osv. */
+    .nav-link {
       display: block;
       margin: 12px 0;
       padding: 12px 16px;
@@ -38,7 +57,7 @@
       text-decoration: none;
     }
 
-    a:hover {
+    .nav-link:hover {
       background-color: #1d4ed8;
     }
   </style>
@@ -46,11 +65,22 @@
 
 <body>
 
+  <!-- NY HEADER (korrekt placeret) -->
+  <header class="pp-header">
+    <h1>Små pauser. Stor forskel.</h1>
+    <p>For dig, der sidder meget og gør en vigtig forskel hver dag.</p>
+
+    <a href="FirmaJ.html">
+      <button class="pp-main-btn">Start en 30 sekunders pause</button>
+    </a>
+  </header>
+
+  <!-- DINE EKSISTERENDE LINKS -->
   <h1>Plug & Pause</h1>
 
-  <a href="FirmaJ.html">Firma J</a>
-  <a href="FirmaT.html">Firma T</a>
-  <a href="settings.html">Indstillinger</a>
+  <a class="nav-link" href="FirmaJ.html">Firma J</a>
+  <a class="nav-link" href="FirmaT.html">Firma T</a>
+  <a class="nav-link" href="settings.html">Indstillinger</a>
 
 </body>
 </html>
