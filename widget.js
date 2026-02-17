@@ -9,8 +9,14 @@ const fallbackIdeas = [
   "Tag 10 dybe vejrtrækninger",
   "Gå en kort tur væk fra skærmen",
   "Drik et glas vand",
-  "Ryst skuldrene i 15 sekunder"
+  "Ryst skuldrene i 15 sekunder",
+  "Squat i 30 sekunder",
+  "Wall sit i 20–30 sekunder",
+  "Rul skuldrene 10 gange",
+  "Stræk lænden i 20 sekunder",
+  "Ryst armene i 15 sekunder"
 ];
+
 
 function getCompanyId() {
   const params = new URLSearchParams(window.location.search);
