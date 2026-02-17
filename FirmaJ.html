@@ -24,8 +24,9 @@
 
     /* Feed container */
     #feedContainer {
-      max-height: 250px;
-      overflow-y: auto;
+      overflow-y: hidden;
+      max-height: none;
+
       border: 1px solid #ddd;
       padding: 5px;
       border-radius: 4px;
@@ -72,9 +73,6 @@
       <div id="feed">Indlæser…</div>
     </div>
 
-    <button id="showMoreBtn" style="display:none; margin-top:10px;">
-      Vis flere
-    </button>
   </div>
 
   <div class="section">
