@@ -66,7 +66,7 @@ async function loadFeed() {
     const list = await res.json();
 
     if (!Array.isArray(list) || list.length === 0) {
-      feed.innerHTML = "Ingen data endnu – vær den første til at tage en pause.";
+      feed.innerHTML = "Ingen data endnu – vær den første til at tage en pause med bevægelse.";
       return;
     }
 
@@ -76,7 +76,7 @@ async function loadFeed() {
     renderFeedSlice(0, MAX_VISIBLE_ITEMS);
 
   } catch (e) {
-    feed.innerHTML = "Ingen data endnu – vær den første til at tage en pause.";
+    feed.innerHTML = "Ingen data endnu – vær den første til at tage en pause med bevægelse.";
   }
 }
 
@@ -94,7 +94,8 @@ function renderFeedSlice(start, end) {
     const hh = time.getHours().toString().padStart(2, "0");
     const mm = time.getMinutes().toString().padStart(2, "0");
 
-    div.textContent = `${hh}:${mm} – ${item.name} lavede: ${item.activity}`;
+    // Konsistent sprog: "tog en pause med bevægelse"
+    div.textContent = `${hh}:${mm} – ${item.name} tog en pause med bevægelse: ${item.activity}`;
     div.classList.add("feed-item");
 
     feed.appendChild(div);
@@ -108,9 +109,9 @@ function updateGreeting() {
   const greeting = document.getElementById("greeting");
 
   if (name) {
-    greeting.textContent = `Hej ${name} — tid til et øjeblik til dig selv.`;
+    greeting.textContent = `Hej ${name} — klar til en pause med bevægelse?`;
   } else {
-    greeting.textContent = "Hej — tid til et øjeblik til dig selv.";
+    greeting.textContent = "Hej — klar til en pause med bevægelse?";
   }
 
   localStorage.setItem("pp_hasVisited", "true");
@@ -118,24 +119,35 @@ function updateGreeting() {
 
 /* --- UI handling --- */
 
+// Knap: start en pause med bevægelse (henter en aktivitet)
 document.getElementById("ideaBtn").onclick = async () => {
   const idea = await getIdea();
-  document.getElementById("currentIdea").textContent = idea;
+  // Vis som "Din pause med bevægelse"
+  document.getElementById("currentIdea").textContent = `Din pause med bevægelse: ${idea}`;
 };
 
+// Knap: bekræft at pause med bevægelse er gennemført
 document.getElementById("doneBtn").onclick = async () => {
-  const idea = document.getElementById("currentIdea").textContent;
-  if (!idea) return;
+  const currentText = document.getElementById("currentIdea").textContent;
+  if (!currentText) return;
 
-  await markDone(idea);
+  // Træk selve aktiviteten ud (efter "Din pause med bevægelse: ")
+  const prefix = "Din pause med bevægelse: ";
+  const activity = currentText.startsWith(prefix) ? currentText.slice(prefix.length) : currentText;
+
+  await markDone(activity);
   loadFeed();
 
-  // Mikro-feedback
+  // Mikro-feedback (konsekvent sprog)
   const box = document.getElementById("microFeedback");
+  box.textContent = "Godt gået — pause med bevægelse gennemført.";
   box.style.display = "block";
   setTimeout(() => {
     box.style.display = "none";
   }, 1500);
+
+  // Ryd den viste pause
+  document.getElementById("currentIdea").textContent = "";
 };
 
 window.onload = () => {
