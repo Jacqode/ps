@@ -101,9 +101,9 @@ function updateGreeting() {
   const greeting = document.getElementById("greeting");
 
   if (name) {
-    greeting.innerHTML = `Hej ${name}<br>klar til en pause med bevægelse?`;
+    greeting.innerHTML = `Hej ${name}<br>Klar til et energiboost?`;
   } else {
-    greeting.innerHTML = `Hej<br>klar til en pause med bevægelse?`;
+    greeting.innerHTML = `Hej<br>Klar til et boost energi?`;
   }
 
   localStorage.setItem("pp_hasVisited", "true");
