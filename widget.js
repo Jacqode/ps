@@ -126,7 +126,7 @@ document.getElementById("doneBtn").onclick = async () => {
   const box = document.getElementById("microFeedback");
   box.textContent = "Godt gået — korte, aktive pauser øger energien i følge forskning.";
   box.style.display = "block";
-  setTimeout(() => { box.style.display = "none"; }, 4500);
+  setTimeout(() => { box.style.display = "none"; }, 9000);
 
   document.getElementById("currentIdea").textContent = "";
 };
