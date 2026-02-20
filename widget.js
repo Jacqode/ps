@@ -18,12 +18,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   doneBtn.addEventListener("click", () => {
-    // Fade ind
-    microFeedback.style.opacity = "1";
+    microFeedback.style.display = "block";
 
-    // Fade ud efter 3 sekunder
     setTimeout(() => {
-      microFeedback.style.opacity = "0";
-    }, 3000);
+      microFeedback.style.display = "none";
+    }, 9000); // 9 sekunder
   });
 });
