@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const greeting = document.getElementById("greeting");
   const feed = document.getElementById("feed");
 
-  /* CLOUDFLARE ENDPOINTS – matcher Worker */
+  /* CLOUDFLARE ENDPOINTS */
   const BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
   const COMPANY = "J";
 
@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!savedName || savedName.trim() === "") {
     greeting.innerHTML =
-      "Hej 👋<br><a href='settings.html' style='font-size:14px; opacity:0.8; text-decoration:underline;'>Ændr navn</a>";
+      "Hej ukendt kollega 👋<br><a href='settings.html' style='font-size:14px; opacity:0.8; text-decoration:underline;'>Ændr navn</a>";
   } else {
     greeting.textContent = "Hej " + savedName;
   }
@@ -64,16 +64,17 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const res = await fetch(FEED_API);
       const data = await res.json();
+      const rows = Array.isArray(data) ? data : (data && data.results) ? data.results : [];
 
-      if (!Array.isArray(data) || data.length === 0) {
+      if (rows.length === 0) {
         feed.innerHTML = "<div class='feed-item'>Ingen pauser registreret endnu</div>";
         return;
       }
 
-      feed.innerHTML = data
+      feed.innerHTML = rows
         .map(row => {
-          const icon = getIconForActivity(row.activity);
-          const name = row.name || "En kollega";
+          const icon = getIconForActivity(row.activity || "");
+          const name = row.name || "ukendt kollega";
           return `<div class="feed-item">${icon} ${name} lavede: ${row.activity}</div>`;
         })
         .join("");
@@ -91,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
     microFeedback.style.display = "block";
 
     const activity = currentIdea.textContent || "en kort pause";
-    const name = savedName || "En kollega";
+    const name = savedName || "ukendt kollega";
 
     try {
       await fetch(SUBMIT_API, {
@@ -100,7 +101,8 @@ document.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify({ name, activity })
       });
 
-      loadFeed(); // opdater feed efter upload
+      loadFeed();
+
     } catch (err) {
       console.error("Cloudflare-fejl:", err);
     }
