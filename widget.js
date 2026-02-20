@@ -7,8 +7,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const feed = document.getElementById("feed");
 
   /* CLOUDFLARE ENDPOINTS */
-  const FEED_API = "https://plugandpause-backend.jakobhelkjaer.workers.dev/feed";
-  const ADD_API = "https://plugandpause-backend.jakobhelkjaer.workers.dev/add";
+  const BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
+  const COMPANY = "J";
+
+  const FEED_API = `${BASE}/api/feed?companyId=${COMPANY}`;
+  const SUBMIT_API = `${BASE}/api/submit?companyId=${COMPANY}`;
 
   /* GREETING-LOGIK */
   const savedName = localStorage.getItem("userName");
@@ -68,7 +71,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       feed.innerHTML = data
-        .map(item => `<div class="feed-item">${item}</div>`)
+        .map(row => {
+          const icon = getIconForActivity(row.activity);
+          return `<div class="feed-item">${icon} ${row.name} lavede: ${row.activity}</div>`;
+        })
         .join("");
 
     } catch (err) {
@@ -82,26 +88,18 @@ document.addEventListener("DOMContentLoaded", () => {
   doneBtn.addEventListener("click", async () => {
     microFeedback.style.display = "block";
 
-    const now = new Date();
-    const date = now.toLocaleDateString("da-DK", {
-      day: "2-digit",
-      month: "2-digit"
-    });
-    const time = now.toLocaleTimeString("da-DK", {
-      hour: "2-digit",
-      minute: "2-digit"
-    });
-
     const activity = currentIdea.textContent || "en kort pause";
-    const icon = getIconForActivity(activity);
-
-    const newItem = `${date} kl. ${time} – ${icon} ${(savedName || "En kollega")} lavede: ${activity}`;
+    const name = savedName || "En kollega";
 
     /* SEND TIL CLOUDFLARE */
     try {
-      await fetch(ADD_API, {
+      await fetch(SUBMIT_API, {
         method: "POST",
-        body: JSON.stringify({ entry: newItem })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          activity
+        })
       });
 
       loadFeed(); // opdater feed efter upload
