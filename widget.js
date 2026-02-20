@@ -41,13 +41,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "userName") updateGreeting();
   });
 
-  /* Standard prompt i currentIdea når ingen aktivitet er valgt */
+  /* Standard: currentIdea skal være blank indtil bruger trykker på knappen */
   function resetCurrentIdeaView() {
-    currentIdea.textContent = "Klik og få en let aktivitet";
+    currentIdea.textContent = "";
     delete currentIdea.dataset.activity;
   }
-
-  /* Initialt skjul aktivitetstekst */
   resetCurrentIdeaView();
 
   /* 15 AKTIVITETER */
@@ -159,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
       await loadFeed();
 
       // Efter bruger har trykket "Sådan - jeg er færdig" skal aktiviteten skjules igen
-      // indtil brugeren atter trykker "Klik og få en let aktivitet"
+      // indtil brugeren atter trykker på knappen for at få en aktivitet
       resetCurrentIdeaView();
 
     } catch (err) {
