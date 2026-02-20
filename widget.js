@@ -12,17 +12,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const FEED_API = `${BASE}/api/feed?companyId=${COMPANY}`;
   const SUBMIT_API = `${BASE}/api/submit?companyId=${COMPANY}`;
 
-  /* GREETING-LOGIK */
+  /* GREETING-LOGIK – nu med smiley i begge tilfælde */
   function updateGreeting() {
     const savedName = localStorage.getItem("userName");
+
     if (!savedName || savedName.trim() === "") {
       greeting.innerHTML =
-        "Hej ukendt kollega 👋<br><a class='settings-link' href='settings.html'>Ændr navn</a>";
+        "Hej ukendt kollega 😊<br><a class='settings-link' href='settings.html'>Ændr navn</a>";
     } else {
-      greeting.textContent = "Hej " + savedName;
+      greeting.textContent = "Hej " + savedName + " 😊";
     }
   }
+
   updateGreeting();
+
   window.addEventListener("storage", (e) => {
     if (e.key === "userName") updateGreeting();
   });
@@ -80,7 +83,9 @@ document.addEventListener("DOMContentLoaded", () => {
         .map(row => {
           const icon = getIconForActivity(row.activity || "");
           const name = row.name || "ukendt kollega";
-          const time = row.timestamp ? ` (${new Date(row.timestamp).toLocaleTimeString("da-DK",{hour:'2-digit',minute:'2-digit'})})` : "";
+          const time = row.timestamp
+            ? ` (${new Date(row.timestamp).toLocaleTimeString("da-DK",{hour:'2-digit',minute:'2-digit'})})`
+            : "";
           return `<div class="feed-item">${icon} ${name} lavede: ${row.activity || ''}${time}</div>`;
         })
         .join("");
@@ -90,6 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
       feed.innerHTML = "<div class='feed-item'>Kunne ikke hente fælles feed</div>";
     }
   }
+
   loadFeed();
 
   /* MICROFEEDBACK + SEND TIL CLOUDFLARE */
@@ -106,8 +112,8 @@ document.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify({ name, activity })
       });
 
-      // opdater feed efter upload
       await loadFeed();
+
     } catch (err) {
       console.error("Cloudflare-fejl:", err);
     }
