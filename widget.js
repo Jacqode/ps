@@ -15,7 +15,6 @@ document.addEventListener("DOMContentLoaded", () => {
   /* GREETING-LOGIK – med smiley */
   function updateGreeting() {
     const savedName = localStorage.getItem("userName");
-
     if (!savedName || savedName.trim() === "") {
       greeting.innerHTML =
         "Hej ukendt kollega 😊<br><a class='settings-link' href='settings.html'>Ændr navn</a>";
@@ -23,7 +22,6 @@ document.addEventListener("DOMContentLoaded", () => {
       greeting.textContent = "Hej " + savedName + " 😊";
     }
   }
-
   updateGreeting();
   window.addEventListener("storage", (e) => {
     if (e.key === "userName") updateGreeting();
@@ -48,53 +46,44 @@ document.addEventListener("DOMContentLoaded", () => {
     "Gå en lille tur i rummet i 20–30 sekunder."
   ];
 
-  /* IKON-LOGIK (bruges både til forslag og i feed) */
+  /* EMOTICON LOGIK – intuitiv mapping */
   function getIconForActivity(activity) {
     if (!activity) return "⚡";
-
     const a = activity.toLowerCase();
 
-    // vejrtræk / åndedræt
-    if (a.includes("vejrtræk") || a.includes("dybe vejrtræk")) return "🧘";
+    // Åndedræt / afspænding
+    if (a.includes("vejrtræk") || a.includes("åndedræt") || a.includes("dybe")) return "🧘";
 
-    // gå / tur
-    if (a.includes("gå") || a.includes("tur") || a.includes("gå en lille")) return "🚶";
+    // Gå / tur / bevægelse
+    if (a.includes("gå") || a.includes("tur") || a.includes("gå en")) return "🚶";
 
-    // stræk
-    if (a.includes("stræk") || a.includes("strækker") || a.includes("strækning")) return "🌿";
+    // Stræk / række / fleksibilitet
+    if (a.includes("stræk") || a.includes("række") || a.includes("sidebøj")) return "🤸";
 
-    // rul / rotation
-    if (a.includes("rul") || a.includes("rotation") || a.includes("rotationer")) return "🔄";
+    // Rotation / rul / torso rotation -> clockwise arrow (klar rotation)
+    if (a.includes("rul") || a.includes("rotation") || a.includes("torso")) return "↻";
 
-    // knæbøj / benstyrke
-    if (a.includes("knæbøj") || a.includes("knæ")) return "💪";
+    // Styrke / knæbøjninger / ben
+    if (a.includes("knæbøj") || a.includes("knæ") || a.includes("styrke")) return "💪";
 
-    // ryst / shake
-    if (a.includes("ryst") || a.includes("ryste")) return "✨";
+    // Ryst / shake / løsne op -> løftede hænder (positiv frigørelse)
+    if (a.includes("ryst") || a.includes("ryste") || a.includes("shake")) return "🙌";
 
-    // kig ud / vindue / pause mental
-    if (a.includes("vindue") || a.includes("kig ud")) return "🌤️";
+    // Kig ud / vindue / mental pause
+    if (a.includes("vindue") || a.includes("kig ud") || a.includes("kig")) return "🌤️";
 
-    // tåhævninger / fødder
-    if (a.includes("tåhæv") || a.includes("tåhævninger")) return "🦶";
+    // Tåhævninger / fødder / ankler
+    if (a.includes("tåhæv") || a.includes("tåhævninger") || a.includes("fod") || a.includes("ankel")) return "🦶";
 
-    // lænd / rygstræk
-    if (a.includes("lænd") || a.includes("ryg") || a.includes("række frem")) return "🧍‍♂️";
-
-    // ankler
-    if (a.includes("ankel") || a.includes("ankler")) return "🦵";
-
-    // torso rotation
-    if (a.includes("torso") || a.includes("rotationer") || a.includes("torso-rotation")) return "🔁";
-
-    // fallback
+    // Fallback
     return "⚡";
   }
 
-  /* IDE-KNAP */
+  /* IDE-KNAP: vis emoticon før teksten når brugeren klikker */
   ideaBtn.addEventListener("click", () => {
     const idea = ideas[Math.floor(Math.random() * ideas.length)];
-    currentIdea.textContent = idea;
+    const icon = getIconForActivity(idea);
+    currentIdea.textContent = `${icon} ${idea}`;
   });
 
   /* HENT FÆLLES FEED FRA CLOUDFLARE */
@@ -117,7 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
           const time = row.timestamp
             ? ` (${new Date(row.timestamp).toLocaleTimeString("da-DK",{hour:'2-digit',minute:'2-digit'})})`
             : "";
-          // Emoticon afhænger af aktiviteten og vises før navnet
           return `<div class="feed-item">${icon} ${name} lavede: ${activityText}${time}</div>`;
         })
         .join("");
