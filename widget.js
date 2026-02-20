@@ -51,39 +51,33 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!activity) return "⚡";
     const a = activity.toLowerCase();
 
-    // Åndedræt / afspænding
     if (a.includes("vejrtræk") || a.includes("åndedræt") || a.includes("dybe")) return "🧘";
-
-    // Gå / tur / bevægelse
     if (a.includes("gå") || a.includes("tur") || a.includes("gå en")) return "🚶";
-
-    // Stræk / række / fleksibilitet
     if (a.includes("stræk") || a.includes("række") || a.includes("sidebøj")) return "🤸";
-
-    // Rotation / rul / torso rotation -> clockwise arrow (klar rotation)
     if (a.includes("rul") || a.includes("rotation") || a.includes("torso")) return "↻";
-
-    // Styrke / knæbøjninger / ben
     if (a.includes("knæbøj") || a.includes("knæ") || a.includes("styrke")) return "💪";
-
-    // Ryst / shake / løsne op -> løftede hænder (positiv frigørelse)
     if (a.includes("ryst") || a.includes("ryste") || a.includes("shake")) return "🙌";
-
-    // Kig ud / vindue / mental pause
     if (a.includes("vindue") || a.includes("kig ud") || a.includes("kig")) return "🌤️";
-
-    // Tåhævninger / fødder / ankler
     if (a.includes("tåhæv") || a.includes("tåhævninger") || a.includes("fod") || a.includes("ankel")) return "🦶";
-
-    // Fallback
     return "⚡";
   }
 
-  /* IDE-KNAP: vis emoticon før teksten når brugeren klikker */
+  /* Hjælper: fjern evt. ledende emoji(er) fra en aktivitetstekst */
+  function stripLeadingEmoji(text) {
+    if (!text) return "";
+    try {
+      return text.replace(/^[\p{Emoji_Presentation}\p{Emoji}\uFE0F\u200D\s]+/u, "").trim();
+    } catch (e) {
+      return text.replace(/^[^\p{L}\p{N}]+/u, "").trim();
+    }
+  }
+
+  /* IDE-KNAP: vis emoticon før teksten i currentIdea, men gem rå aktivitet uden emoji */
   ideaBtn.addEventListener("click", () => {
     const idea = ideas[Math.floor(Math.random() * ideas.length)];
     const icon = getIconForActivity(idea);
     currentIdea.textContent = `${icon} ${idea}`;
+    currentIdea.dataset.activity = idea;
   });
 
   /* HENT FÆLLES FEED FRA CLOUDFLARE */
@@ -100,13 +94,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       feed.innerHTML = rows
         .map(row => {
-          const activityText = row.activity || "";
-          const icon = getIconForActivity(activityText);
+          const rawActivity = stripLeadingEmoji(row.activity || "");
+          const icon = getIconForActivity(rawActivity);
           const name = row.name || "ukendt kollega";
           const time = row.timestamp
             ? ` (${new Date(row.timestamp).toLocaleTimeString("da-DK",{hour:'2-digit',minute:'2-digit'})})`
             : "";
-          return `<div class="feed-item">${icon} ${name} lavede: ${activityText}${time}</div>`;
+          return `<div class="feed-item">${name} lavede: ${icon} ${rawActivity}${time}</div>`;
         })
         .join("");
 
@@ -120,9 +114,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* MICROFEEDBACK + SEND TIL CLOUDFLARE */
   doneBtn.addEventListener("click", async () => {
+    // Vis clap emoji + tekst
+    microFeedback.textContent = "🙌 Godt gået!";
     microFeedback.style.display = "block";
 
-    const activity = currentIdea.textContent || "en kort pause";
+    const activity = (currentIdea.dataset && currentIdea.dataset.activity) ? currentIdea.dataset.activity : stripLeadingEmoji(currentIdea.textContent || "");
     const name = localStorage.getItem("userName") || "ukendt kollega";
 
     try {
