@@ -1,3 +1,81 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <title>Plug & Pause – Firma J</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    /* CENTRERER HELE WIDGETEN */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding-top: 40px;
+      display: flex;
+      justify-content: center;   /* centrerer vandret */
+      align-items: flex-start;    /* holder den i toppen */
+      min-height: 100vh;          /* fylder hele skærmen */
+    }
+
+    /* SELVE WIDGET-BOKSEN */
+    .widget-container {
+      max-width: 400px;
+      width: 100%;
+      text-align: left;
+    }
+
+    button {
+      padding: 10px 15px;
+      margin: 5px 0;
+      width: 100%;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .section {
+      margin-top: 20px;
+    }
+
+    #feedContainer {
+      background: #fafafa;
+      border: 1px solid #ddd;
+      padding: 5px;
+      border-radius: 4px;
+      overflow-y: hidden;
+    }
+
+    .feed-item {
+      padding: 6px 0;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .feed-item:last-child {
+      border-bottom: none;
+    }
+
+    /* MICROFEEDBACK MED FADE */
+    #microFeedback {
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      background: #e6ffe6;
+      border: 1px solid #b2ffb2;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 4px;
+      color: #2d7a2d;
+      font-weight: bold;
+    }
+
+    #logo {
+      margin-top: 25px;
+      text-align: center;
+      opacity: 0.7;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+
 <body>
   <div class="widget-container">
 
@@ -45,3 +123,4 @@
 
   <script src="widget.js?v=10"></script>
 </body>
+</html>
