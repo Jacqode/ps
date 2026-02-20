@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!savedName || savedName.trim() === "") {
     greeting.innerHTML =
-      "Hej 👋<br><span style='font-size:14px; opacity:0.7;'>Tilføj dit navn under Indstillinger</span>";
+      "Hej 👋<br><a href='settings.html' style='font-size:14px; opacity:0.8; text-decoration:underline;'>Ændr navn</a>";
   } else {
     greeting.textContent = "Hej " + savedName;
   }
@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "Gå en lille tur i rummet i 20–30 sekunder."
   ];
 
-  /* IKON-LOGIK baseret på aktivitet */
+  /* IKON-LOGIK */
   function getIconForActivity(activity) {
     if (activity.includes("vejrtræk")) return "🧘";
     if (activity.includes("gå")) return "🚶";
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (activity.includes("rul")) return "🔄";
     if (activity.includes("knæbøj")) return "💪";
     if (activity.includes("ryst")) return "✨";
-    return "⚡"; // fallback
+    return "⚡";
   }
 
   /* IDE-KNAP */
