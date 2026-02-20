@@ -6,6 +6,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const greeting = document.getElementById("greeting");
   const feed = document.getElementById("feed");
 
+  /* Indsæt "Ændr navn" link under feed og over logo */
+  (function insertChangeNameLink() {
+    const changeLink = document.createElement("a");
+    changeLink.href = "settings.html";
+    changeLink.className = "settings-link change-name-link";
+    changeLink.textContent = "Ændr navn";
+    const logo = document.getElementById("logo");
+    if (logo && logo.parentNode) {
+      logo.parentNode.insertBefore(changeLink, logo);
+    } else if (feed && feed.parentNode) {
+      feed.parentNode.insertBefore(changeLink, feed.nextSibling);
+    }
+  })();
+
   /* CLOUDFLARE ENDPOINTS */
   const BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
   const COMPANY = "J";
@@ -26,6 +40,15 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("storage", (e) => {
     if (e.key === "userName") updateGreeting();
   });
+
+  /* Standard prompt i currentIdea når ingen aktivitet er valgt */
+  function resetCurrentIdeaView() {
+    currentIdea.textContent = "Klik og få en let aktivitet";
+    delete currentIdea.dataset.activity;
+  }
+
+  /* Initialt skjul aktivitetstekst */
+  resetCurrentIdeaView();
 
   /* 15 AKTIVITETER */
   const ideas = [
@@ -134,6 +157,10 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       await loadFeed();
+
+      // Efter bruger har trykket "Sådan - jeg er færdig" skal aktiviteten skjules igen
+      // indtil brugeren atter trykker "Klik og få en let aktivitet"
+      resetCurrentIdeaView();
 
     } catch (err) {
       console.error("Cloudflare-fejl:", err);
