@@ -9,19 +9,23 @@ document.addEventListener("DOMContentLoaded", () => {
   /* CLOUDFLARE ENDPOINTS */
   const BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
   const COMPANY = "J";
-
   const FEED_API = `${BASE}/api/feed?companyId=${COMPANY}`;
   const SUBMIT_API = `${BASE}/api/submit?companyId=${COMPANY}`;
 
   /* GREETING-LOGIK */
-  const savedName = localStorage.getItem("userName");
-
-  if (!savedName || savedName.trim() === "") {
-    greeting.innerHTML =
-      "Hej ukendt kollega 👋<br><a href='settings.html' style='font-size:14px; opacity:0.8; text-decoration:underline;'>Ændr navn</a>";
-  } else {
-    greeting.textContent = "Hej " + savedName;
+  function updateGreeting() {
+    const savedName = localStorage.getItem("userName");
+    if (!savedName || savedName.trim() === "") {
+      greeting.innerHTML =
+        "Hej ukendt kollega 👋<br><a class='settings-link' href='settings.html'>Ændr navn</a>";
+    } else {
+      greeting.textContent = "Hej " + savedName;
+    }
   }
+  updateGreeting();
+  window.addEventListener("storage", (e) => {
+    if (e.key === "userName") updateGreeting();
+  });
 
   /* 15 AKTIVITETER */
   const ideas = [
@@ -44,6 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* IKON-LOGIK */
   function getIconForActivity(activity) {
+    if (!activity) return "⚡";
     if (activity.includes("vejrtræk")) return "🧘";
     if (activity.includes("gå")) return "🚶";
     if (activity.includes("stræk")) return "🌿";
@@ -75,7 +80,8 @@ document.addEventListener("DOMContentLoaded", () => {
         .map(row => {
           const icon = getIconForActivity(row.activity || "");
           const name = row.name || "ukendt kollega";
-          return `<div class="feed-item">${icon} ${name} lavede: ${row.activity}</div>`;
+          const time = row.timestamp ? ` (${new Date(row.timestamp).toLocaleTimeString("da-DK",{hour:'2-digit',minute:'2-digit'})})` : "";
+          return `<div class="feed-item">${icon} ${name} lavede: ${row.activity || ''}${time}</div>`;
         })
         .join("");
 
@@ -84,7 +90,6 @@ document.addEventListener("DOMContentLoaded", () => {
       feed.innerHTML = "<div class='feed-item'>Kunne ikke hente fælles feed</div>";
     }
   }
-
   loadFeed();
 
   /* MICROFEEDBACK + SEND TIL CLOUDFLARE */
@@ -92,7 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
     microFeedback.style.display = "block";
 
     const activity = currentIdea.textContent || "en kort pause";
-    const name = savedName || "ukendt kollega";
+    const name = localStorage.getItem("userName") || "ukendt kollega";
 
     try {
       await fetch(SUBMIT_API, {
@@ -101,8 +106,8 @@ document.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify({ name, activity })
       });
 
-      loadFeed();
-
+      // opdater feed efter upload
+      await loadFeed();
     } catch (err) {
       console.error("Cloudflare-fejl:", err);
     }
