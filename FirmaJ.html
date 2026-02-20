@@ -1,118 +1,47 @@
-<!DOCTYPE html>
-<html lang="da">
-<head>
-  <meta charset="UTF-8">
-  <title>Plug & Pause – Firma J</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <style>
-.widget-container {
-  max-width: 400px;      /* smal, mobilvenlig bredde */
-  margin: 40px auto;     /* centrerer containeren på alle skærme */
-  text-align: left;      /* holder al tekst venstrejusteret */
-}
-
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      max-width: 500px;
-    }
-
-    button {
-      padding: 10px 15px;
-      margin: 5px 0;
-      width: 100%;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .section {
-      margin-top: 20px;
-    }
-
-    #feedContainer {
-      background: #fafafa;
-      border: 1px solid #ddd;
-      padding: 5px;
-      border-radius: 4px;
-      overflow-y: hidden;
-    }
-
-    .feed-item {
-      padding: 6px 0;
-      border-bottom: 1px solid #ddd;
-    }
-
-    .feed-item:last-child {
-      border-bottom: none;
-    }
-
-    #microFeedback {
-      display: none;
-      background: #e6ffe6;
-      border: 1px solid #b2ffb2;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 4px;
-      color: #2d7a2d;
-      font-weight: bold;
-    }
-
-    #logo {
-      margin-top: 25px;
-      text-align: center;
-      opacity: 0.7;
-      font-size: 14px;
-      letter-spacing: 0.5px;
-    }
-  </style>
-</head>
-
 <body>
-<div class="widget-container">
-  <h2 id="greeting"></h2>
+  <div class="widget-container">
 
-<p class="hint" style="
-  font-size:16px;
-  font-family:inherit;
-  font-weight:normal;
-  line-height:1.3;
-  color:#000;
-  margin:10px 0 12px 0;
-">
-  20–60 sekunders let aktivitet øger energien.
-</p>
+    <h2 id="greeting"></h2>
 
-  <button id="ideaBtn" title="Få en kort, let aktivitet">
-    Klik og få en let aktivitet
-  </button>
+    <p class="hint" style="
+      font-size:16px;
+      font-family:inherit;
+      font-weight:normal;
+      line-height:1.3;
+      color:#000;
+      margin:10px 0 12px 0;
+    ">
+      20–60 sekunders let aktivitet øger energien.
+    </p>
 
-  <div id="currentIdea" style="margin: 10px 0; font-weight: bold;"></div>
+    <button id="ideaBtn" title="Få en kort, let aktivitet">
+      Klik og få en let aktivitet
+    </button>
 
-  <button id="doneBtn">
-    Sådan — jeg er færdig
-  </button>
+    <div id="currentIdea" style="margin: 10px 0; font-weight: bold;"></div>
 
-  <div id="microFeedback">
-    Godt gået — korte, aktive pauser øger energien i følge forskning.
-  </div>
+    <button id="doneBtn">
+      Sådan — jeg er færdig
+    </button>
 
-</body>
-
-  <div class="section">
-    <h3>Andres pauser med bevægelse</h3>
-    <div id="feedContainer">
-      <div id="feed">Indlæser…</div>
+    <div id="microFeedback">
+      Godt gået — korte, aktive pauser øger energien ifølge forskning.
     </div>
-  </div>
 
-  <div id="logo">Plug ’n’ Pause</div>
+    <div class="section">
+      <h3>Andres pauser med bevægelse</h3>
+      <div id="feedContainer">
+        <div id="feed">Indlæser…</div>
+      </div>
+    </div>
 
-  <div class="section">
-    <a href="settings.html">Indstillinger</a>
+    <div id="logo">Plug ’n’ Pause</div>
+
+    <div class="section">
+      <a href="settings.html">Indstillinger</a>
+    </div>
+
   </div>
 
   <script src="widget.js?v=10"></script>
-
 </body>
-</html>
