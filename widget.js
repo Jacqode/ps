@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const greeting = document.getElementById("greeting");
   const feed = document.getElementById("feed");
 
-  /* CLOUDLFARE ENDPOINTS */
+  /* CLOUDFLARE ENDPOINTS */
   const FEED_API = "https://plugandpause-backend.jakobhelkjaer.workers.dev/feed";
   const ADD_API = "https://plugandpause-backend.jakobhelkjaer.workers.dev/add";
 
@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
     currentIdea.textContent = idea;
   });
 
-  /* HENT FEED FRA CLOUDFLARE */
+  /* HENT FÆLLES FEED FRA CLOUDFLARE */
   async function loadFeed() {
     try {
       const res = await fetch(FEED_API);
@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const activity = currentIdea.textContent || "en kort pause";
     const icon = getIconForActivity(activity);
 
-    const newItem = `${date} kl. ${time} – ${icon} ${savedName || "En kollega"} lavede: ${activity}`;
+    const newItem = `${date} kl. ${time} – ${icon} ${(savedName || "En kollega")} lavede: ${activity}`;
 
     /* SEND TIL CLOUDFLARE */
     try {
@@ -103,7 +103,9 @@ document.addEventListener("DOMContentLoaded", () => {
         method: "POST",
         body: JSON.stringify({ entry: newItem })
       });
+
       loadFeed(); // opdater feed efter upload
+
     } catch (err) {
       console.error("Cloudflare-fejl:", err);
     }
