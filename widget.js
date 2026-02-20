@@ -6,6 +6,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const greeting = document.getElementById("greeting");
   const feed = document.getElementById("feed");
 
+  /* CLOUDLFARE ENDPOINTS */
+  const FEED_API = "https://plugandpause-backend.jakobhelkjaer.workers.dev/feed";
+  const ADD_API = "https://plugandpause-backend.jakobhelkjaer.workers.dev/add";
+
   /* GREETING-LOGIK */
   const savedName = localStorage.getItem("userName");
 
@@ -52,24 +56,30 @@ document.addEventListener("DOMContentLoaded", () => {
     currentIdea.textContent = idea;
   });
 
-  /* FEED-LOGIK */
-  let feedData = JSON.parse(localStorage.getItem("feedData") || "[]");
+  /* HENT FEED FRA CLOUDFLARE */
+  async function loadFeed() {
+    try {
+      const res = await fetch(FEED_API);
+      const data = await res.json();
 
-  function renderFeed() {
-    if (feedData.length === 0) {
-      feed.innerHTML = "<div class='feed-item'>Ingen pauser registreret endnu</div>";
-      return;
+      if (!Array.isArray(data) || data.length === 0) {
+        feed.innerHTML = "<div class='feed-item'>Ingen pauser registreret endnu</div>";
+        return;
+      }
+
+      feed.innerHTML = data
+        .map(item => `<div class="feed-item">${item}</div>`)
+        .join("");
+
+    } catch (err) {
+      feed.innerHTML = "<div class='feed-item'>Kunne ikke hente fælles feed</div>";
     }
-
-    feed.innerHTML = feedData
-      .map(item => `<div class="feed-item">${item}</div>`)
-      .join("");
   }
 
-  renderFeed();
+  loadFeed();
 
-  /* MICROFEEDBACK + FEED-OPDATERING */
-  doneBtn.addEventListener("click", () => {
+  /* MICROFEEDBACK + SEND TIL CLOUDFLARE */
+  doneBtn.addEventListener("click", async () => {
     microFeedback.style.display = "block";
 
     const now = new Date();
@@ -85,15 +95,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const activity = currentIdea.textContent || "en kort pause";
     const icon = getIconForActivity(activity);
 
-    const newItem = `${date} kl. ${time} – ${icon} du lavede: ${activity}`;
+    const newItem = `${date} kl. ${time} – ${icon} ${savedName || "En kollega"} lavede: ${activity}`;
 
-    feedData.unshift(newItem);
-    localStorage.setItem("feedData", JSON.stringify(feedData));
-    renderFeed();
+    /* SEND TIL CLOUDFLARE */
+    try {
+      await fetch(ADD_API, {
+        method: "POST",
+        body: JSON.stringify({ entry: newItem })
+      });
+      loadFeed(); // opdater feed efter upload
+    } catch (err) {
+      console.error("Cloudflare-fejl:", err);
+    }
 
     setTimeout(() => {
       microFeedback.style.display = "none";
     }, 9000);
   });
 });
-
