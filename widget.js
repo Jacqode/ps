@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const FEED_API = `${BASE}/api/feed?companyId=${COMPANY}`;
   const SUBMIT_API = `${BASE}/api/submit?companyId=${COMPANY}`;
 
-  /* GREETING-LOGIK – nu med smiley i begge tilfælde */
+  /* GREETING-LOGIK – med smiley */
   function updateGreeting() {
     const savedName = localStorage.getItem("userName");
 
@@ -25,7 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   updateGreeting();
-
   window.addEventListener("storage", (e) => {
     if (e.key === "userName") updateGreeting();
   });
@@ -49,15 +48,46 @@ document.addEventListener("DOMContentLoaded", () => {
     "Gå en lille tur i rummet i 20–30 sekunder."
   ];
 
-  /* IKON-LOGIK */
+  /* IKON-LOGIK (bruges både til forslag og i feed) */
   function getIconForActivity(activity) {
     if (!activity) return "⚡";
-    if (activity.includes("vejrtræk")) return "🧘";
-    if (activity.includes("gå")) return "🚶";
-    if (activity.includes("stræk")) return "🌿";
-    if (activity.includes("rul")) return "🔄";
-    if (activity.includes("knæbøj")) return "💪";
-    if (activity.includes("ryst")) return "✨";
+
+    const a = activity.toLowerCase();
+
+    // vejrtræk / åndedræt
+    if (a.includes("vejrtræk") || a.includes("dybe vejrtræk")) return "🧘";
+
+    // gå / tur
+    if (a.includes("gå") || a.includes("tur") || a.includes("gå en lille")) return "🚶";
+
+    // stræk
+    if (a.includes("stræk") || a.includes("strækker") || a.includes("strækning")) return "🌿";
+
+    // rul / rotation
+    if (a.includes("rul") || a.includes("rotation") || a.includes("rotationer")) return "🔄";
+
+    // knæbøj / benstyrke
+    if (a.includes("knæbøj") || a.includes("knæ")) return "💪";
+
+    // ryst / shake
+    if (a.includes("ryst") || a.includes("ryste")) return "✨";
+
+    // kig ud / vindue / pause mental
+    if (a.includes("vindue") || a.includes("kig ud")) return "🌤️";
+
+    // tåhævninger / fødder
+    if (a.includes("tåhæv") || a.includes("tåhævninger")) return "🦶";
+
+    // lænd / rygstræk
+    if (a.includes("lænd") || a.includes("ryg") || a.includes("række frem")) return "🧍‍♂️";
+
+    // ankler
+    if (a.includes("ankel") || a.includes("ankler")) return "🦵";
+
+    // torso rotation
+    if (a.includes("torso") || a.includes("rotationer") || a.includes("torso-rotation")) return "🔁";
+
+    // fallback
     return "⚡";
   }
 
@@ -81,12 +111,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       feed.innerHTML = rows
         .map(row => {
-          const icon = getIconForActivity(row.activity || "");
+          const activityText = row.activity || "";
+          const icon = getIconForActivity(activityText);
           const name = row.name || "ukendt kollega";
           const time = row.timestamp
             ? ` (${new Date(row.timestamp).toLocaleTimeString("da-DK",{hour:'2-digit',minute:'2-digit'})})`
             : "";
-          return `<div class="feed-item">${icon} ${name} lavede: ${row.activity || ''}${time}</div>`;
+          // Emoticon afhænger af aktiviteten og vises før navnet
+          return `<div class="feed-item">${icon} ${name} lavede: ${activityText}${time}</div>`;
         })
         .join("");
 
