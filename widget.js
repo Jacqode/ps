@@ -114,12 +114,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* MICROFEEDBACK + SEND TIL CLOUDFLARE */
   doneBtn.addEventListener("click", async () => {
-    // Vis clap emoji + tekst
-    microFeedback.textContent = "🙌 Godt gået!";
+    // Hent navn til microfeedback (fallback til "ukendt kollega")
+    const savedName = localStorage.getItem("userName");
+    const displayName = (savedName && savedName.trim() !== "") ? savedName : "ukendt kollega";
+
+    // Vis clap emoji + personlig tekst
+    microFeedback.textContent = `🙌 Godt gået, ${displayName}!`;
     microFeedback.style.display = "block";
 
+    // Brug den rå aktivitet gemt i data-attribute (uden emoji)
     const activity = (currentIdea.dataset && currentIdea.dataset.activity) ? currentIdea.dataset.activity : stripLeadingEmoji(currentIdea.textContent || "");
-    const name = localStorage.getItem("userName") || "ukendt kollega";
+    const name = displayName;
 
     try {
       await fetch(SUBMIT_API, {
