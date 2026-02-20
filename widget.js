@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const greeting = document.getElementById("greeting");
   const feed = document.getElementById("feed");
 
-  /* CLOUDFLARE ENDPOINTS */
+  /* CLOUDFLARE ENDPOINTS – matcher Worker */
   const BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
   const COMPANY = "J";
 
@@ -73,11 +73,13 @@ document.addEventListener("DOMContentLoaded", () => {
       feed.innerHTML = data
         .map(row => {
           const icon = getIconForActivity(row.activity);
-          return `<div class="feed-item">${icon} ${row.name} lavede: ${row.activity}</div>`;
+          const name = row.name || "En kollega";
+          return `<div class="feed-item">${icon} ${name} lavede: ${row.activity}</div>`;
         })
         .join("");
 
     } catch (err) {
+      console.error(err);
       feed.innerHTML = "<div class='feed-item'>Kunne ikke hente fælles feed</div>";
     }
   }
@@ -91,19 +93,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const activity = currentIdea.textContent || "en kort pause";
     const name = savedName || "En kollega";
 
-    /* SEND TIL CLOUDFLARE */
     try {
       await fetch(SUBMIT_API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          activity
-        })
+        body: JSON.stringify({ name, activity })
       });
 
       loadFeed(); // opdater feed efter upload
-
     } catch (err) {
       console.error("Cloudflare-fejl:", err);
     }
