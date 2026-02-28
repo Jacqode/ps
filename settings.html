@@ -2,44 +2,48 @@
 <html lang="da">
 <head>
   <meta charset="utf-8" />
-  <title>Ændr navn</title>
+  <title>Indstillinger – Plug & Pause</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    body { font-family: Arial, sans-serif; padding:20px; max-width:480px; margin:0 auto; }
-    input { width:100%; padding:10px; font-size:16px; margin-bottom:10px; }
-    button { padding:10px 14px; font-size:16px; }
+    body { font-family: Arial, sans-serif; margin:20px; max-width:420px; }
+    label { font-weight:600; display:block; margin-top:20px; }
+    input, select { padding:8px; width:100%; margin-top:6px; font-size:16px; }
+    button { margin-top:20px; padding:10px; width:100%; font-size:16px; cursor:pointer; }
+    a { display:block; margin-top:20px; text-decoration:underline; }
   </style>
 </head>
+
 <body>
-  <h2>Ændr navn</h2>
-  <input id="nameInput" placeholder="Skriv dit navn" />
-  <div>
-    <button id="saveBtn">Gem</button>
-    <button id="clearBtn" style="margin-left:8px;">Fjern navn</button>
-  </div>
+  <h2>Indstillinger</h2>
+
+  <label for="name">Dit navn</label>
+  <input id="name" type="text" placeholder="Skriv dit navn" />
+
+  <label for="interval">Hvor ofte vil du mindes?</label>
+  <select id="interval">
+    <option value="20">Hver 20. minut</option>
+    <option value="30">Hver 30. minut</option>
+    <option value="40">Hver 40. minut</option>
+    <option value="60">Hver 60. minut</option>
+  </select>
+
+  <button id="saveBtn">Gem indstillinger</button>
+
+  <a href="FirmaJ.html">Tilbage</a>
 
   <script>
-    const input = document.getElementById("nameInput");
-    const saveBtn = document.getElementById("saveBtn");
-    const clearBtn = document.getElementById("clearBtn");
+    const nameInput = document.getElementById("name");
+    const intervalSelect = document.getElementById("interval");
 
-    input.value = localStorage.getItem("userName") || "";
+    // Load saved values
+    nameInput.value = localStorage.getItem("userName") || "";
+    intervalSelect.value = localStorage.getItem("pp_interval_min") || "40";
 
-    saveBtn.addEventListener("click", () => {
-      const v = (input.value || "").trim();
-      if (v) {
-        localStorage.setItem("userName", v);
-      } else {
-        localStorage.removeItem("userName");
-      }
-      // gå tilbage til widget
-      window.location.href = "/ps/FirmaJ.html";
-    });
-
-    clearBtn.addEventListener("click", () => {
-      localStorage.removeItem("userName");
-      window.location.href = "/ps/FirmaJ.html";
-    });
+    document.getElementById("saveBtn").onclick = () => {
+      localStorage.setItem("userName", nameInput.value.trim());
+      localStorage.setItem("pp_interval_min", intervalSelect.value);
+      alert("Indstillinger gemt");
+    };
   </script>
 </body>
 </html>
