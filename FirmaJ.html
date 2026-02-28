@@ -2,48 +2,145 @@
 <html lang="da">
 <head>
   <meta charset="utf-8" />
-  <title>Indstillinger – Plug & Pause</title>
+  <title>Plug & Pause – Firma J</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+
   <style>
-    body { font-family: Arial, sans-serif; margin:20px; max-width:420px; }
-    label { font-weight:600; display:block; margin-top:20px; }
-    input, select { padding:8px; width:100%; margin-top:6px; font-size:16px; }
-    button { margin-top:20px; padding:10px; width:100%; font-size:16px; cursor:pointer; }
-    a { display:block; margin-top:20px; text-decoration:underline; }
+    body { font-family: Arial, sans-serif; margin:0; padding-top:40px; display:flex; justify-content:center; align-items:flex-start; min-height:100vh; }
+    .widget-container { max-width:400px; width:100%; text-align:left; padding:0 16px; }
+    button { padding:10px 15px; margin:6px 0; width:100%; font-size:16px; cursor:pointer; }
+    #feedContainer { background:#fafafa; border:1px solid #ddd; padding:6px; border-radius:6px; overflow-y:auto; max-height:220px; }
+    .feed-item { padding:8px 6px; border-bottom:1px solid #eee; }
+    .feed-item:last-child { border-bottom:none; }
+    #microFeedback { display:none; background:#e6ffe6; border:1px solid #b2ffb2; padding:10px; margin-top:10px; border-radius:6px; color:#2d7a2d; font-weight:600; }
+    #logo { margin-top:18px; text-align:center; opacity:0.75; font-size:13px; }
+    a.settings-link { font-size:14px; opacity:0.85; text-decoration:underline; color:inherit; display:block; margin-bottom:12px; }
+
+    /* Modal styling */
+    .pp-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .pp-card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      width: 280px;
+      text-align: center;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+      animation: fadeIn 0.25s ease-out;
+    }
+    .pp-card h3 { margin: 0 0 10px 0; font-size: 20px; }
+    .pp-card p { margin: 0 0 16px 0; color:#333; }
+    .pp-card button {
+      padding: 10px 12px;
+      width: 100%;
+      margin-top: 6px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      background: #f7f7f7;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    .pp-card button.primary {
+      background: #0078d4;
+      color: white;
+      border-color: transparent;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
   </style>
 </head>
 
 <body>
-  <h2>Indstillinger</h2>
+  <div class="widget-container">
 
-  <label for="name">Dit navn</label>
-  <input id="name" type="text" placeholder="Skriv dit navn" />
+    <!-- Indstillinger-link over øverste knap -->
+    <a href="settings.html" class="settings-link">Indstillinger</a>
 
-  <label for="interval">Hvor ofte vil du mindes?</label>
-  <select id="interval">
-    <option value="20">Hver 20. minut</option>
-    <option value="30">Hver 30. minut</option>
-    <option value="40">Hver 40. minut</option>
-    <option value="60">Hver 60. minut</option>
-  </select>
+    <h2 id="greeting"></h2>
 
-  <button id="saveBtn">Gem indstillinger</button>
+    <p style="font-size:16px; margin:10px 0 12px 0;">
+      20–60 sekunders let aktivitet øger energien.
+    </p>
 
-  <a href="FirmaJ.html">Tilbage</a>
+    <button id="ideaBtn">Klik og få en let aktivitet</button>
 
+    <div id="currentIdea" style="margin:10px 0; font-weight:700;"></div>
+
+    <button id="doneBtn">Sådan — jeg er færdig</button>
+
+    <div id="microFeedback">Godt gået — korte, aktive pauser øger energien ifølge forskning.</div>
+
+    <div class="section" style="margin-top:18px;">
+      <h3>Andres pauser med bevægelse</h3>
+      <div id="feedContainer">
+        <div id="feed">Indlæser…</div>
+      </div>
+    </div>
+
+    <!-- Nyt link her (erstatter “Ændr navn”) -->
+    <a href="settings.html" class="settings-link">Indstillinger</a>
+
+    <div id="logo">Plug ’n’ Pause</div>
+  </div>
+
+  <script src="widget.js?v=23"></script>
+
+  <!-- Reminder der bruger brugerens valgte interval -->
   <script>
-    const nameInput = document.getElementById("name");
-    const intervalSelect = document.getElementById("interval");
+    function getInterval() {
+      return Number(localStorage.getItem("pp_interval_min")) || 40;
+    }
 
-    // Load saved values
-    nameInput.value = localStorage.getItem("userName") || "";
-    intervalSelect.value = localStorage.getItem("pp_interval_min") || "40";
+    function scheduleReminder() {
+      setTimeout(showPPModal, getInterval() * 60 * 1000);
+    }
 
-    document.getElementById("saveBtn").onclick = () => {
-      localStorage.setItem("userName", nameInput.value.trim());
-      localStorage.setItem("pp_interval_min", intervalSelect.value);
-      alert("Indstillinger gemt");
-    };
+    function showPPModal() {
+      if (document.querySelector(".pp-modal")) return;
+
+      const root = document.createElement("div");
+      root.className = "pp-modal";
+
+      root.innerHTML = `
+        <div class="pp-card">
+          <h3>Mikropause</h3>
+          <p>Klar til en kort aktivitet?</p>
+          <button class="primary" id="pp-now">Ja, giv mig en</button>
+          <button id="pp-snooze">Snooze 5 min</button>
+          <button id="pp-close">Luk</button>
+        </div>
+      `;
+
+      document.body.appendChild(root);
+
+      document.getElementById("pp-now").onclick = () => {
+        document.getElementById("ideaBtn")?.click();
+        root.remove();
+        scheduleReminder();
+      };
+
+      document.getElementById("pp-snooze").onclick = () => {
+        root.remove();
+        setTimeout(showPPModal, 5 * 60 * 1000);
+      };
+
+      document.getElementById("pp-close").onclick = () => {
+        root.remove();
+        scheduleReminder();
+      };
+    }
+
+    scheduleReminder();
   </script>
+
 </body>
 </html>
