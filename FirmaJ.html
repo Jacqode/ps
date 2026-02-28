@@ -92,8 +92,10 @@
     <div id="logo">Plug ’n’ Pause</div>
   </div>
 
+  <!-- Korrekt version af widget.js -->
   <script src="widget.js?v=24"></script>
 
+  <!-- Reminder + nedtælling -->
   <script>
     let nextPauseTime = null;
 
@@ -143,4 +145,26 @@
       document.body.appendChild(root);
 
       document.getElementById("pp-now").onclick = () => {
-        document.getElementById("ideaBtn")?.
+        document.getElementById("ideaBtn")?.click();
+        root.remove();
+        scheduleReminder();
+      };
+
+      document.getElementById("pp-snooze").onclick = () => {
+        root.remove();
+        nextPauseTime = Date.now() + 5 * 60 * 1000;
+        updateCountdown();
+        setTimeout(showPPModal, 5 * 60 * 1000);
+      };
+
+      document.getElementById("pp-close").onclick = () => {
+        root.remove();
+        scheduleReminder();
+      };
+    }
+
+    scheduleReminder();
+  </script>
+
+</body>
+</html>
