@@ -19,7 +19,7 @@ const ideas = [
   "🙆 Stræk brystet ved at åbne armene bagud i 15 sekunder."
 ];
 
-// Elementreferencer (kan være null hvis script køres før DOM)
+// Elementreferencer
 const ideaBtn = document.getElementById("ideaBtn");
 const currentIdea = document.getElementById("currentIdea");
 const doneBtn = document.getElementById("doneBtn");
@@ -27,7 +27,7 @@ const microFeedback = document.getElementById("microFeedback");
 const feedContainer = document.getElementById("feed");
 const greetingEl = document.getElementById("greeting");
 
-// Set greeting (ingen udråbstegn)
+// Hilsen uden udråbstegn
 const savedName = localStorage.getItem("userName") || "";
 if (greetingEl) greetingEl.textContent = savedName ? `Hej ${savedName}` : "Hej";
 
@@ -35,29 +35,27 @@ if (greetingEl) greetingEl.textContent = savedName ? `Hej ${savedName}` : "Hej";
 if (ideaBtn) {
   ideaBtn.addEventListener("click", () => {
     const idea = ideas[Math.floor(Math.random() * ideas.length)];
-    if (currentIdea) currentIdea.textContent = idea;
-    if (microFeedback) microFeedback.style.display = "none";
+    currentIdea.textContent = idea;
+    microFeedback.style.display = "none";
   });
 }
 
-// Done-knap: vis altid "Alt gået, Jakob!" og submit
+// Done-knap: vis "Godt gået, Jakob!"
 if (doneBtn) {
   doneBtn.addEventListener("click", () => {
-    if (microFeedback) {
-      microFeedback.textContent = "Alt gået, Jakob!";
-      microFeedback.style.display = "block";
-    }
+    microFeedback.textContent = "Godt gået, Jakob!";
+    microFeedback.style.display = "block";
     submitPause();
   });
 }
 
-// Submit pause til backend — inkluderer activity
+// Submit pause til backend
 async function submitPause() {
   try {
     const name = localStorage.getItem("userName") || "Ukendt";
-    const activity = (currentIdea && currentIdea.textContent) ? currentIdea.textContent : "⚡ en kort pause";
+    const activity = currentIdea.textContent || "";
 
-    const res = await fetch("https://plugandpause-backend.jacqode.workers.dev/submit", {
+    await fetch("https://plugandpause-backend.jacqode.workers.dev/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -68,11 +66,7 @@ async function submitPause() {
       })
     });
 
-    if (!res.ok) {
-      console.error("Submit failed", res.status);
-    }
-
-    await loadFeed();
+    loadFeed();
   } catch (e) {
     console.error("Submit error", e);
   }
@@ -87,26 +81,26 @@ async function loadFeed() {
     renderFeed(data);
   } catch (e) {
     console.error("Feed error", e);
-    if (feedContainer) feedContainer.innerHTML = "<div>Kunne ikke hente feed.</div>";
+    feedContainer.innerHTML = "<div>Kunne ikke hente feed.</div>";
   }
 }
 
-// Render feed — op til 15 seneste, emoji i aktivitet og smiley efter navn
+// Render feed — op til 15 seneste
 function renderFeed(items) {
-  if (!feedContainer) return;
-
   if (!items || items.length === 0) {
     feedContainer.innerHTML = "<div>Ingen pauser endnu.</div>";
     return;
   }
 
   items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-  const slice = items.slice(0, 15);
 
-  feedContainer.innerHTML = slice.map(item => {
+  feedContainer.innerHTML = items.slice(0, 15).map(item => {
     const name = (item.name || "Ukendt") + " 😊";
-    const activity = item.activity ? item.activity : "";
-    const time = item.timestamp ? new Date(item.timestamp).toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" }) : "";
+    const activity = item.activity || "";
+    const time = item.timestamp
+      ? new Date(item.timestamp).toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" })
+      : "";
+
     return `
       <div class="feed-item">
         <strong>${escapeHtml(name)}</strong> lavede:<br>
@@ -117,9 +111,8 @@ function renderFeed(items) {
   }).join("");
 }
 
-// Enkel HTML-escape
+// HTML-escape
 function escapeHtml(str) {
-  if (!str) return "";
   return String(str)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -128,7 +121,7 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
-// Initial load og auto-refresh
+// Initial load
 document.addEventListener("DOMContentLoaded", () => {
   loadFeed();
   setInterval(loadFeed, 30000);
