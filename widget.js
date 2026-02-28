@@ -19,7 +19,7 @@ const ideas = [
   "🙆 Stræk brystet ved at åbne armene bagud i 15 sekunder."
 ];
 
-// Elementreferencer
+// Elements
 const ideaBtn = document.getElementById("ideaBtn");
 const currentIdea = document.getElementById("currentIdea");
 const doneBtn = document.getElementById("doneBtn");
@@ -27,29 +27,25 @@ const microFeedback = document.getElementById("microFeedback");
 const feedContainer = document.getElementById("feed");
 const greetingEl = document.getElementById("greeting");
 
-// Hilsen uden udråbstegn
+// Greeting uden udråbstegn
 const savedName = localStorage.getItem("userName") || "";
 if (greetingEl) greetingEl.textContent = savedName ? `Hej ${savedName}` : "Hej";
 
-// Vis tilfældig idé
-if (ideaBtn) {
-  ideaBtn.addEventListener("click", () => {
-    const idea = ideas[Math.floor(Math.random() * ideas.length)];
-    currentIdea.textContent = idea;
-    microFeedback.style.display = "none";
-  });
-}
+// Random aktivitet
+ideaBtn.addEventListener("click", () => {
+  const idea = ideas[Math.floor(Math.random() * ideas.length)];
+  currentIdea.textContent = idea;
+  microFeedback.style.display = "none";
+});
 
-// Done-knap: vis "Godt gået, Jakob!"
-if (doneBtn) {
-  doneBtn.addEventListener("click", () => {
-    microFeedback.textContent = "Godt gået, Jakob!";
-    microFeedback.style.display = "block";
-    submitPause();
-  });
-}
+// Done → Godt gået, Jakob!
+doneBtn.addEventListener("click", () => {
+  microFeedback.textContent = "Godt gået, Jakob!";
+  microFeedback.style.display = "block";
+  submitPause();
+});
 
-// Submit pause til backend
+// Submit pause
 async function submitPause() {
   try {
     const name = localStorage.getItem("userName") || "Ukendt";
@@ -76,19 +72,18 @@ async function submitPause() {
 async function loadFeed() {
   try {
     const res = await fetch("https://plugandpause-backend.jacqode.workers.dev/feed?companyId=J");
-    if (!res.ok) throw new Error("Network response not ok: " + res.status);
     const data = await res.json();
     renderFeed(data);
   } catch (e) {
     console.error("Feed error", e);
-    feedContainer.innerHTML = "<div>Kunne ikke hente feed.</div>";
+    feedContainer.innerHTML = "Kunne ikke hente feed.";
   }
 }
 
-// Render feed — op til 15 seneste
+// Render feed — som før
 function renderFeed(items) {
   if (!items || items.length === 0) {
-    feedContainer.innerHTML = "<div>Ingen pauser endnu.</div>";
+    feedContainer.innerHTML = "Ingen pauser endnu.";
     return;
   }
 
@@ -97,31 +92,22 @@ function renderFeed(items) {
   feedContainer.innerHTML = items.slice(0, 15).map(item => {
     const name = (item.name || "Ukendt") + " 😊";
     const activity = item.activity || "";
-    const time = item.timestamp
-      ? new Date(item.timestamp).toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" })
-      : "";
+    const time = new Date(item.timestamp).toLocaleTimeString("da-DK", {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
 
     return `
       <div class="feed-item">
-        <strong>${escapeHtml(name)}</strong> lavede:<br>
-        ${escapeHtml(activity)}
-        <span class="meta"> (${time})</span>
+        <strong>${name}</strong> lavede:<br>
+        ${activity}
+        <span class="meta">(${time})</span>
       </div>
     `;
   }).join("");
 }
 
-// HTML-escape
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-// Initial load
+// Init
 document.addEventListener("DOMContentLoaded", () => {
   loadFeed();
   setInterval(loadFeed, 30000);
