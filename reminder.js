@@ -1,105 +1,163 @@
-// === Plug & Pause – Reminderfunktion (bygger oven på widget.js) ===
+// reminder.js — Plug & Pause reminderfunktion (vanilla JS)
+// Kræver at widget.js allerede er indlæst og at elementer med id'erne
+// "ideaBtn" og evt. "doneBtn" findes i DOM.
 
-const PP_DEFAULT_INTERVAL_MIN = 40;
-const PP_DURATION_SEC = 30;
+(() => {
+  const DEFAULT_INTERVAL_MIN = 40;   // standard hyppighed
+  const DEFAULT_DURATION_SEC = 30;   // informativ varighed
+  const SNOOZE_MIN = 5;
 
-const ppTabId = sessionStorage.getItem("pp_tab") || crypto.randomUUID();
-sessionStorage.setItem("pp_tab", ppTabId);
+  // unik tab-id for cross-tab koordinering
+  const tabId = sessionStorage.getItem('pp_tab') || crypto.randomUUID();
+  sessionStorage.setItem('pp_tab', tabId);
 
-function ppIsLeader() {
-  const raw = localStorage.getItem("pp_leader");
-  if (!raw) return true;
-  try {
-    const data = JSON.parse(raw);
-    const age = Date.now() - data.ts;
-    return age > 8000 || data.tabId === ppTabId;
-  } catch {
-    return true;
+  // leader-heartbeat i localStorage for at undgå dobbelte reminders
+  const LEADER_KEY = 'pp_leader_v1';
+  function getLeader() {
+    try { return JSON.parse(localStorage.getItem(LEADER_KEY)); } catch { return null; }
   }
-}
+  function setLeader(obj) { localStorage.setItem(LEADER_KEY, JSON.stringify(obj)); }
 
-function ppHeartbeat() {
-  if (ppIsLeader()) {
-    localStorage.setItem("pp_leader", JSON.stringify({ tabId: ppTabId, ts: Date.now() }));
+  function isLeader() {
+    const l = getLeader();
+    if (!l) return true;
+    const age = Date.now() - (l.ts || 0);
+    return age > 9000 || l.tabId === tabId;
   }
-}
-setInterval(ppHeartbeat, 3000);
 
-let ppTimer = null;
+  function heartbeat() {
+    if (isLeader()) setLeader({ tabId, ts: Date.now() });
+  }
+  setInterval(heartbeat, 3000);
+  heartbeat();
 
-function ppSchedule(fromNow = true) {
-  clearTimeout(ppTimer);
-  const intervalMs = PP_DEFAULT_INTERVAL_MIN * 60 * 1000;
-  const delay = fromNow ? intervalMs : Math.max(0, intervalMs - (Date.now() - (window.ppLastReminder || 0)));
-  ppTimer = setTimeout(() => {
-    if (ppIsLeader()) ppTriggerReminder();
-  }, delay);
-}
+  // scheduler
+  let timerId = null;
+  let lastReminderTs = null;
 
-async function ppTriggerReminder() {
-  window.ppLastReminder = Date.now();
+  function scheduleNext(delayMs) {
+    clearTimeout(timerId);
+    const d = typeof delayMs === 'number' ? delayMs : DEFAULT_INTERVAL_MIN * 60 * 1000;
+    timerId = setTimeout(() => {
+      if (isLeader()) triggerReminder();
+    }, d);
+  }
 
-  const permission = await ppEnsurePermission();
-  if (permission === "granted") {
-    new Notification("Tid til en mikropause", {
-      body: `Klik for at få en aktivitet (ca. ${PP_DURATION_SEC} sek.)`,
-      tag: "plugpause"
-    }).onclick = () => {
-      window.focus();
-      ppFireIdea();
-    };
+  // ensure Notification permission
+  async function ensureNotificationPermission() {
+    if (!('Notification' in window)) return 'denied';
+    if (Notification.permission === 'granted') return 'granted';
+    if (Notification.permission === 'denied') return 'denied';
+    try {
+      return await Notification.requestPermission();
+    } catch {
+      return 'denied';
+    }
+  }
+
+  // trigger reminder: notification or modal fallback
+  async function triggerReminder() {
+    lastReminderTs = Date.now();
+    const perm = await ensureNotificationPermission();
+
+    if (perm === 'granted') {
+      const n = new Notification('Tid til en mikropause', {
+        body: `Klik for at få en aktivitet (ca. ${DEFAULT_DURATION_SEC} sek.)`,
+        tag: 'plugpause'
+      });
+      n.onclick = () => {
+        window.focus();
+        fireIdea();
+      };
+    } else {
+      showModal();
+    }
+
+    // planlæg næste
+    scheduleNext();
+  }
+
+  // klikker på eksisterende "Klik og få en let aktivitet"-knap
+  function fireIdea() {
+    const btn = document.getElementById('ideaBtn');
+    if (btn) {
+      try { btn.click(); } catch (e) { /* no-op */ }
+    } else {
+      // hvis knappen ikke findes endnu, prøv igen kort efter
+      setTimeout(fireIdea, 200);
+    }
+  }
+
+  // modal fallback UI
+  function showModal() {
+    // undgå at oprette flere modaler
+    if (document.querySelector('.pp-modal')) return;
+
+    const root = document.createElement('div');
+    root.className = 'pp-modal';
+    root.innerHTML = `
+      <div class="pp-card" role="dialog" aria-modal="true" aria-label="Mikropause">
+        <h3>Mikropause</h3>
+        <p>Vil du have en aktivitet nu? Varighed: ${DEFAULT_DURATION_SEC} sek.</p>
+        <div class="pp-actions">
+          <button id="pp-now" class="primary">Ja, giv mig en</button>
+          <button id="pp-snooze">Snooze ${SNOOZE_MIN} min</button>
+          <button id="pp-close">Luk</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(root);
+
+    const remove = () => { root.remove(); };
+
+    root.querySelector('#pp-now').addEventListener('click', () => {
+      fireIdea();
+      remove();
+    });
+    root.querySelector('#pp-snooze').addEventListener('click', () => {
+      remove();
+      clearTimeout(timerId);
+      scheduleNext(SNOOZE_MIN * 60 * 1000);
+    });
+    root.querySelector('#pp-close').addEventListener('click', () => {
+      remove();
+    });
+  }
+
+  // hvis bruger klikker "done" i widget, kan vi logge tidspunkt (valgfrit)
+  const doneBtn = document.getElementById('doneBtn');
+  if (doneBtn) {
+    doneBtn.addEventListener('click', () => {
+      // opdater sidste reminder så næste planlægning starter fra nu
+      lastReminderTs = Date.now();
+      clearTimeout(timerId);
+      scheduleNext();
+    });
+  }
+
+  // synkroniser across tabs: hvis en anden fane viser reminder, vi skal ikke duplikere
+  window.addEventListener('storage', (ev) => {
+    if (ev.key === LEADER_KEY) {
+      // hvis leader ændres, genberegn om vi skal være leader
+      // heartbeat-funktionen håndterer det; her kan vi reschedule hvis nødvendigt
+      // ingen yderligere handling nødvendig
+    }
+  });
+
+  // start scheduler når DOM er klar (sikrer widget.js er kørt)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      scheduleNext();
+    });
   } else {
-    ppShowModal();
+    scheduleNext();
   }
 
-  ppSchedule(true);
-}
-
-async function ppEnsurePermission() {
-  if (!("Notification" in window)) return "denied";
-  if (Notification.permission === "granted") return "granted";
-  if (Notification.permission === "denied") return "denied";
-  try {
-    return await Notification.requestPermission();
-  } catch {
-    return "denied";
-  }
-}
-
-function ppFireIdea() {
-  const btn = document.getElementById("ideaBtn");
-  if (btn) btn.click();
-}
-
-function ppShowModal() {
-  const root = document.createElement("div");
-  root.className = "pp-modal";
-  root.innerHTML = `
-    <div class="pp-card">
-      <h3>Mikropause</h3>
-      <p>Vil du have en ny aktivitet nu?</p>
-      <button id="pp-now">Ja, giv mig en</button>
-      <button id="pp-snooze">Snooze 5 min</button>
-      <button id="pp-close">Luk</button>
-    </div>
-  `;
-  document.body.appendChild(root);
-
-  document.getElementById("pp-now").onclick = () => {
-    ppFireIdea();
-    root.remove();
+  // eksponér et simpelt API for debugging (valgfrit)
+  window.__ppReminder = {
+    scheduleNow: () => { clearTimeout(timerId); scheduleNext(0); },
+    snoozeMinutes: (m) => { clearTimeout(timerId); scheduleNext(m * 60 * 1000); },
+    getTabId: () => tabId,
+    isLeader: isLeader
   };
-  document.getElementById("pp-snooze").onclick = () => {
-    root.remove();
-    clearTimeout(ppTimer);
-    ppTimer = setTimeout(ppTriggerReminder, 5 * 60 * 1000);
-  };
-  document.getElementById("pp-close").onclick = () => {
-    root.remove();
-  };
-}
-
-(function ppInit() {
-  ppHeartbeat();
-  ppSchedule(true);
 })();
