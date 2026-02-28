@@ -16,7 +16,6 @@
     #logo { margin-top:18px; text-align:center; opacity:0.75; font-size:13px; }
     a.settings-link { font-size:14px; opacity:0.85; text-decoration:underline; color:inherit; display:block; margin:12px 0; }
 
-    /* Modal styling */
     .pp-modal {
       position: fixed;
       inset: 0;
@@ -83,7 +82,7 @@
       </div>
     </div>
 
-    <!-- ⭐ Det eneste link i bunden – korrekt placeret -->
+    <!-- Det eneste link i bunden -->
     <a href="settings.html" class="settings-link">Indstillinger</a>
 
     <div id="logo">Plug ’n’ Pause</div>
@@ -91,7 +90,6 @@
 
   <script src="widget.js?v=23"></script>
 
-  <!-- Reminder der bruger brugerens valgte interval -->
   <script>
     function getInterval() {
       return Number(localStorage.getItem("pp_interval_min")) || 40;
