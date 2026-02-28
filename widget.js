@@ -51,7 +51,7 @@ async function submitPause() {
     const name = localStorage.getItem("userName") || "Ukendt";
     const activity = currentIdea.textContent || "";
 
-    await fetch("https://plugandpause-backend.jacqode.workers.dev/submit", {
+    await fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -71,7 +71,7 @@ async function submitPause() {
 // Load feed
 async function loadFeed() {
   try {
-    const res = await fetch("https://plugandpause-backend.jacqode.workers.dev/feed?companyId=J");
+    const res = await fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/feed?companyId=J");
     const data = await res.json();
     renderFeed(data);
   } catch (e) {
@@ -80,7 +80,7 @@ async function loadFeed() {
   }
 }
 
-// Render feed — som før
+// Render feed — op til 15 seneste
 function renderFeed(items) {
   if (!items || items.length === 0) {
     feedContainer.innerHTML = "Ingen pauser endnu.";
