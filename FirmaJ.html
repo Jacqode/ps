@@ -35,7 +35,7 @@
 
     <p class="lead">20–60 sekunders let aktivitet øger energien.</p>
 
-    <!-- Nedtælling står under teksten -->
+    <!-- Beholdt præcis som nu -->
     <div id="nextPause">Næste pause beregnes…</div>
 
     <button id="ideaBtn">Klik og få en let aktivitet</button>
@@ -44,8 +44,7 @@
 
     <button id="doneBtn">Sådan — jeg er færdig</button>
 
-    <!-- MicroFeedback viser kun "Godt gået, Navn!" eller "Godt gået!" -->
-    <div id="microFeedback">Godt gået!</div>
+    <div id="microFeedback">Godt gået, Jakob!</div>
 
     <div class="section" style="margin-top:18px;">
       <h3>Andres pauser med bevægelse</h3>
@@ -62,7 +61,6 @@
   <script src="widget.js?v=24"></script>
 
   <script>
-    // Reminder + nedtælling (viser sekunder under 60s)
     let nextPauseTime = null;
     let reminderTimeoutId = null;
 
@@ -72,7 +70,7 @@
 
     function scheduleReminder(msOverride) {
       if (reminderTimeoutId) clearTimeout(reminderTimeoutId);
-      const intervalMs = typeof msOverride === "number" ? msOverride : getInterval() * 60 * 1000;
+      const intervalMs = typeof msOverride === "number" ? msOverride : getInterval() * 60000;
       nextPauseTime = Date.now() + intervalMs;
       updateCountdown();
       reminderTimeoutId = setTimeout(showPPModal, intervalMs);
@@ -80,24 +78,17 @@
 
     function updateCountdown() {
       const el = document.getElementById("nextPause");
-      if (!nextPauseTime || !el) return;
-
       const diff = Math.max(0, nextPauseTime - Date.now());
-      if (diff === 0) {
-        el.textContent = "⏱ Pause nu!";
-        return;
-      }
+      if (diff === 0) { el.textContent = "⏱ Pause nu!"; return; }
 
       const mins = Math.floor(diff / 60000);
       const secs = Math.floor((diff % 60000) / 1000);
 
-      if (mins >= 1) {
-        el.textContent = `⏱ Næste pause om: ${mins} min`;
-        setTimeout(updateCountdown, 10000);
-      } else {
-        el.textContent = `⏱ Næste pause om: ${secs} sek`;
-        setTimeout(updateCountdown, 1000);
-      }
+      el.textContent = mins >= 1
+        ? `⏱ Næste pause om: ${mins} min`
+        : `⏱ Næste pause om: ${secs} sek`;
+
+      setTimeout(updateCountdown, mins >= 1 ? 10000 : 1000);
     }
 
     function showPPModal() {
@@ -117,13 +108,13 @@
       document.body.appendChild(root);
 
       document.getElementById("pp-now").onclick = () => {
-        document.getElementById("ideaBtn")?.click();
+        document.getElementById("ideaBtn").click();
         root.remove();
         scheduleReminder();
       };
       document.getElementById("pp-snooze").onclick = () => {
         root.remove();
-        scheduleReminder(5 * 60 * 1000);
+        scheduleReminder(5 * 60000);
       };
       document.getElementById("pp-close").onclick = () => {
         root.remove();
@@ -131,13 +122,10 @@
       };
     }
 
-    // Start reminder on load and set greeting (no exclamation)
     document.addEventListener("DOMContentLoaded", () => {
       scheduleReminder();
-      const savedName = localStorage.getItem("userName") || "";
-      const greetingEl = document.getElementById("greeting");
-      if (greetingEl) greetingEl.textContent = savedName ? `Hej ${savedName}` : "Hej";
-      // microFeedback initial text handled by widget.js when actions occur
+      const name = localStorage.getItem("userName") || "";
+      document.getElementById("greeting").textContent = name ? `Hej ${name}` : "Hej";
     });
   </script>
 </body>
