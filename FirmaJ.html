@@ -1,106 +1,146 @@
-// widget.js — Plug & Pause widget for Firma J
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="utf-8" />
+  <title>Plug & Pause – Firma J</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-// Load saved name
-const savedName = localStorage.getItem("userName") || "";
-const greetingEl = document.getElementById("greeting");
-greetingEl.textContent = savedName ? `Hej ${savedName}!` : "Hej!";
+  <style>
+    body { font-family: Arial, sans-serif; margin:0; padding-top:40px; display:flex; justify-content:center; align-items:flex-start; min-height:100vh; }
+    .widget-container { max-width:400px; width:100%; text-align:left; padding:0 16px; }
+    button { padding:10px 15px; margin:6px 0; width:100%; font-size:16px; cursor:pointer; }
+    #feedContainer { background:#fafafa; border:1px solid #ddd; padding:6px; border-radius:6px; overflow-y:auto; max-height:220px; }
+    .feed-item { padding:8px 6px; border-bottom:1px solid #eee; }
+    .feed-item:last-child { border-bottom:none; }
+    #microFeedback { display:none; background:#e6ffe6; border:1px solid #b2ffb2; padding:10px; margin-top:10px; border-radius:6px; color:#2d7a2d; font-weight:600; }
+    #logo { margin-top:18px; text-align:center; opacity:0.75; font-size:13px; }
+    a.settings-link { font-size:14px; opacity:0.85; text-decoration:underline; color:inherit; display:block; margin:12px 0; }
 
-// 15 aktiviteter med passende emojis (samme stil som feedet)
-const ideas = [
-  "↻ Rul anklerne 10 gange hver vej",
-  "↻ Rul skuldrene 10 gange bagud",
-  "🤸 Stræk nakken blidt til hver side i 10 sekunder",
-  "🤸 Lav 15 sekunders let sidebøjninger",
-  "🙌 Ryst hænder og arme i 15 sekunder",
-  "🧘 Tag 5 dybe vejrtrækninger med fokus på langsom udånding",
-  "🧘 Rejs dig op og tag 10 langsomme vejrtrækninger",
-  "🚶 Gå hen til et vindue og kig ud i 20 sekunder",
-  "🚶 Gå på stedet i 30 sekunder",
-  "💪 Lav 10 langsomme knæbøjninger",
-  "🦶 Lav 10 tåhævninger",
-  "🤸 Stræk lænden ved at række frem mod gulvet i 15 sekunder",
-  "↻ Lav 20 sekunders torso-rotationer fra side til side",
-  "🤲 Stræk håndled frem og tilbage i 15 sekunder",
-  "🙆 Stræk brystet ved at åbne armene bagud i 15 sekunder"
-];
+    .pp-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .pp-card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      width: 280px;
+      text-align: center;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+      animation: fadeIn 0.25s ease-out;
+    }
+    .pp-card h3 { margin: 0 0 10px 0; font-size: 20px; }
+    .pp-card p { margin: 0 0 16px 0; color:#333; }
+    .pp-card button {
+      padding: 10px 12px;
+      width: 100%;
+      margin-top: 6px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      background: #f7f7f7;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    .pp-card button.primary {
+      background: #0078d4;
+      color: white;
+      border-color: transparent;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
 
-// Elements
-const ideaBtn = document.getElementById("ideaBtn");
-const currentIdea = document.getElementById("currentIdea");
-const doneBtn = document.getElementById("doneBtn");
-const microFeedback = document.getElementById("microFeedback");
-const feedContainer = document.getElementById("feed");
+<body>
+  <div class="widget-container">
 
-// Show random idea
-ideaBtn.addEventListener("click", () => {
-  const idea = ideas[Math.floor(Math.random() * ideas.length)];
-  currentIdea.textContent = idea;
-  microFeedback.style.display = "none";
-});
+    <h2 id="greeting"></h2>
 
-// Done button
-doneBtn.addEventListener("click", () => {
-  microFeedback.style.display = "block";
-  submitPause();
-});
+    <!-- Nedtælling til næste pause -->
+    <div id="nextPause" style="margin:6px 0 14px 0; font-size:15px; opacity:0.8;">
+      Næste pause beregnes…
+    </div>
 
-// Submit pause to backend
-async function submitPause() {
-  try {
-    const name = localStorage.getItem("userName") || "Ukendt";
-    await fetch("https://plugandpause-backend.jacqode.workers.dev/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        companyId: "J",
-        name,
-        timestamp: Date.now()
-      })
-    });
-    loadFeed();
-  } catch (e) {
-    console.error("Submit error", e);
-  }
-}
+    <p style="font-size:16px; margin:10px 0 12px 0;">
+      20–60 sekunders let aktivitet øger energien.
+    </p>
 
-// Load feed
-async function loadFeed() {
-  try {
-    const res = await fetch("https://plugandpause-backend.jacqode.workers.dev/feed?companyId=J");
-    const data = await res.json();
-    renderFeed(data);
-  } catch (e) {
-    console.error("Feed error", e);
-    feedContainer.innerHTML = "<div>Kunne ikke hente feed.</div>";
-  }
-}
+    <button id="ideaBtn">Klik og få en let aktivitet</button>
 
-function renderFeed(items) {
-  if (!items || items.length === 0) {
-    feedContainer.innerHTML = "<div>Ingen pauser endnu.</div>";
-    return;
-  }
+    <div id="currentIdea" style="margin:10px 0; font-weight:700;"></div>
 
-  feedContainer.innerHTML = items
-    .map(
-      (item) => `
-      <div class="feed-item">
-        <strong>${item.name}</strong> lavede:<br>
-        ${item.activity ? item.activity : ""}
-        <span style="opacity:0.7; font-size:13px;">
-          (${new Date(item.timestamp).toLocaleTimeString("da-DK", {
-            hour: "2-digit",
-            minute: "2-digit"
-          })})
-        </span>
+    <button id="doneBtn">Sådan — jeg er færdig</button>
+
+    <div id="microFeedback">Godt gået — korte, aktive pauser øger energien ifølge forskning.</div>
+
+    <div class="section" style="margin-top:18px;">
+      <h3>Andres pauser med bevægelse</h3>
+      <div id="feedContainer">
+        <div id="feed">Indlæser…</div>
       </div>
-    `
-    )
-    .join("");
-}
+    </div>
 
-// Initial load
-loadFeed();
+    <a href="settings.html" class="settings-link">Indstillinger</a>
 
-// Auto-refresh feed every 30 seconds
-setInterval(loadFeed, 30000);
+    <div id="logo">Plug ’n’ Pause</div>
+  </div>
+
+  <script src="widget.js?v=24"></script>
+
+  <script>
+    let nextPauseTime = null;
+
+    function getInterval() {
+      return Number(localStorage.getItem("pp_interval_min")) || 40;
+    }
+
+    function scheduleReminder() {
+      const intervalMs = getInterval() * 60 * 1000;
+      nextPauseTime = Date.now() + intervalMs;
+      updateCountdown();
+      setTimeout(showPPModal, intervalMs);
+    }
+
+    function updateCountdown() {
+      const el = document.getElementById("nextPause");
+      if (!nextPauseTime) return;
+
+      const diff = nextPauseTime - Date.now();
+      if (diff <= 0) {
+        el.textContent = "⏱ Pause nu!";
+        return;
+      }
+
+      const min = Math.ceil(diff / 60000);
+      el.textContent = `⏱ Næste pause om: ${min} min`;
+
+      setTimeout(updateCountdown, 10000);
+    }
+
+    function showPPModal() {
+      if (document.querySelector(".pp-modal")) return;
+
+      const root = document.createElement("div");
+      root.className = "pp-modal";
+
+      root.innerHTML = `
+        <div class="pp-card">
+          <h3>Mikropause</h3>
+          <p>Klar til en kort aktivitet?</p>
+          <button class="primary" id="pp-now">Ja, giv mig en</button>
+          <button id="pp-snooze">Snooze 5 min</button>
+          <button id="pp-close">Luk</button>
+        </div>
+      `;
+
+      document.body.appendChild(root);
+
+      document.getElementById("pp-now").onclick = () => {
+        document.getElementById("ideaBtn")?.
