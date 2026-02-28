@@ -3,29 +3,25 @@
 // Load saved name
 const savedName = localStorage.getItem("userName") || "";
 const greetingEl = document.getElementById("greeting");
-if (savedName) {
-  greetingEl.textContent = `Hej ${savedName}!`;
-} else {
-  greetingEl.textContent = "Hej!";
-}
+greetingEl.textContent = savedName ? `Hej ${savedName}!` : "Hej!";
 
-// 15 activity ideas
+// 15 aktiviteter med passende emojis (samme stil som feedet)
 const ideas = [
-  "Stræk armene mod loftet i 20 sekunder",
-  "Rul skuldrene 10 gange bagud",
-  "Rejs dig op og tag 10 dybe vejrtrækninger",
-  "Lav 15 sekunders let sidebøjninger",
-  "Ryst hænder og arme i 20 sekunder",
-  "Stræk nakken blidt til hver side i 10 sekunder",
-  "Gå på stedet i 20 sekunder",
-  "Lav 10 langsomme knæbøjninger",
-  "Stræk lægmusklerne i 15 sekunder",
-  "Rul nakken blidt i cirkler i 10 sekunder",
-  "Stræk håndled frem og tilbage i 15 sekunder",
-  "Lav 10 tåhævninger",
-  "Stræk brystet ved at åbne armene bagud i 15 sekunder",
-  "Lav 20 sekunders let torso-rotationer",
-  "Tag 5 dybe, rolige vejrtrækninger med fokus på langsom udånding"
+  "↻ Rul anklerne 10 gange hver vej",
+  "↻ Rul skuldrene 10 gange bagud",
+  "🤸 Stræk nakken blidt til hver side i 10 sekunder",
+  "🤸 Lav 15 sekunders let sidebøjninger",
+  "🙌 Ryst hænder og arme i 15 sekunder",
+  "🧘 Tag 5 dybe vejrtrækninger med fokus på langsom udånding",
+  "🧘 Rejs dig op og tag 10 langsomme vejrtrækninger",
+  "🚶 Gå hen til et vindue og kig ud i 20 sekunder",
+  "🚶 Gå på stedet i 30 sekunder",
+  "💪 Lav 10 langsomme knæbøjninger",
+  "🦶 Lav 10 tåhævninger",
+  "🤸 Stræk lænden ved at række frem mod gulvet i 15 sekunder",
+  "↻ Lav 20 sekunders torso-rotationer fra side til side",
+  "🤲 Stræk håndled frem og tilbage i 15 sekunder",
+  "🙆 Stræk brystet ved at åbne armene bagud i 15 sekunder"
 ];
 
 // Elements
@@ -89,12 +85,13 @@ function renderFeed(items) {
     .map(
       (item) => `
       <div class="feed-item">
-        <strong>${item.name}</strong> tog en pause<br>
+        <strong>${item.name}</strong> lavede:<br>
+        ${item.activity ? item.activity : ""}
         <span style="opacity:0.7; font-size:13px;">
-          ${new Date(item.timestamp).toLocaleTimeString("da-DK", {
+          (${new Date(item.timestamp).toLocaleTimeString("da-DK", {
             hour: "2-digit",
             minute: "2-digit"
-          })}
+          })})
         </span>
       </div>
     `
