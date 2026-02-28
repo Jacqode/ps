@@ -1,6 +1,6 @@
-// widget.js — Plug & Pause widget for Firma J (v24)
+// widget.js — Plug & Pause widget for Firma J (API-version)
 
-// 15 aktiviteter med emojis
+// Aktiviteter
 const ideas = [
   "↻ Rul anklerne 10 gange hver vej.",
   "↻ Rul skuldrene 10 gange bagud.",
@@ -19,7 +19,7 @@ const ideas = [
   "🙆 Stræk brystet ved at åbne armene bagud i 15 sekunder."
 ];
 
-// Elements
+// DOM-elementer
 const ideaBtn = document.getElementById("ideaBtn");
 const currentIdea = document.getElementById("currentIdea");
 const doneBtn = document.getElementById("doneBtn");
@@ -27,39 +27,34 @@ const microFeedback = document.getElementById("microFeedback");
 const feedContainer = document.getElementById("feed");
 const greetingEl = document.getElementById("greeting");
 
-// Greeting uden udråbstegn
+// Hilsen
 const savedName = localStorage.getItem("userName") || "";
 if (greetingEl) greetingEl.textContent = savedName ? `Hej ${savedName}` : "Hej";
 
-// Random aktivitet
+// Ny idé
 ideaBtn.addEventListener("click", () => {
   const idea = ideas[Math.floor(Math.random() * ideas.length)];
   currentIdea.textContent = idea;
   microFeedback.style.display = "none";
 });
 
-// Done → Godt gået, Jakob!
+// Done → Godt gået
 doneBtn.addEventListener("click", () => {
   microFeedback.textContent = "Godt gået, Jakob!";
   microFeedback.style.display = "block";
   submitPause();
 });
 
-// Submit pause
+// Submit pause → POST /api/submit
 async function submitPause() {
   try {
     const name = localStorage.getItem("userName") || "Ukendt";
     const activity = currentIdea.textContent || "";
 
-    await fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/submit", {
+    await fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/api/submit?companyId=J", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        companyId: "J",
-        name,
-        activity,
-        timestamp: Date.now()
-      })
+      body: JSON.stringify({ name, activity })
     });
 
     loadFeed();
@@ -68,10 +63,10 @@ async function submitPause() {
   }
 }
 
-// Load feed
+// Load feed → GET /api/feed
 async function loadFeed() {
   try {
-    const res = await fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/feed?companyId=J");
+    const res = await fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/api/feed?companyId=J");
     const data = await res.json();
     renderFeed(data);
   } catch (e) {
@@ -80,14 +75,12 @@ async function loadFeed() {
   }
 }
 
-// Render feed — op til 15 seneste
+// Render feed
 function renderFeed(items) {
   if (!items || items.length === 0) {
     feedContainer.innerHTML = "Ingen pauser endnu.";
     return;
   }
-
-  items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
   feedContainer.innerHTML = items.slice(0, 15).map(item => {
     const name = (item.name || "Ukendt") + " 😊";
