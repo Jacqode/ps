@@ -5,14 +5,13 @@
   <title>Indstillinger – Plug & Pause</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    body { font-family: Arial, sans-serif; margin:20px; max-width:420px; }
-    label { font-weight:600; display:block; margin-top:20px; }
-    input, select { padding:8px; width:100%; margin-top:6px; font-size:16px; }
-    button { margin-top:20px; padding:10px; width:100%; font-size:16px; cursor:pointer; }
-    a { display:block; margin-top:20px; text-decoration:underline; }
+    body { font-family: Arial, sans-serif; margin:20px; max-width:520px; color:#111; }
+    label { font-weight:600; display:block; margin-top:18px; }
+    input, select { padding:10px; width:100%; margin-top:8px; font-size:16px; border-radius:6px; border:1px solid #ddd; }
+    button { margin-top:20px; padding:10px; width:100%; font-size:16px; cursor:pointer; border-radius:8px; background:#0078d4; color:#fff; border:none; }
+    a { display:block; margin-top:20px; text-decoration:underline; color:inherit; }
   </style>
 </head>
-
 <body>
   <h2>Indstillinger</h2>
 
@@ -34,13 +33,12 @@
   <script>
     const nameInput = document.getElementById("name");
     const intervalSelect = document.getElementById("interval");
+    const saveBtn = document.getElementById("saveBtn");
 
-    // Load saved values
     nameInput.value = localStorage.getItem("userName") || "";
     intervalSelect.value = localStorage.getItem("pp_interval_min") || "40";
 
-    // Save settings
-    document.getElementById("saveBtn").onclick = () => {
+    saveBtn.onclick = () => {
       localStorage.setItem("userName", nameInput.value.trim());
       localStorage.setItem("pp_interval_min", intervalSelect.value);
       alert("Indstillinger gemt");
