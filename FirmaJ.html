@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <title>Plug & Pause – Firma J</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+
   <style>
     body { font-family: Arial, sans-serif; margin:0; padding-top:40px; display:flex; justify-content:center; align-items:flex-start; min-height:100vh; }
     .widget-container { max-width:400px; width:100%; text-align:left; padding:0 16px; }
@@ -15,11 +16,11 @@
     #logo { margin-top:18px; text-align:center; opacity:0.75; font-size:13px; }
     a.settings-link { font-size:14px; opacity:0.85; text-decoration:underline; color:inherit; }
 
-    /* Modal / reminder styles */
+    /* Modal styling */
     .pp-modal {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.4);
+      background: rgba(0,0,0,0.35);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -27,20 +28,37 @@
     }
     .pp-card {
       background: #fff;
-      padding: 18px;
-      border-radius: 8px;
-      width: 300px;
+      padding: 20px;
+      border-radius: 12px;
+      width: 280px;
       text-align: center;
       box-shadow: 0 6px 18px rgba(0,0,0,0.18);
-      font-family: inherit;
+      animation: fadeIn 0.25s ease-out;
     }
-    .pp-card h3 { margin: 0 0 8px 0; font-size:18px; }
-    .pp-card p { margin: 0 0 12px 0; color:#333; }
-    .pp-card .pp-actions { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
-    .pp-card button { padding:8px 10px; cursor:pointer; border-radius:6px; border:1px solid #ddd; background:#f7f7f7; }
-    .pp-card button.primary { background:#0078d4; color:#fff; border-color:transparent; }
+    .pp-card h3 { margin: 0 0 10px 0; font-size: 20px; }
+    .pp-card p { margin: 0 0 16px 0; color:#333; }
+    .pp-card button {
+      padding: 10px 12px;
+      width: 100%;
+      margin-top: 6px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      background: #f7f7f7;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    .pp-card button.primary {
+      background: #0078d4;
+      color: white;
+      border-color: transparent;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
   </style>
 </head>
+
 <body>
   <div class="widget-container">
     <h2 id="greeting"></h2>
@@ -67,10 +85,47 @@
     <div id="logo">Plug ’n’ Pause</div>
   </div>
 
-  <!-- eksisterende widget-logik skal indlæses først -->
   <script src="widget.js?v=23"></script>
 
-  <!-- reminder-laget indlæses efter widget.js -->
-  <script src="reminder.js?v=2"></script>
+  <!-- ⭐ Minimal, pæn reminder-modal med snooze ⭐ -->
+  <script>
+    // Første reminder efter 2 minutter (kan ændres)
+    setTimeout(showPPModal, 2 * 60 * 1000);
+
+    // Gentag hver 40. minut
+    setInterval(showPPModal, 40 * 60 * 1000);
+
+    function showPPModal() {
+      if (document.querySelector(".pp-modal")) return;
+
+      const root = document.createElement("div");
+      root.className = "pp-modal";
+
+      root.innerHTML = `
+        <div class="pp-card">
+          <h3>Mikropause</h3>
+          <p>Klar til en kort aktivitet?</p>
+          <button class="primary" id="pp-now">Ja, giv mig en</button>
+          <button id="pp-snooze">Snooze 5 min</button>
+          <button id="pp-close">Luk</button>
+        </div>
+      `;
+
+      document.body.appendChild(root);
+
+      document.getElementById("pp-now").onclick = () => {
+        document.getElementById("ideaBtn")?.click();
+        root.remove();
+      };
+
+      document.getElementById("pp-snooze").onclick = () => {
+        root.remove();
+        setTimeout(showPPModal, 5 * 60 * 1000);
+      };
+
+      document.getElementById("pp-close").onclick = () => root.remove();
+    }
+  </script>
+
 </body>
 </html>
