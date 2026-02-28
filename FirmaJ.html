@@ -15,33 +15,32 @@
     #logo { margin-top:18px; text-align:center; opacity:0.75; font-size:13px; }
     a.settings-link { font-size:14px; opacity:0.85; text-decoration:underline; color:inherit; }
 
+    /* Modal / reminder styles */
     .pp-modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-.pp-card {
-  background: #fff;
-  padding: 18px;
-  border-radius: 8px;
-  width: 260px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-.pp-card button {
-  margin: 6px;
-  padding: 8px 10px;
-  cursor: pointer;
-}
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .pp-card {
+      background: #fff;
+      padding: 18px;
+      border-radius: 8px;
+      width: 300px;
+      text-align: center;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+      font-family: inherit;
+    }
+    .pp-card h3 { margin: 0 0 8px 0; font-size:18px; }
+    .pp-card p { margin: 0 0 12px 0; color:#333; }
+    .pp-card .pp-actions { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+    .pp-card button { padding:8px 10px; cursor:pointer; border-radius:6px; border:1px solid #ddd; background:#f7f7f7; }
+    .pp-card button.primary { background:#0078d4; color:#fff; border-color:transparent; }
   </style>
 </head>
-
-<script src="reminder.js?v=1"></script>
-
 <body>
   <div class="widget-container">
     <h2 id="greeting"></h2>
@@ -68,6 +67,10 @@
     <div id="logo">Plug ’n’ Pause</div>
   </div>
 
+  <!-- eksisterende widget-logik skal indlæses først -->
   <script src="widget.js?v=23"></script>
+
+  <!-- reminder-laget indlæses efter widget.js -->
+  <script src="reminder.js?v=2"></script>
 </body>
 </html>
