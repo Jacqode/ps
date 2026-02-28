@@ -1,171 +1,48 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const ideaBtn = document.getElementById("ideaBtn");
-  const doneBtn = document.getElementById("doneBtn");
-  const currentIdea = document.getElementById("currentIdea");
-  const microFeedback = document.getElementById("microFeedback");
-  const greeting = document.getElementById("greeting");
-  const feed = document.getElementById("feed");
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="utf-8" />
+  <title>Indstillinger – Plug & Pause</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif; margin:20px; max-width:420px; }
+    label { font-weight:600; display:block; margin-top:20px; }
+    input, select { padding:8px; width:100%; margin-top:6px; font-size:16px; }
+    button { margin-top:20px; padding:10px; width:100%; font-size:16px; cursor:pointer; }
+    a { display:block; margin-top:20px; text-decoration:underline; }
+  </style>
+</head>
 
-  /* Indsæt "Ændr navn" link under feed og over logo */
-  (function insertChangeNameLink() {
-    const changeLink = document.createElement("a");
-    changeLink.href = "settings.html";
-    changeLink.className = "settings-link change-name-link";
-    changeLink.textContent = "Ændr navn";
-    const logo = document.getElementById("logo");
-    if (logo && logo.parentNode) {
-      logo.parentNode.insertBefore(changeLink, logo);
-    } else if (feed && feed.parentNode) {
-      feed.parentNode.insertBefore(changeLink, feed.nextSibling);
-    }
-  })();
+<body>
+  <h2>Indstillinger</h2>
 
-  /* CLOUDFLARE ENDPOINTS */
-  const BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
-  const COMPANY = "J";
-  const FEED_API = `${BASE}/api/feed?companyId=${COMPANY}`;
-  const SUBMIT_API = `${BASE}/api/submit?companyId=${COMPANY}`;
+  <label for="name">Dit navn</label>
+  <input id="name" type="text" placeholder="Skriv dit navn" />
 
-  /* GREETING-LOGIK – med smiley */
-  function updateGreeting() {
-    const savedName = localStorage.getItem("userName");
-    if (!savedName || savedName.trim() === "") {
-      greeting.innerHTML =
-        "Hej ukendt kollega 😊<br><a class='settings-link' href='settings.html'>Ændr navn</a>";
-    } else {
-      greeting.textContent = "Hej " + savedName + " 😊";
-    }
-  }
-  updateGreeting();
-  window.addEventListener("storage", (e) => {
-    if (e.key === "userName") updateGreeting();
-  });
+  <label for="interval">Hvor ofte vil du mindes?</label>
+  <select id="interval">
+    <option value="20">Hver 20. minut</option>
+    <option value="30">Hver 30. minut</option>
+    <option value="40">Hver 40. minut</option>
+    <option value="60">Hver 60. minut</option>
+  </select>
 
-  /* Standard: currentIdea skal være blank indtil bruger trykker på knappen */
-  function resetCurrentIdeaView() {
-    currentIdea.textContent = "";
-    delete currentIdea.dataset.activity;
-  }
-  resetCurrentIdeaView();
+  <button id="saveBtn">Gem indstillinger</button>
 
-  /* 15 AKTIVITETER */
-  const ideas = [
-    "Stræk armene over hovedet i 20 sekunder.",
-    "Rul skuldrene 10 gange bagud.",
-    "Rejs dig op og tag 10 langsomme vejrtrækninger.",
-    "Lav 15 sekunders let sidebøjninger.",
-    "Gå på stedet i 30 sekunder.",
-    "Lav 10 langsomme knæbøjninger.",
-    "Stræk nakken blidt til hver side i 10 sekunder.",
-    "Ryst hænder og arme i 15 sekunder.",
-    "Gå hen til et vindue og kig ud i 20 sekunder.",
-    "Lav 10 tåhævninger.",
-    "Stræk lænden ved at række frem mod gulvet i 15 sekunder.",
-    "Rul anklerne 10 gange hver vej.",
-    "Tag 5 dybe vejrtrækninger med fokus på langsom udånding.",
-    "Lav 20 sekunders torso-rotationer fra side til side.",
-    "Gå en lille tur i rummet i 20–30 sekunder."
-  ];
+  <a href="FirmaJ.html">Tilbage</a>
 
-  /* EMOTICON LOGIK – intuitiv mapping */
-  function getIconForActivity(activity) {
-    if (!activity) return "⚡";
-    const a = activity.toLowerCase();
+  <script>
+    const nameInput = document.getElementById("name");
+    const intervalSelect = document.getElementById("interval");
 
-    if (a.includes("vejrtræk") || a.includes("åndedræt") || a.includes("dybe")) return "🧘";
-    if (a.includes("gå") || a.includes("tur") || a.includes("gå en")) return "🚶";
-    if (a.includes("stræk") || a.includes("række") || a.includes("sidebøj")) return "🤸";
-    if (a.includes("rul") || a.includes("rotation") || a.includes("torso")) return "↻";
-    if (a.includes("knæbøj") || a.includes("knæ") || a.includes("styrke")) return "💪";
-    if (a.includes("ryst") || a.includes("ryste") || a.includes("shake")) return "🙌";
-    if (a.includes("vindue") || a.includes("kig ud") || a.includes("kig")) return "🌤️";
-    if (a.includes("tåhæv") || a.includes("tåhævninger") || a.includes("fod") || a.includes("ankel")) return "🦶";
-    return "⚡";
-  }
+    nameInput.value = localStorage.getItem("userName") || "";
+    intervalSelect.value = localStorage.getItem("pp_interval_min") || "40";
 
-  /* Hjælper: fjern evt. ledende emoji(er) fra en aktivitetstekst */
-  function stripLeadingEmoji(text) {
-    if (!text) return "";
-    try {
-      return text.replace(/^[\p{Emoji_Presentation}\p{Emoji}\uFE0F\u200D\s]+/u, "").trim();
-    } catch (e) {
-      return text.replace(/^[^\p{L}\p{N}]+/u, "").trim();
-    }
-  }
-
-  /* IDE-KNAP: vis emoticon før teksten i currentIdea, men gem rå aktivitet uden emoji */
-  ideaBtn.addEventListener("click", () => {
-    const idea = ideas[Math.floor(Math.random() * ideas.length)];
-    const icon = getIconForActivity(idea);
-    currentIdea.textContent = `${icon} ${idea}`;
-    currentIdea.dataset.activity = idea;
-  });
-
-  /* HENT FÆLLES FEED FRA CLOUDFLARE */
-  async function loadFeed() {
-    try {
-      const res = await fetch(FEED_API);
-      const data = await res.json();
-      const rows = Array.isArray(data) ? data : (data && data.results) ? data.results : [];
-
-      if (rows.length === 0) {
-        feed.innerHTML = "<div class='feed-item'>Ingen pauser registreret endnu</div>";
-        return;
-      }
-
-      feed.innerHTML = rows
-        .map(row => {
-          const rawActivity = stripLeadingEmoji(row.activity || "");
-          const icon = getIconForActivity(rawActivity);
-          const name = row.name || "ukendt kollega";
-          const time = row.timestamp
-            ? ` (${new Date(row.timestamp).toLocaleTimeString("da-DK",{hour:'2-digit',minute:'2-digit'})})`
-            : "";
-          return `<div class="feed-item">${name} lavede: ${icon} ${rawActivity}${time}</div>`;
-        })
-        .join("");
-
-    } catch (err) {
-      console.error(err);
-      feed.innerHTML = "<div class='feed-item'>Kunne ikke hente fælles feed</div>";
-    }
-  }
-
-  loadFeed();
-
-  /* MICROFEEDBACK + SEND TIL CLOUDFLARE */
-  doneBtn.addEventListener("click", async () => {
-    // Hent navn til microfeedback (fallback til "ukendt kollega")
-    const savedName = localStorage.getItem("userName");
-    const displayName = (savedName && savedName.trim() !== "") ? savedName : "ukendt kollega";
-
-    // Vis clap emoji + personlig tekst
-    microFeedback.textContent = `🙌 Godt gået, ${displayName}!`;
-    microFeedback.style.display = "block";
-
-    // Brug den rå aktivitet gemt i data-attribute (uden emoji)
-    const activity = (currentIdea.dataset && currentIdea.dataset.activity) ? currentIdea.dataset.activity : stripLeadingEmoji(currentIdea.textContent || "");
-    const name = displayName;
-
-    try {
-      await fetch(SUBMIT_API, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, activity })
-      });
-
-      await loadFeed();
-
-      // Efter bruger har trykket "Sådan - jeg er færdig" skal aktiviteten skjules igen
-      // indtil brugeren atter trykker på knappen for at få en aktivitet
-      resetCurrentIdeaView();
-
-    } catch (err) {
-      console.error("Cloudflare-fejl:", err);
-    }
-
-    setTimeout(() => {
-      microFeedback.style.display = "none";
-    }, 9000);
-  });
-});
+    document.getElementById("saveBtn").onclick = () => {
+      localStorage.setItem("userName", nameInput.value.trim());
+      localStorage.setItem("pp_interval_min", intervalSelect.value);
+      alert("Indstillinger gemt");
+    };
+  </script>
+</body>
+</html>
