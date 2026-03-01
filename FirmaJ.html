@@ -1,43 +1,35 @@
 <!DOCTYPE html>
-<html lang="da">
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Plug & Pause – Firma J</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <style>
-    body { font-family: Arial, sans-serif; margin:20px; max-width:720px; color:#111; }
-    h1 { font-size:20px; margin:0; }
-    .intro { margin-top:12px; color:#333; }
-    .controls { margin-top:18px; display:flex; gap:10px; flex-wrap:wrap; }
-    button { padding:10px 14px; font-size:16px; border-radius:8px; border:none; cursor:pointer; background:#0078d4; color:#fff; }
-    #doneBtn { background:#28a745; }
-    #microFeedback { margin-top:12px; padding:10px; background:#f1f7ff; border-radius:6px; display:none; }
-    #currentIdea { margin-top:12px; padding:12px; background:#fff; border:1px solid #eee; border-radius:6px; min-height:48px; }
-    #feed { margin-top:18px; }
-    .feed-item { padding:10px; border-bottom:1px solid #f0f0f0; }
-    .meta { color:#666; font-size:12px; margin-left:6px; }
-    a.settings { display:block; margin-top:20px; text-decoration:underline; color:inherit; font-size:14px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FirmaJ</title>
 </head>
 <body>
+    <h1>FirmaJ Reminder</h1>
+    <p>Your reminder functionality will sound this 4-tone chime for notifications.</p>
+    
+    <audio id="chime1" src="data:audio/wav;base64,..." preload="auto"></audio>
+    <audio id="chime2" src="data:audio/wav;base64,..." preload="auto"></audio>
+    <audio id="chime3" src="data:audio/wav;base64,..." preload="auto"></audio>
+    <audio id="chime4" src="data:audio/wav;base64,..." preload="auto"></audio>
 
-  <h1 id="greeting">Hej</h1>
+    <button onclick="playChimes()">Play Reminder Chimes</button>
 
-  <p class="intro">Bip Bip — 20–60 sekunders let aktivitet øger energien. Klik for at få en let aktivitet.</p>
-
-  <div class="controls">
-    <button id="ideaBtn">Få en aktivitet</button>
-    <button id="doneBtn">Jeg er færdig</button>
-  </div>
-
-  <div id="microFeedback" aria-live="polite"></div>
-
-  <div id="currentIdea" aria-live="polite"></div>
-
-  <section id="feed" aria-label="Andres pauser"></section>
-
-  <a class="settings" href="settings.html">Indstillinger</a>
-
-  <script src="widget.js"></script>
+    <script>
+        function playChimes() {
+            const chimes = [
+                document.getElementById('chime1'),
+                document.getElementById('chime2'),
+                document.getElementById('chime3'),
+                document.getElementById('chime4')
+            ];
+            chimes.forEach((chime, index) => {
+                setTimeout(() => {
+                    chime.play();
+                }, index * 1000); // Play each chime 1 second apart
+            });
+        }
+    </script>
 </body>
 </html>
