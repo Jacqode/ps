@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
     body { font-family: Arial, sans-serif; margin:20px; max-width:720px; color:#111; }
-    header { display:flex; align-items:center; justify-content:space-between; }
     h1 { font-size:20px; margin:0; }
     .intro { margin-top:12px; color:#333; }
     .controls { margin-top:18px; display:flex; gap:10px; flex-wrap:wrap; }
@@ -17,16 +16,12 @@
     #feed { margin-top:18px; }
     .feed-item { padding:10px; border-bottom:1px solid #f0f0f0; }
     .meta { color:#666; font-size:12px; margin-left:6px; }
-    a.settings { font-size:14px; text-decoration:underline; color:inherit; margin-left:8px; }
+    a.settings { display:block; margin-top:20px; text-decoration:underline; color:inherit; font-size:14px; }
   </style>
 </head>
 <body>
-  <header>
-    <h1 id="greeting">Hej</h1>
-    <div>
-      <a class="settings" href="settings.html">Indstillinger</a>
-    </div>
-  </header>
+
+  <h1 id="greeting">Hej</h1>
 
   <p class="intro">Bip Bip — 20–60 sekunders let aktivitet øger energien. Klik for at få en let aktivitet.</p>
 
@@ -35,13 +30,13 @@
     <button id="doneBtn">Jeg er færdig</button>
   </div>
 
-  <div id="microFeedback" role="status" aria-live="polite"></div>
+  <div id="microFeedback" aria-live="polite"></div>
 
   <div id="currentIdea" aria-live="polite"></div>
 
-  <section id="feed" aria-label="Andres pauser">
-    <!-- Feed indlæses dynamisk -->
-  </section>
+  <section id="feed" aria-label="Andres pauser"></section>
+
+  <a class="settings" href="settings.html">Indstillinger</a>
 
   <script src="widget.js"></script>
 </body>
