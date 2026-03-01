@@ -1,51 +1,13 @@
-<!DOCTYPE html>
-<html lang="da">
-<head>
-  <meta charset="utf-8" />
-  <title>Indstillinger – Plug & Pause</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <style>
-    body { font-family: Arial, sans-serif; margin:20px; max-width:520px; color:#111; }
-    label { font-weight:600; display:block; margin-top:18px; }
-    input, select { padding:10px; width:100%; margin-top:8px; font-size:16px; border-radius:6px; border:1px solid #ddd; }
-    button { margin-top:20px; padding:10px; width:100%; font-size:16px; cursor:pointer; border-radius:8px; background:#0078d4; color:#fff; border:none; }
-    a { display:block; margin-top:20px; text-decoration:underline; color:inherit; }
-  </style>
-</head>
-<body>
-  <h2>Indstillinger</h2>
+// settings.js — flyt dette ind hvis du foretrækker ekstern fil
+const nameInput = document.getElementById("name");
+const intervalSelect = document.getElementById("interval");
+const saveBtn = document.getElementById("saveBtn");
 
-  <label for="name">Dit navn</label>
-  <input id="name" type="text" placeholder="Skriv dit navn" />
+nameInput.value = localStorage.getItem("userName") || "";
+intervalSelect.value = localStorage.getItem("pp_interval_min") || "40";
 
-  <label for="interval">Hvor ofte vil du påmindes om at tage en aktiv pause?</label>
-  <select id="interval">
-    <option value="0.5">Hver 30. sekund (test)</option>
-    <option value="20">Hver 20. minut</option>
-    <option value="30">Hver 30. minut</option>
-    <option value="40">Hver 40. minut</option>
-    <option value="60">Hver 60. minut</option>
-  </select>
-
-  <button id="saveBtn">Gem indstillinger</button>
-
-  <a href="FirmaJ.html">Tilbage</a>
-
-  <script>
-    const nameInput = document.getElementById("name");
-    const intervalSelect = document.getElementById("interval");
-    const saveBtn = document.getElementById("saveBtn");
-
-    // Indlæs gemte værdier (pp_interval_min gemmes som tal i minutter; 0.5 = 30s)
-    nameInput.value = localStorage.getItem("userName") || "";
-    intervalSelect.value = localStorage.getItem("pp_interval_min") || "40";
-
-    saveBtn.onclick = () => {
-      localStorage.setItem("userName", nameInput.value.trim());
-      localStorage.setItem("pp_interval_min", intervalSelect.value);
-      alert("Indstillinger gemt");
-      // Hvis du vil, kan vi også opdatere aktive timers her (fx via postMessage), men det er valgfrit.
-    };
-  </script>
-</body>
-</html>
+saveBtn.onclick = () => {
+  localStorage.setItem("userName", nameInput.value.trim());
+  localStorage.setItem("pp_interval_min", intervalSelect.value);
+  alert("Indstillinger gemt");
+};
