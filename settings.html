@@ -1,13 +1,48 @@
-// settings.js — flyt dette ind hvis du foretrækker ekstern fil
-const nameInput = document.getElementById("name");
-const intervalSelect = document.getElementById("interval");
-const saveBtn = document.getElementById("saveBtn");
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="utf-8" />
+  <title>Plug & Pause – Firma J</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif; margin:20px; max-width:720px; color:#111; }
+    header { display:flex; align-items:center; justify-content:space-between; }
+    h1 { font-size:20px; margin:0; }
+    .intro { margin-top:12px; color:#333; }
+    .controls { margin-top:18px; display:flex; gap:10px; flex-wrap:wrap; }
+    button { padding:10px 14px; font-size:16px; border-radius:8px; border:none; cursor:pointer; background:#0078d4; color:#fff; }
+    #doneBtn { background:#28a745; }
+    #microFeedback { margin-top:12px; padding:10px; background:#f1f7ff; border-radius:6px; display:none; }
+    #currentIdea { margin-top:12px; padding:12px; background:#fff; border:1px solid #eee; border-radius:6px; min-height:48px; }
+    #feed { margin-top:18px; }
+    .feed-item { padding:10px; border-bottom:1px solid #f0f0f0; }
+    .meta { color:#666; font-size:12px; margin-left:6px; }
+    a.settings { font-size:14px; text-decoration:underline; color:inherit; margin-left:8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 id="greeting">Hej</h1>
+    <div>
+      <a class="settings" href="settings.html">Indstillinger</a>
+    </div>
+  </header>
 
-nameInput.value = localStorage.getItem("userName") || "";
-intervalSelect.value = localStorage.getItem("pp_interval_min") || "40";
+  <p class="intro">Bip Bip — 20–60 sekunders let aktivitet øger energien. Klik for at få en let aktivitet.</p>
 
-saveBtn.onclick = () => {
-  localStorage.setItem("userName", nameInput.value.trim());
-  localStorage.setItem("pp_interval_min", intervalSelect.value);
-  alert("Indstillinger gemt");
-};
+  <div class="controls">
+    <button id="ideaBtn">Få en aktivitet</button>
+    <button id="doneBtn">Jeg er færdig</button>
+  </div>
+
+  <div id="microFeedback" role="status" aria-live="polite"></div>
+
+  <div id="currentIdea" aria-live="polite"></div>
+
+  <section id="feed" aria-label="Andres pauser">
+    <!-- Feed indlæses dynamisk -->
+  </section>
+
+  <script src="widget.js"></script>
+</body>
+</html>
