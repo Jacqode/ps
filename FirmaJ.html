@@ -4,39 +4,131 @@
   <meta charset="utf-8" />
   <title>Plug & Pause – Firma J</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+
   <style>
-    body { font-family: Arial, sans-serif; margin:20px; max-width:720px; color:#111; }
-    h1 { font-size:20px; margin:0; }
-    .intro { margin-top:12px; color:#333; }
-    .controls { margin-top:18px; display:flex; gap:10px; flex-wrap:wrap; }
-    button { padding:10px 14px; font-size:16px; border-radius:8px; border:none; cursor:pointer; background:#0078d4; color:#fff; }
-    #doneBtn { background:#28a745; }
-    #microFeedback { margin-top:12px; padding:10px; background:#f1f7ff; border-radius:6px; display:none; }
-    #currentIdea { margin-top:12px; padding:12px; background:#fff; border:1px solid #eee; border-radius:6px; min-height:48px; }
-    #feed { margin-top:18px; }
-    .feed-item { padding:10px; border-bottom:1px solid #f0f0f0; }
-    .meta { color:#666; font-size:12px; margin-left:6px; }
-    a.settings { display:block; margin-top:20px; text-decoration:underline; color:inherit; font-size:14px; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .app-container {
+      background: #ffffff;
+      padding: 32px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 22px;
+      margin: 0 0 10px 0;
+    }
+
+    .intro {
+      margin-top: 8px;
+      color: #444;
+      font-size: 15px;
+    }
+
+    .controls {
+      margin-top: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      font-size: 17px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      background: #0078d4;
+      color: #fff;
+    }
+
+    #doneBtn {
+      background: #28a745;
+    }
+
+    #microFeedback {
+      margin-top: 14px;
+      padding: 12px;
+      background: #f1f7ff;
+      border-radius: 8px;
+      display: none;
+      font-size: 15px;
+    }
+
+    #currentIdea {
+      margin-top: 16px;
+      padding: 14px;
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      min-height: 48px;
+      font-size: 16px;
+    }
+
+    #feed {
+      margin-top: 22px;
+      text-align: left;
+    }
+
+    .feed-item {
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      border: 1px solid #eee;
+      font-size: 15px;
+    }
+
+    .meta {
+      color: #666;
+      font-size: 12px;
+      margin-left: 6px;
+    }
+
+    a.settings {
+      display: block;
+      margin-top: 24px;
+      text-decoration: underline;
+      color: #333;
+      font-size: 14px;
+    }
   </style>
 </head>
+
 <body>
+  <div class="app-container">
+    <h1 id="greeting">Hej</h1>
 
-  <h1 id="greeting">Hej</h1>
+    <p class="intro">
+      Bip Bip — 20–60 sekunders let aktivitet øger energien. Klik for at få en let aktivitet.
+    </p>
 
-  <p class="intro">Bip Bip — 20–60 sekunders let aktivitet øger energien. Klik for at få en let aktivitet.</p>
+    <div class="controls">
+      <button id="ideaBtn">Få en aktivitet</button>
+      <button id="doneBtn">Jeg er færdig</button>
+    </div>
 
-  <div class="controls">
-    <button id="ideaBtn">Få en aktivitet</button>
-    <button id="doneBtn">Jeg er færdig</button>
+    <div id="microFeedback" aria-live="polite"></div>
+
+    <div id="currentIdea" aria-live="polite"></div>
+
+    <section id="feed" aria-label="Andres pauser"></section>
+
+    <a class="settings" href="settings.html">Indstillinger</a>
   </div>
-
-  <div id="microFeedback" aria-live="polite"></div>
-
-  <div id="currentIdea" aria-live="polite"></div>
-
-  <section id="feed" aria-label="Andres pauser"></section>
-
-  <a class="settings" href="settings.html">Indstillinger</a>
 
   <script src="widget.js"></script>
 </body>
