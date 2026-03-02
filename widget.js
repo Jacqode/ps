@@ -1,4 +1,3 @@
-// Aktiviteter
 const ideas = [
   "↻ Rul anklerne 10 gange hver vej.",
   "↻ Rul skuldrene 10 gange bagud.",
@@ -17,7 +16,6 @@ const ideas = [
   "🙆 Stræk brystet ved at åbne armene bagud i 15 sekunder."
 ];
 
-// Elementer
 const ideaBtn = document.getElementById("ideaBtn");
 const currentIdea = document.getElementById("currentIdea");
 const doneBtn = document.getElementById("doneBtn");
@@ -25,11 +23,9 @@ const microFeedback = document.getElementById("microFeedback");
 const feedContainer = document.getElementById("feed");
 const greetingEl = document.getElementById("greeting");
 
-// Hilsen
 const savedName = localStorage.getItem("userName") || "";
 if (greetingEl) greetingEl.textContent = savedName ? `Hej ${savedName} 😊` : "Hej 😊";
 
-// Aktivitet
 if (ideaBtn) {
   ideaBtn.addEventListener("click", () => {
     const idea = ideas[Math.floor(Math.random() * ideas.length)];
@@ -38,7 +34,6 @@ if (ideaBtn) {
   });
 }
 
-// Færdig
 if (doneBtn) {
   doneBtn.addEventListener("click", () => {
     microFeedback.textContent = "Godt gået!";
@@ -47,7 +42,6 @@ if (doneBtn) {
   });
 }
 
-// Send pause til backend
 async function submitPause() {
   try {
     const name = localStorage.getItem("userName") || "Ukendt";
@@ -65,7 +59,6 @@ async function submitPause() {
   }
 }
 
-// Hent feed
 async function loadFeed() {
   try {
     const res = await fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/api/feed?companyId=J");
@@ -77,7 +70,6 @@ async function loadFeed() {
   }
 }
 
-// Vis feed
 function renderFeed(items) {
   if (!items || items.length === 0) {
     feedContainer.innerHTML = "Ingen pauser endnu.";
@@ -103,54 +95,7 @@ function renderFeed(items) {
   }).join("");
 }
 
-// Reminder-lyd
-function playChime() {
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const notes = [440, 660, 880, 660];
-  let t = ctx.currentTime;
-
-  notes.forEach(freq => {
-    const osc = ctx.createOscillator();
-    osc.frequency.value = freq;
-    osc.connect(ctx.destination);
-    osc.start(t);
-    osc.stop(t + 0.15);
-    t += 0.18;
-  });
-}
-
-// Reminder
-let reminderTimerId = null;
-
-function startReminders() {
-  if (Notification.permission !== "granted") {
-    Notification.requestPermission();
-  }
-
-  const intervalMin = parseFloat(localStorage.getItem("pp_interval_min")) || 40;
-  const intervalMs = Math.max(60000, Math.round(intervalMin * 60000));
-
-  if (reminderTimerId) clearInterval(reminderTimerId);
-
-  reminderTimerId = setInterval(() => {
-    triggerReminder();
-  }, intervalMs);
-}
-
-function triggerReminder() {
-  if (Notification.permission === "granted") {
-    new Notification("Plug & Pause", {
-      body: "Tid til en aktiv pause!",
-      icon: "https://jacqode.github.io/ps/icon.png"
-    });
-  }
-
-  playChime();
-}
-
-// Init
 document.addEventListener("DOMContentLoaded", () => {
   loadFeed();
   setInterval(loadFeed, 30000);
-  startReminders();
 });
