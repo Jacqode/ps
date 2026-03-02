@@ -4,27 +4,80 @@
   <meta charset="utf-8" />
   <title>Indstillinger</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+
   <style>
-    body { font-family: Arial, sans-serif; margin:20px; max-width:720px; color:#111; }
-    label { display:block; margin-top:20px; font-size:16px; }
-    input { padding:10px; width:100%; margin-top:6px; font-size:16px; }
-    button { margin-top:20px; padding:10px 14px; font-size:16px; border:none; border-radius:8px; background:#0078d4; color:#fff; cursor:pointer; }
-    a.back { display:block; margin-top:20px; text-decoration:underline; color:inherit; font-size:14px; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .app-container {
+      background: #ffffff;
+      padding: 32px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 20px;
+      font-size: 16px;
+      text-align: left;
+    }
+
+    input {
+      padding: 10px;
+      width: 100%;
+      margin-top: 6px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      margin-top: 24px;
+      padding: 12px;
+      width: 100%;
+      font-size: 17px;
+      border: none;
+      border-radius: 10px;
+      background: #0078d4;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    a.back {
+      display: block;
+      margin-top: 20px;
+      text-decoration: underline;
+      color: #333;
+      font-size: 14px;
+    }
   </style>
 </head>
+
 <body>
+  <div class="app-container">
+    <h1>Indstillinger</h1>
 
-  <h1>Indstillinger</h1>
+    <label for="nameInput">Dit navn</label>
+    <input id="nameInput" type="text" placeholder="Skriv dit navn" />
 
-  <label for="nameInput">Dit navn</label>
-  <input id="nameInput" type="text" placeholder="Skriv dit navn" />
+    <label for="intervalInput">Påmindelsesinterval (minutter)</label>
+    <input id="intervalInput" type="number" min="1" max="180" />
 
-  <label for="intervalInput">Påmindelsesinterval (minutter)</label>
-  <input id="intervalInput" type="number" min="1" max="180" />
+    <button id="saveBtn">Gem</button>
 
-  <button id="saveBtn">Gem</button>
-
-  <a class="back" href="FirmaJ.html">Tilbage</a>
+    <a class="back" href="FirmaJ.html">Tilbage</a>
+  </div>
 
   <script>
     const nameInput = document.getElementById("nameInput");
@@ -40,6 +93,5 @@
       window.location.href = "FirmaJ.html";
     });
   </script>
-
 </body>
 </html>
