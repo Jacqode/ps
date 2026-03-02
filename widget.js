@@ -1,3 +1,4 @@
+// Aktiviteter
 const ideas = [
   "↻ Rul anklerne 10 gange hver vej.",
   "↻ Rul skuldrene 10 gange bagud.",
@@ -16,6 +17,7 @@ const ideas = [
   "🙆 Stræk brystet ved at åbne armene bagud i 15 sekunder."
 ];
 
+// Elementer
 const ideaBtn = document.getElementById("ideaBtn");
 const currentIdea = document.getElementById("currentIdea");
 const doneBtn = document.getElementById("doneBtn");
@@ -23,31 +25,33 @@ const microFeedback = document.getElementById("microFeedback");
 const feedContainer = document.getElementById("feed");
 const greetingEl = document.getElementById("greeting");
 
+// Hilsen
 const savedName = localStorage.getItem("userName") || "";
-if (greetingEl) greetingEl.textContent = savedName ? `Hej ${savedName}` : "Hej";
+if (greetingEl) greetingEl.textContent = savedName ? `Hej ${savedName} 😊` : "Hej 😊";
 
+// Aktivitet
 if (ideaBtn) {
   ideaBtn.addEventListener("click", () => {
     const idea = ideas[Math.floor(Math.random() * ideas.length)];
-    if (currentIdea) currentIdea.textContent = idea;
-    if (microFeedback) microFeedback.style.display = "none";
+    currentIdea.textContent = idea;
+    microFeedback.style.display = "none";
   });
 }
 
+// Færdig
 if (doneBtn) {
   doneBtn.addEventListener("click", () => {
-    if (microFeedback) {
-      microFeedback.textContent = "Godt gået, " + (savedName || "deltager") + "!";
-      microFeedback.style.display = "block";
-    }
+    microFeedback.textContent = "Godt gået!";
+    microFeedback.style.display = "block";
     submitPause();
   });
 }
 
+// Send pause til backend
 async function submitPause() {
   try {
     const name = localStorage.getItem("userName") || "Ukendt";
-    const activity = currentIdea ? currentIdea.textContent : "";
+    const activity = currentIdea.textContent;
 
     await fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/api/submit?companyId=J", {
       method: "POST",
@@ -61,6 +65,7 @@ async function submitPause() {
   }
 }
 
+// Hent feed
 async function loadFeed() {
   try {
     const res = await fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/api/feed?companyId=J");
@@ -68,12 +73,12 @@ async function loadFeed() {
     renderFeed(data);
   } catch (e) {
     console.error("Feed error", e);
-    if (feedContainer) feedContainer.innerHTML = "Kunne ikke hente feed.";
+    feedContainer.innerHTML = "Kunne ikke hente feed.";
   }
 }
 
+// Vis feed
 function renderFeed(items) {
-  if (!feedContainer) return;
   if (!items || items.length === 0) {
     feedContainer.innerHTML = "Ingen pauser endnu.";
     return;
@@ -82,7 +87,7 @@ function renderFeed(items) {
   items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
   feedContainer.innerHTML = items.slice(0, 5).map(item => {
-    const name = (item.name || "Ukendt");
+    const name = item.name || "Ukendt";
     const activity = item.activity || "";
     const time = item.timestamp
       ? new Date(item.timestamp).toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" })
@@ -98,29 +103,54 @@ function renderFeed(items) {
   }).join("");
 }
 
+// Reminder-lyd
+function playChime() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const notes = [440, 660, 880, 660];
+  let t = ctx.currentTime;
+
+  notes.forEach(freq => {
+    const osc = ctx.createOscillator();
+    osc.frequency.value = freq;
+    osc.connect(ctx.destination);
+    osc.start(t);
+    osc.stop(t + 0.15);
+    t += 0.18;
+  });
+}
+
+// Reminder
 let reminderTimerId = null;
 
 function startReminders() {
+  if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+  }
+
   const intervalMin = parseFloat(localStorage.getItem("pp_interval_min")) || 40;
-  const intervalMs = Math.max(1000, Math.round(intervalMin * 60000));
+  const intervalMs = Math.max(60000, Math.round(intervalMin * 60000));
 
   if (reminderTimerId) clearInterval(reminderTimerId);
 
   reminderTimerId = setInterval(() => {
-    showReminder();
+    triggerReminder();
   }, intervalMs);
 }
 
-function showReminder() {
-  if (microFeedback) {
-    microFeedback.textContent = "Tid til en aktiv pause!";
-    microFeedback.style.display = "block";
+function triggerReminder() {
+  if (Notification.permission === "granted") {
+    new Notification("Plug & Pause", {
+      body: "Tid til en aktiv pause!",
+      icon: "https://jacqode.github.io/ps/icon.png"
+    });
   }
+
+  playChime();
 }
 
+// Init
 document.addEventListener("DOMContentLoaded", () => {
   loadFeed();
   setInterval(loadFeed, 30000);
   startReminders();
-  window.addEventListener("focus", () => startReminders());
 });
