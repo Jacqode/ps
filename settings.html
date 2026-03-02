@@ -2,49 +2,43 @@
 <html lang="da">
 <head>
   <meta charset="utf-8" />
-  <title>Indstillinger – Plug & Pause</title>
+  <title>Indstillinger</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    body { font-family: Arial, sans-serif; margin:20px; max-width:520px; color:#111; }
-    label { font-weight:600; display:block; margin-top:18px; }
-    input, select { padding:10px; width:100%; margin-top:8px; font-size:16px; border-radius:6px; border:1px solid #ddd; }
-    button { margin-top:20px; padding:10px; width:100%; font-size:16px; cursor:pointer; border-radius:8px; background:#0078d4; color:#fff; border:none; }
-    a { display:block; margin-top:20px; text-decoration:underline; color:inherit; }
+    body { font-family: Arial, sans-serif; margin:20px; max-width:720px; color:#111; }
+    label { display:block; margin-top:20px; font-size:16px; }
+    input { padding:10px; width:100%; margin-top:6px; font-size:16px; }
+    button { margin-top:20px; padding:10px 14px; font-size:16px; border:none; border-radius:8px; background:#0078d4; color:#fff; cursor:pointer; }
+    a.back { display:block; margin-top:20px; text-decoration:underline; color:inherit; font-size:14px; }
   </style>
 </head>
 <body>
 
-  <h2>Indstillinger</h2>
+  <h1>Indstillinger</h1>
 
-  <label for="name">Dit navn</label>
-  <input id="name" type="text" placeholder="Skriv dit navn" />
+  <label for="nameInput">Dit navn</label>
+  <input id="nameInput" type="text" placeholder="Skriv dit navn" />
 
-  <label for="interval">Hvor ofte vil du påmindes om at tage en aktiv pause?</label>
-  <select id="interval">
-    <option value="0.5">Hver 30. sekund (test)</option>
-    <option value="20">Hver 20. minut</option>
-    <option value="30">Hver 30. minut</option>
-    <option value="40">Hver 40. minut</option>
-    <option value="60">Hver 60. minut</option>
-  </select>
+  <label for="intervalInput">Påmindelsesinterval (minutter)</label>
+  <input id="intervalInput" type="number" min="1" max="180" />
 
-  <button id="saveBtn">Gem indstillinger</button>
+  <button id="saveBtn">Gem</button>
 
-  <a href="FirmaJ.html">Tilbage</a>
+  <a class="back" href="FirmaJ.html">Tilbage</a>
 
   <script>
-    const nameInput = document.getElementById("name");
-    const intervalSelect = document.getElementById("interval");
+    const nameInput = document.getElementById("nameInput");
+    const intervalInput = document.getElementById("intervalInput");
     const saveBtn = document.getElementById("saveBtn");
 
     nameInput.value = localStorage.getItem("userName") || "";
-    intervalSelect.value = localStorage.getItem("pp_interval_min") || "40";
+    intervalInput.value = localStorage.getItem("pp_interval_min") || 40;
 
-    saveBtn.onclick = () => {
+    saveBtn.addEventListener("click", () => {
       localStorage.setItem("userName", nameInput.value.trim());
-      localStorage.setItem("pp_interval_min", intervalSelect.value);
-      alert("Indstillinger gemt");
-    };
+      localStorage.setItem("pp_interval_min", intervalInput.value);
+      window.location.href = "FirmaJ.html";
+    });
   </script>
 
 </body>
