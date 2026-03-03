@@ -1,7 +1,7 @@
 // Find companyId ud fra URL'en
 function getCompanyId() {
   const path = window.location.pathname;
-  const match = path.match(/\/ps\/(.*)\.html/);
+  const match = path.match(/\/ps\/public\/(.*)\.html/);
 
   if (match && match[1]) {
     return match[1].toUpperCase(); // FirmaJ → FIRMAJ
