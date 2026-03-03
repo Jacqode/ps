@@ -66,6 +66,7 @@ function renderFeed(items) {
             timeZone: "Europe/Copenhagen"
         });
 
+        // Ingen smiley i feed
         div.textContent = `${item.user} lavede: ${item.activity} (${time})`;
         feed.appendChild(div);
     });
