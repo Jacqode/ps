@@ -97,14 +97,44 @@
     console.info('[pp] modal shown');
   }
 
+  // beep sound via Web Audio API — reuse AudioContext to avoid resource exhaustion
+  let _audioCtx = null;
+  function getAudioCtx() {
+    if (!_audioCtx || _audioCtx.state === 'closed') {
+      _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return _audioCtx;
+  }
+
+  function playBeep() {
+    try {
+      const ctx = getAudioCtx();
+      [[440, 0, 0.15], [587, 0.2, 0.15]].forEach(([freq, start, dur]) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        gain.gain.setValueAtTime(0.4, ctx.currentTime + start);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+        osc.start(ctx.currentTime + start);
+        osc.stop(ctx.currentTime + start + dur + 0.05);
+      });
+      console.info('[pp] beep played');
+    } catch (e) {
+      console.warn('[pp] playBeep failed', e);
+    }
+  }
+
   // trigger
   async function triggerReminder() {
     console.info('[pp] triggerReminder called');
+    playBeep();
     const perm = await ensurePermission();
     if (perm === 'granted') {
       try {
         const n = new Notification('Tid til en mikropause', {
-          body: `Klik for at få en aktivitet (ca. ${DURATION_SEC} sek.)`,
+          body: `Bip Bip — klik for at få en aktivitet (ca. ${DURATION_SEC} sek.)`,
           tag: 'plugpause'
         });
         n.onclick = () => { window.focus(); fireIdea(); };
