@@ -1,106 +1,43 @@
-// Dynamisk hilsen
-function setGreeting() {
-    const userName = localStorage.getItem("userName") || "ven";
-    const greetingEl = document.getElementById("greeting");
-    if (greetingEl) greetingEl.textContent = `Hej ${userName} 😊`;
-}
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="utf-8" />
+    <title>Plug & Pause – Widget</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-// Hent aktivitet
-async function getActivity() {
-    try {
-        const res = await fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/api/activity");
-        if (!res.ok) return "Tag en kort pause 🌿";
-        const data = await res.json();
-        return data.activity;
-    } catch {
-        return "Tag en kort pause 🌿";
-    }
-}
+    <!-- Absolut sti til CSS (stabil for GitHub Pages) -->
+    <link rel="stylesheet" href="/ps/css/style.css" />
+</head>
 
-// Send pause til backend
-async function submitPause(activityText) {
-    try {
-        await fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/api/pause", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                activity: activityText,
-                timestamp: new Date().toISOString(),
-                user: localStorage.getItem("userName") || "ven"
-            })
-        });
-    } catch (err) {
-        console.error("Fejl ved submitPause:", err);
-    }
-}
+<body class="page-widget">
+    <div class="app-container">
 
-// Hent feed
-async function loadFeed() {
-    try {
-        const res = await fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/api/feed");
-        if (!res.ok) return [];
-        return await res.json();
-    } catch {
-        return [];
-    }
-}
+        <!-- Dynamisk hilsen -->
+        <h1 id="greeting">Hej</h1>
 
-// Render feed
-function renderFeed(items) {
-    const feed = document.getElementById("feed");
-    feed.innerHTML = "";
+        <!-- Opdateret tekst -->
+        <p class="intro">20–60 sekunders let aktivitet øger energien.</p>
 
-    if (!items.length) {
-        feed.innerHTML = "<p>Ingen aktiviteter endnu.</p>";
-        return;
-    }
+        <div class="controls">
+            <button id="ideaBtn">Få en aktivitet</button>
+            <button id="doneBtn">Jeg er færdig</button>
+        </div>
 
-    items.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "feed-item";
+        <!-- Micro-feedback -->
+        <div id="microFeedback" aria-live="polite"></div>
 
-        const t = new Date(item.timestamp);
-        const time = t.toLocaleTimeString("da-DK", {
-            hour: "2-digit",
-            minute: "2-digit",
-            timeZone: "Europe/Copenhagen"
-        });
+        <!-- Aktivitetstekst -->
+        <div id="currentIdea" aria-live="polite"></div>
 
-        // Ingen smiley i feed
-        div.textContent = `${item.user} lavede: ${item.activity} (${time})`;
-        feed.appendChild(div);
-    });
-}
+        <!-- Feed -->
+        <section id="feed" aria-label="Andres pauser"></section>
 
-// Micro-feedback
-function showMicroFeedback() {
-    const el = document.getElementById("microFeedback");
-    const userName = localStorage.getItem("userName") || "ven";
-    el.textContent = `Godt gået, ${userName}!`;
-    el.style.opacity = "1";
-    setTimeout(() => el.style.opacity = "0", 1500);
-}
+        <!-- Indstillinger -->
+        <a class="settings" href="settings.html">Indstillinger</a>
+    </div>
 
-// Init
-async function initWidget() {
-    setGreeting();
-
-    const ideaBtn = document.getElementById("ideaBtn");
-    const doneBtn = document.getElementById("doneBtn");
-    const currentIdea = document.getElementById("currentIdea");
-
-    ideaBtn.addEventListener("click", async () => {
-        currentIdea.textContent = await getActivity();
-    });
-
-    doneBtn.addEventListener("click", async () => {
-        const text = currentIdea.textContent || "Ukendt aktivitet";
-        await submitPause(text);
-        showMicroFeedback();
-        renderFeed(await loadFeed());
-    });
-
-    renderFeed(await loadFeed());
-}
-
-document.addEventListener("DOMContentLoaded", initWidget);
+    <!-- Scripts -->
+    <script src="/ps/js/widget.js"></script>
+    <script src="/ps/js/reminder.js"></script>
+</body>
+</html>
