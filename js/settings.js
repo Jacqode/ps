@@ -1,14 +1,31 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const nameInput = document.getElementById("nameInput");
-    const intervalInput = document.getElementById("intervalInput");
-    const saveBtn = document.getElementById("saveBtn");
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="utf-8" />
+    <title>Indstillinger</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-    nameInput.value = localStorage.getItem("userName") || "";
-    intervalInput.value = localStorage.getItem("reminderInterval") || 30;
+    <!-- Stabil absolut sti til CSS -->
+    <link rel="stylesheet" href="/ps/css/style.css" />
+</head>
 
-    saveBtn.addEventListener("click", () => {
-        localStorage.setItem("userName", nameInput.value.trim());
-        localStorage.setItem("reminderInterval", intervalInput.value);
-        alert("Indstillinger gemt");
-    });
-});
+<body class="page-settings">
+    <div class="app-container">
+
+        <h1>Indstillinger</h1>
+
+        <label for="nameInput">Dit navn</label>
+        <input id="nameInput" type="text" placeholder="Dit navn" />
+
+        <label for="intervalInput">Påmindelses-interval (minutter)</label>
+        <input id="intervalInput" type="number" min="1" />
+
+        <button id="saveBtn">Gem</button>
+
+        <a class="back" href="widget.html">Tilbage</a>
+    </div>
+
+    <!-- Absolut sti til JS -->
+    <script src="/ps/js/settings.js"></script>
+</body>
+</html>
