@@ -1,107 +1,61 @@
-const ideas = [
-  "↻ Rul anklerne 10 gange hver vej.",
-  "↻ Rul skuldrene 10 gange bagud.",
-  "🤸 Stræk nakken blidt til hver side i 10 sekunder.",
-  "🤸 Lav 15 sekunders let sidebøjninger.",
-  "🙌 Ryst hænder og arme i 15 sekunder.",
-  "🧘 Tag 5 dybe vejrtrækninger med fokus på langsom udånding.",
-  "🧘 Rejs dig op og tag 10 langsomme vejrtrækninger.",
-  "🚶 Gå hen til et vindue og kig ud i 20 sekunder.",
-  "🚶 Gå på stedet i 30 sekunder.",
-  "💪 Lav 10 langsomme knæbøjninger.",
-  "🦶 Lav 10 tåhævninger.",
-  "🤸 Stræk lænden ved at række frem mod gulvet i 15 sekunder.",
-  "↻ Lav 20 sekunders torso-rotationer fra side til side.",
-  "🤲 Stræk håndled frem og tilbage i 15 sekunder.",
-  "🙆 Stræk brystet ved at åbne armene bagud i 15 sekunder."
-];
+// Submit a completed pause to the backend
+async function submitPause(activityText) {
+    try {
+        const response = await fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/api/pause", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                activity: activityText,
+                timestamp: new Date().toISOString(),
+                user: localStorage.getItem("userName") || "Jakob"
+            })
+        });
 
-const ideaBtn = document.getElementById("ideaBtn");
-const currentIdea = document.getElementById("currentIdea");
-const doneBtn = document.getElementById("doneBtn");
-const microFeedback = document.getElementById("microFeedback");
-const feedContainer = document.getElementById("feed");
-const greetingEl = document.getElementById("greeting");
-
-const savedName = localStorage.getItem("userName") || "";
-if (greetingEl) greetingEl.textContent = savedName ? `Hej ${savedName} 😊` : "Hej 😊";
-
-if (ideaBtn) {
-  ideaBtn.addEventListener("click", () => {
-    const idea = ideas[Math.floor(Math.random() * ideas.length)];
-    currentIdea.textContent = idea;
-    microFeedback.style.display = "none";
-  });
+        if (!response.ok) {
+            console.error("Fejl ved submitPause:", response.statusText);
+        }
+    } catch (error) {
+        console.error("Netværksfejl ved submitPause:", error);
+    }
 }
 
-if (doneBtn) {
-  doneBtn.addEventListener("click", () => {
-    microFeedback.textContent = "Godt gået!";
-    microFeedback.style.display = "block";
-    submitPause();
-  });
-}
-
-async function submitPause() {
-  try {
-    const name = localStorage.getItem("userName") || "Ukendt";
-    const activity = currentIdea.textContent;
-
-    await fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/api/submit?companyId=J", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, activity })
-    });
-
-    loadFeed();
-  } catch (e) {
-    console.error("Submit error", e);
-  }
-}
-
+// Load feed from backend
 async function loadFeed() {
-  try {
-    const res = await fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/api/feed?companyId=J");
-    const data = await res.json();
-    renderFeed(data);
-  } catch (e) {
-    console.error("Feed error", e);
-    feedContainer.innerHTML = "Kunne ikke hente feed.";
-  }
+    try {
+        const response = await fetch("https://plugandpause-backend.jakobhelkjaer.workers.dev/api/feed");
+        if (!response.ok) {
+            console.error("Fejl ved hentning af feed:", response.statusText);
+            return [];
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Netværksfejl ved hentning af feed:", error);
+        return [];
+    }
 }
 
-function renderFeed(items) {
-  if (!items || items.length === 0) {
-    feedContainer.innerHTML = "Ingen pauser endnu.";
-    return;
-  }
+// Render feed items into the UI
+function renderFeed(feedItems) {
+    const feedContainer = document.getElementById("feed");
+    if (!feedContainer) return;
 
-  items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    feedContainer.innerHTML = "";
 
-  feedContainer.innerHTML = items.slice(0, 5).map(item => {
-    const name = item.name || "Ukendt";
-    const activity = item.activity || "";
+    if (!feedItems || feedItems.length === 0) {
+        feedContainer.innerHTML = "<p>Ingen aktiviteter endnu – tryk på ‘Få en aktivitet’ for at komme i gang.</p>";
+        return;
+    }
 
-    const time = item.timestamp
-      ? new Date(item.timestamp + "Z").toLocaleTimeString("da-DK", {
-          hour: "2-digit",
-          minute: "2-digit",
-          timeZone: "Europe/Copenhagen"
-        })
-      : "";
+    feedItems.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "feed-item";
 
-    return `
-      <div class="feed-item">
-        <strong>${name}</strong> lavede:<br>
-        ${activity}
-        ${time ? `<span class="meta">(${time})</span>` : ""}
-      </div>
-    `;
-  }).join("");
-}
+        const time = new Date(item.timestamp);
+        const formatted = time.toLocaleTimeString("da-DK", {
+            hour: "2-digit",
+            minute: "2-digit",
+            timeZone: "Europe/Copenhagen"
+        });
 
-document.addEventListener("DOMContentLoaded", () => {
-  loadFeed();
-  setInterval(loadFeed, 30000);
-});
-
+        div.textContent = `${item.user} lavede: ${item.activity} (${formatted})`;
+        feedContainer.appendChild(div
