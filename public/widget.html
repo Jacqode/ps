@@ -1,35 +1,41 @@
 <!DOCTYPE html>
 <html lang="da">
 <head>
-  <meta charset="utf-8" />
-  <title>Plug & Pause – Widget</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="../css/style.css">
+    <meta charset="utf-8" />
+    <title>Plug & Pause – Widget</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="../css/style.css" />
 </head>
 
 <body class="page-widget">
-  <div class="app-container">
-    <h1 id="greeting">Hej</h1>
+    <div class="app-container">
 
-    <p class="intro">
-      Bip Bip — 20–60 sekunders let aktivitet øger energien. Klik for at få en let aktivitet.
-    </p>
+        <!-- Dynamisk hilsen -->
+        <h1 id="greeting">Hej</h1>
 
-    <div class="controls">
-      <button id="ideaBtn">Få en aktivitet</button>
-      <button id="doneBtn">Jeg er færdig</button>
+        <!-- Opdateret tekst -->
+        <p class="intro">20–60 sekunders let aktivitet øger energien.</p>
+
+        <div class="controls">
+            <button id="ideaBtn">Få en aktivitet</button>
+            <button id="doneBtn">Jeg er færdig</button>
+        </div>
+
+        <!-- Micro-feedback -->
+        <div id="microFeedback" aria-live="polite"></div>
+
+        <!-- Aktivitetstekst -->
+        <div id="currentIdea" aria-live="polite"></div>
+
+        <!-- Feed -->
+        <section id="feed" aria-label="Andres pauser"></section>
+
+        <!-- Indstillinger -->
+        <a class="settings" href="settings.html">Indstillinger</a>
     </div>
 
-    <div id="microFeedback" aria-live="polite"></div>
-
-    <div id="currentIdea" aria-live="polite"></div>
-
-    <section id="feed" aria-label="Andres pauser"></section>
-
-    <a class="settings" href="settings.html">Indstillinger</a>
-  </div>
-
-  <script src="../js/widget.js"></script>
-  <script src="../js/reminder.js"></script>
+    <!-- Scripts -->
+    <script src="../js/widget.js"></script>
+    <script src="../js/reminder.js"></script>
 </body>
 </html>
