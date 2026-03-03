@@ -1,273 +1,41 @@
-/* ===== Fælles base ===== */
 body {
-  font-family: Arial, sans-serif;
-}
-
-/* ===== Widget & Settings sider (centreret kort) ===== */
-body.page-widget,
-body.page-settings {
-  background: #f5f7fa;
-  margin: 0;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    font-family: system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #fafafa;
 }
 
 .app-container {
-  background: #ffffff;
-  padding: 32px;
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-  width: 100%;
-  max-width: 420px;
-  text-align: center;
+    max-width: 420px;
+    margin: auto;
+    padding: 20px;
 }
 
-/* ===== Widget ===== */
-body.page-widget h1 {
-  font-size: 22px;
-  margin: 0 0 10px 0;
+h1 {
+    margin-bottom: 10px;
 }
 
 .intro {
-  margin-top: 8px;
-  color: #444;
-  font-size: 15px;
+    margin-bottom: 20px;
 }
 
-.controls {
-  margin-top: 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-body.page-widget button {
-  width: 100%;
-  padding: 14px;
-  font-size: 17px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  background: #0078d4;
-  color: #fff;
-}
-
-#doneBtn {
-  background: #28a745;
+.controls button {
+    margin-right: 10px;
 }
 
 #microFeedback {
-  margin-top: 14px;
-  padding: 12px;
-  background: #f1f7ff;
-  border-radius: 8px;
-  display: none;
-  font-size: 15px;
-}
-
-#currentIdea {
-  margin-top: 16px;
-  padding: 14px;
-  background: #fff;
-  border: 1px solid #eee;
-  border-radius: 10px;
-  min-height: 48px;
-  font-size: 16px;
-}
-
-#feed {
-  margin-top: 22px;
-  text-align: left;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    margin-top: 10px;
+    font-weight: bold;
 }
 
 .feed-item {
-  background: #f9fafb;
-  border-radius: 10px;
-  padding: 12px;
-  margin-bottom: 10px;
-  border: 1px solid #eee;
-  font-size: 15px;
+    padding: 8px 0;
+    border-bottom: 1px solid #ddd;
 }
 
-.meta {
-  color: #666;
-  font-size: 12px;
-  margin-left: 6px;
-}
-
-a.settings {
-  display: block;
-  margin-top: 24px;
-  text-decoration: underline;
-  color: #333;
-  font-size: 14px;
-}
-
-/* ===== Settings ===== */
-body.page-settings label {
-  display: block;
-  margin-top: 20px;
-  font-size: 16px;
-  text-align: left;
-}
-
-body.page-settings input {
-  padding: 10px;
-  width: 100%;
-  margin-top: 6px;
-  font-size: 16px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-
-body.page-settings button {
-  margin-top: 24px;
-  padding: 12px;
-  width: 100%;
-  font-size: 17px;
-  border: none;
-  border-radius: 10px;
-  background: #0078d4;
-  color: #fff;
-  cursor: pointer;
-}
-
-a.back {
-  display: block;
-  margin-top: 20px;
-  text-decoration: underline;
-  color: #333;
-  font-size: 14px;
-}
-
-/* ===== Index / Landingpage ===== */
-body.page-index {
-  padding: 40px;
-  max-width: 600px;
-  margin: auto;
-  text-align: center;
-  background: #f5f5f0;
-}
-
-.pp-header {
-  text-align: center;
-  padding: 2rem 1rem;
-  color: #123b5d;
-}
-
-.pp-header h1 {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-.pp-header p {
-  font-size: 1.1rem;
-  margin-bottom: 1.5rem;
-}
-
-.pp-main-btn {
-  background: #2f7f7b;
-  color: #fff;
-  border: none;
-  padding: 0.9rem 1.8rem;
-  border-radius: 999px;
-  font-size: 1rem;
-  cursor: pointer;
-}
-
-.pp-main-btn:hover {
-  background: #25635f;
-}
-
-.nav-link {
-  display: block;
-  margin: 12px 0;
-  padding: 12px 16px;
-  font-size: 16px;
-  border-radius: 6px;
-  background-color: #2563eb;
-  color: white;
-  text-decoration: none;
-}
-
-.nav-link:hover {
-  background-color: #1d4ed8;
-}
-
-/* ===== Dashboard ===== */
-body.page-dashboard {
-  padding: 20px;
-  max-width: 900px;
-  margin: auto;
-}
-
-body.page-dashboard h1 {
-  margin-bottom: 20px;
-}
-
-#charts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 30px;
-  margin-top: 20px;
-}
-
-.chart-box {
-  flex: 1 1 400px;
-  border: 1px solid #eee;
-  padding: 20px;
-  border-radius: 10px;
-}
-
-canvas {
-  width: 100% !important;
-  height: 300px !important;
-}
-
-/* ===== Admin ===== */
-body.page-admin {
-  padding: 20px;
-  max-width: 700px;
-  margin: auto;
-}
-
-body.page-admin h1 {
-  margin-bottom: 20px;
-}
-
-body.page-admin section {
-  margin-bottom: 30px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #eee;
-}
-
-body.page-admin label {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 14px;
-}
-
-body.page-admin input {
-  padding: 6px 8px;
-  font-size: 14px;
-  margin-bottom: 10px;
-  width: 100%;
-  max-width: 300px;
-}
-
-body.page-admin button {
-  padding: 8px 14px;
-  font-size: 14px;
-  border-radius: 6px;
-  border: 1px solid #2563eb;
-  background-color: #2563eb;
-  color: white;
-  cursor: pointer;
-  margin-top: 6px;
-}
-
-body.page-admin button:hover {
-  background-color: #1d4ed8;
+.settings, .back {
+    display: inline-block;
+    margin-top: 20px;
 }
