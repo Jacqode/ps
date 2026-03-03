@@ -103,5 +103,50 @@ function renderFeed(items) {
 document.addEventListener("DOMContentLoaded", () => {
   loadFeed();
   setInterval(loadFeed, 30000);
+  checkNotificationPermission();
 });
+
+function checkNotificationPermission() {
+  if (!('Notification' in window)) {
+    showNotificationBanner();
+    return;
+  }
+  if (Notification.permission === 'denied') {
+    showNotificationBanner();
+    return;
+  }
+  if (Notification.permission === 'default') {
+    Notification.requestPermission().then(result => {
+      if (result !== 'granted') showNotificationBanner();
+    }).catch(() => showNotificationBanner());
+  }
+}
+
+function showNotificationBanner() {
+  if (document.getElementById('notifBanner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'notifBanner';
+  banner.className = 'notif-banner';
+  banner.setAttribute('role', 'alert');
+
+  const icon = document.createTextNode('🔔 Chrome blokerer notifikationer – ');
+  const link = document.createElement('a');
+  link.href = '#';
+  link.textContent = 'klik her for at aktivere dem';
+  const dot = document.createTextNode('.');
+  banner.appendChild(icon);
+  banner.appendChild(link);
+  banner.appendChild(dot);
+
+  const container = document.querySelector('.app-container');
+  if (container) container.prepend(banner);
+
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (!('Notification' in window)) return;
+    Notification.requestPermission().then(result => {
+      if (result === 'granted') banner.remove();
+    }).catch(() => {});
+  });
+}
 
