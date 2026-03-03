@@ -13,7 +13,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://jacqode.github.io/ps/*"],
+      "matches": ["https://jacqode.github.io/ps/public/*"],
       "js": ["content.js"]
     }
   ],
