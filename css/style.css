@@ -1,25 +1,42 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const nameInput = document.getElementById("nameInput");
-    const intervalInput = document.getElementById("intervalInput");
-    const saveBtn = document.getElementById("saveBtn");
+body {
+    font-family: system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #fafafa;
+}
 
-    // Indlæs eksisterende værdier
-    nameInput.value = localStorage.getItem("userName") || "";
-    intervalInput.value = localStorage.getItem("reminderInterval") || 30;
+.app-container {
+    max-width: 420px;
+    margin: auto;
+    padding: 20px;
+}
 
-    // Gem nye værdier
-    saveBtn.addEventListener("click", () => {
-        const name = nameInput.value.trim();
-        const interval = Number(intervalInput.value);
+h1 {
+    margin-bottom: 10px;
+}
 
-        if (name.length > 0) {
-            localStorage.setItem("userName", name);
-        }
+.intro {
+    margin-bottom: 20px;
+}
 
-        if (interval > 0) {
-            localStorage.setItem("reminderInterval", interval);
-        }
+.controls button {
+    margin-right: 10px;
+}
 
-        alert("Indstillinger gemt");
-    });
-});
+#microFeedback {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.feed-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.settings,
+.back {
+    display: inline-block;
+    margin-top: 20px;
+}
