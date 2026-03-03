@@ -4,7 +4,9 @@
     <meta charset="utf-8" />
     <title>Indstillinger</title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <link rel="stylesheet" href="../css/style.css" />
+
+    <!-- Stabil absolut sti til CSS -->
+    <link rel="stylesheet" href="/ps/css/style.css" />
 </head>
 
 <body class="page-settings">
@@ -12,10 +14,10 @@
 
         <h1>Indstillinger</h1>
 
-        <label>Dit navn</label>
+        <label for="nameInput">Dit navn</label>
         <input id="nameInput" type="text" placeholder="Dit navn" />
 
-        <label>Påmindelses-interval (minutter)</label>
+        <label for="intervalInput">Påmindelses-interval (minutter)</label>
         <input id="intervalInput" type="number" min="1" />
 
         <button id="saveBtn">Gem</button>
@@ -23,6 +25,7 @@
         <a class="back" href="widget.html">Tilbage</a>
     </div>
 
-    <script src="../js/settings.js"></script>
+    <!-- Absolut sti til JS -->
+    <script src="/ps/js/settings.js"></script>
 </body>
 </html>
