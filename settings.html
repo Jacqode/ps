@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="utf-8" />
+    <title>Plug & Pause – Indstillinger</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="/ps/css/style.css" />
+</head>
+
+<body class="page-settings">
+    <div class="app-container">
+
+        <h1>Indstillinger</h1>
+
+        <p class="intro">
+            Her kan du tilpasse dine påmindelser og din oplevelse af Plug & Pause.
+        </p>
+
+        <!-- Påmindelser -->
+        <section>
+            <h2>Påmindelser</h2>
+
+            <label for="reminderInterval">Hvor ofte vil du mindes om en pause?</label>
+            <select id="reminderInterval">
+                <option value="15">Hver 15. minut</option>
+                <option value="30">Hver 30. minut</option>
+                <option value="45">Hver 45. minut</option>
+                <option value="60">Hver time</option>
+            </select>
+
+            <button id="saveSettings">Gem indstillinger</button>
+            <div id="settingsFeedback" aria-live="polite"></div>
+        </section>
+
+        <!-- Navigation -->
+        <a class="back" href="widget.html">← Tilbage til widget</a>
+    </div>
+
+    <script>
+        // Hent gemt interval
+        const intervalSelect = document.getElementById("reminderInterval");
+        const saved = localStorage.getItem("reminderInterval");
+        if (saved) intervalSelect.value = saved;
+
+        // Gem nyt interval
+        document.getElementById("saveSettings").addEventListener("click", () => {
+            localStorage.setItem("reminderInterval", intervalSelect.value);
+
+            const fb = document.getElementById("settingsFeedback");
+            fb.textContent = "Indstillinger gemt ✔️";
+            fb.style.opacity = 1;
+
+            setTimeout(() => fb.style.opacity = 0, 1500);
+        });
+    </script>
+</body>
+</html>
