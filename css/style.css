@@ -35,8 +35,7 @@ h1 {
     border-bottom: 1px solid #ddd;
 }
 
-.settings,
-.back {
+.settings {
     display: inline-block;
     margin-top: 20px;
 }
