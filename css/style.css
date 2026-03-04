@@ -1,55 +1,98 @@
-body {
-    font-family: system-ui, sans-serif;
-    margin: 0;
-    padding: 0;
-    background: #fafafa;
-}
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="utf-8" />
+  <title>Plug & Pause – Indstillinger</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-.app-container {
-    max-width: 420px;
-    margin: auto;
-    padding: 20px;
-}
+  <!-- Kritisk CSS (samme look som widget) -->
+  <style>
+    :root{--bg:#f6f7fb;--card:#ffffff;--accent:#ff6b6b;--muted:#6b7280}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial}
+    body{background:var(--bg);color:#111;display:flex;align-items:flex-start;justify-content:center;padding:28px}
+    .app-container{width:100%;max-width:720px;background:var(--card);border-radius:12px;padding:20px;box-shadow:0 6px 20px rgba(16,24,40,0.08)}
+    h1{margin:0 0 8px;font-size:20px}
+    .intro{margin:0 0 16px;color:var(--muted);font-size:13px}
+    form{display:grid;grid-template-columns:1fr 160px;gap:12px;align-items:center}
+    label{font-size:13px;color:#111}
+    input[type="text"], input[type="number"]{width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef8;background:#fbfdff}
+    .controls{display:flex;gap:10px;margin-top:14px}
+    button{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
+    .secondary{background:#eef2ff;color:#0f172a;border-radius:10px;padding:10px 14px;border:0;cursor:pointer}
+    .note{font-size:12px;color:var(--muted);margin-top:8px}
+    @media (prefers-color-scheme:dark){:root{--bg:#0b1020;--card:#071025;--accent:#ff8b8b;--muted:#9aa4b2} body{color:#e6eef8}}
+  </style>
 
-h1 {
-    margin-bottom: 10px;
-}
+  <!-- Hovedstylesheet med cache-bust så edge henter ny fil -->
+  <link rel="stylesheet" href="css/style.css?v=20260304" />
+</head>
 
-.intro {
-    margin-bottom: 20px;
-}
+<body class="page-settings">
+  <div class="app-container">
+    <h1>Indstillinger</h1>
+    <p class="intro">Tilpas dit navn og hvor ofte du vil have en pause.</p>
 
-#ideaBtn,
-#doneBtn {
-    display: block;
-    width: 100%;
-    margin: 10px 0;
-}
+    <form id="settingsForm" onsubmit="return false;">
+      <div>
+        <label for="userName">Dit navn</label>
+        <input id="userName" type="text" placeholder="F.eks. Jakob" />
+      </div>
 
-#currentIdea {
-    margin: 10px 0;
-    font-size: 1.2rem;
-}
+      <div>
+        <label for="reminderInterval">Interval (min)</label>
+        <input id="reminderInterval" type="number" min="1" max="240" />
+      </div>
 
-.feed-title {
-    margin-top: 30px;
-    margin-bottom: 10px;
-    font-size: 1.1rem;
-}
+      <div class="controls" style="grid-column:1/-1">
+        <button id="saveBtn" type="button">Gem</button>
+        <button id="resetBtn" class="secondary" type="button">Nulstil</button>
+      </div>
 
-.feed-item {
-    padding: 8px 0;
-    border-bottom: 1px solid #ddd;
-}
+      <p class="note">Ændringer gemmes lokalt i din browser og bruges af widgeten.</p>
+    </form>
 
-#microFeedback {
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    margin-top: 10px;
-    font-weight: bold;
-}
+    <a class="settings" href="widget.html" style="display:inline-block;margin-top:12px;color:var(--accent);text-decoration:none;font-weight:600">Tilbage til widget</a>
+  </div>
 
-.settings {
-    display: inline-block;
-    margin-top: 20px;
-}
+  <script>
+    // Indlæs eksisterende værdier
+    const nameInput = document.getElementById('userName');
+    const intervalInput = document.getElementById('reminderInterval');
+    const saveBtn = document.getElementById('saveBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    function loadSettings() {
+      nameInput.value = localStorage.getItem('userName') || '';
+      intervalInput.value = localStorage.getItem('reminderInterval') || '';
+    }
+
+    function saveSettings() {
+      const name = nameInput.value.trim();
+      const interval = intervalInput.value.trim();
+
+      if (name) localStorage.setItem('userName', name);
+      else localStorage.removeItem('userName');
+
+      if (interval) localStorage.setItem('reminderInterval', interval);
+      else localStorage.removeItem('reminderInterval');
+
+      saveBtn.textContent = 'Gemmet ✓';
+      setTimeout(() => saveBtn.textContent = 'Gem', 1200);
+    }
+
+    function resetSettings() {
+      localStorage.removeItem('userName');
+      localStorage.removeItem('reminderInterval');
+      loadSettings();
+      resetBtn.textContent = 'Nulstil ✓';
+      setTimeout(() => resetBtn.textContent = 'Nulstil', 1200);
+    }
+
+    saveBtn.addEventListener('click', saveSettings);
+    resetBtn.addEventListener('click', resetSettings);
+
+    // Indlæs ved start
+    loadSettings();
+  </script>
+</body>
+</html>
