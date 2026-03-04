@@ -6,13 +6,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const microFeedback = document.getElementById("microFeedback");
     const greeting = document.getElementById("greeting");
 
-    // Hent navn fra settings (fallback: Jakob)
-    const savedName = localStorage.getItem("userName") || "Jakob";
+    // Sprog
+    const lang = localStorage.getItem("lang") || "da";
+    const t = {
+        da: {
+            unknown: "Hej ukendt",
+            done: "Godt gået! 💚",
+            feedTitle: "Det gør dine buddies:"
+        },
+        en: {
+            unknown: "Hi stranger",
+            done: "Nice job! 💚",
+            feedTitle: "Your buddies are doing:"
+        }
+    };
 
-    // Hilsen med smiley
-    greeting.textContent = "Hej " + savedName + " 😊";
+    // Navn + team
+    const savedName = localStorage.getItem("userName") || t[lang].unknown;
+    const savedTeam = localStorage.getItem("teamName") || null;
 
-    // 15 aktiviteter
+    greeting.textContent = savedName;
+
+    // Aktiviteter
     const ideas = [
         "Stræk armene over hovedet 🙆‍♂️",
         "Rul skuldrene 10 gange 🔄",
@@ -31,7 +46,6 @@ document.addEventListener("DOMContentLoaded", () => {
         "Ryst hele kroppen let i 15 sekunder 🕺"
     ];
 
-    // 24-timers tidsformat
     function getTime() {
         const d = new Date();
         return d.toLocaleTimeString("da-DK", {
@@ -41,11 +55,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Gem aktivitet i feed (med navn)
+    // Gem aktivitet
     function saveBreak(text) {
         const list = JSON.parse(localStorage.getItem("feed") || "[]");
         list.unshift({
             name: savedName,
+            team: savedTeam,
             text,
             time: getTime()
         });
@@ -53,42 +68,45 @@ document.addEventListener("DOMContentLoaded", () => {
         renderFeed();
     }
 
-    // Vis feed
+    // Vis feed (seneste 5)
     function renderFeed() {
         const list = JSON.parse(localStorage.getItem("feed") || "[]");
+        const latest = list.slice(0, 5);
 
-        if (list.length === 0) {
+        if (latest.length === 0) {
             feed.innerHTML = "<p>Ingen aktiviteter endnu.</p>";
             return;
         }
 
-        feed.innerHTML = list
+        feed.innerHTML = latest
             .map(item =>
-                `<div class="feed-item"><strong>${item.name}</strong> kl. ${item.time}: ${item.text}</div>`
+                `<div class="feed-item"><strong>${item.name}</strong>${item.team ? " (" + item.team + ")" : ""} kl. ${item.time}: ${item.text}</div>`
             )
             .join("");
     }
 
-    // Få aktivitet
     ideaBtn.addEventListener("click", () => {
         const idea = ideas[Math.floor(Math.random() * ideas.length)];
+        currentIdea.style.opacity = 1;
         currentIdea.textContent = idea;
     });
 
-    // Jeg er færdig
     doneBtn.addEventListener("click", () => {
         if (!currentIdea.textContent) return;
 
         saveBreak(currentIdea.textContent);
 
-        microFeedback.textContent = "Godt gået! 💚";
+        microFeedback.textContent = t[lang].done;
         microFeedback.style.opacity = 1;
 
         setTimeout(() => {
             microFeedback.style.opacity = 0;
-        }, 1500);
+        }, 3000);
+
+        setTimeout(() => {
+            currentIdea.style.opacity = 0;
+        }, 3000);
     });
 
-    // Indlæs feed ved start
     renderFeed();
 });
