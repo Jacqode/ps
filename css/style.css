@@ -1,98 +1,136 @@
-<!DOCTYPE html>
-<html lang="da">
-<head>
-  <meta charset="utf-8" />
-  <title>Plug & Pause – Indstillinger</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+:root {
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --accent: #ff6b6b;
+  --muted: #6b7280;
+  --text: #111;
+}
 
-  <!-- Kritisk CSS (samme look som widget) -->
-  <style>
-    :root{--bg:#f6f7fb;--card:#ffffff;--accent:#ff6b6b;--muted:#6b7280}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial}
-    body{background:var(--bg);color:#111;display:flex;align-items:flex-start;justify-content:center;padding:28px}
-    .app-container{width:100%;max-width:720px;background:var(--card);border-radius:12px;padding:20px;box-shadow:0 6px 20px rgba(16,24,40,0.08)}
-    h1{margin:0 0 8px;font-size:20px}
-    .intro{margin:0 0 16px;color:var(--muted);font-size:13px}
-    form{display:grid;grid-template-columns:1fr 160px;gap:12px;align-items:center}
-    label{font-size:13px;color:#111}
-    input[type="text"], input[type="number"]{width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef8;background:#fbfdff}
-    .controls{display:flex;gap:10px;margin-top:14px}
-    button{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
-    .secondary{background:#eef2ff;color:#0f172a;border-radius:10px;padding:10px 14px;border:0;cursor:pointer}
-    .note{font-size:12px;color:var(--muted);margin-top:8px}
-    @media (prefers-color-scheme:dark){:root{--bg:#0b1020;--card:#071025;--accent:#ff8b8b;--muted:#9aa4b2} body{color:#e6eef8}}
-  </style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b1020;
+    --card: #071025;
+    --accent: #ff8b8b;
+    --muted: #9aa4b2;
+    --text: #e6eef8;
+  }
+}
 
-  <!-- Hovedstylesheet med cache-bust så edge henter ny fil -->
-  <link rel="stylesheet" href="css/style.css?v=20260304" />
-</head>
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Helvetica Neue, Arial;
+  background: var(--bg);
+  color: var(--text);
+}
 
-<body class="page-settings">
-  <div class="app-container">
-    <h1>Indstillinger</h1>
-    <p class="intro">Tilpas dit navn og hvor ofte du vil have en pause.</p>
+body {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 28px;
+}
 
-    <form id="settingsForm" onsubmit="return false;">
-      <div>
-        <label for="userName">Dit navn</label>
-        <input id="userName" type="text" placeholder="F.eks. Jakob" />
-      </div>
+.app-container {
+  width: 100%;
+  max-width: 420px;
+  background: var(--card);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 6px 20px rgba(16,24,40,0.08);
+}
 
-      <div>
-        <label for="reminderInterval">Interval (min)</label>
-        <input id="reminderInterval" type="number" min="1" max="240" />
-      </div>
+h1 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
 
-      <div class="controls" style="grid-column:1/-1">
-        <button id="saveBtn" type="button">Gem</button>
-        <button id="resetBtn" class="secondary" type="button">Nulstil</button>
-      </div>
+.intro {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 13px;
+}
 
-      <p class="note">Ændringer gemmes lokalt i din browser og bruges af widgeten.</p>
-    </form>
+button {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
 
-    <a class="settings" href="widget.html" style="display:inline-block;margin-top:12px;color:var(--accent);text-decoration:none;font-weight:600">Tilbage til widget</a>
-  </div>
+.secondary {
+  background: #eef2ff;
+  color: #0f172a;
+}
 
-  <script>
-    // Indlæs eksisterende værdier
-    const nameInput = document.getElementById('userName');
-    const intervalInput = document.getElementById('reminderInterval');
-    const saveBtn = document.getElementById('saveBtn');
-    const resetBtn = document.getElementById('resetBtn');
+#currentIdea {
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #0f172a;
+  transition: opacity .4s;
+}
 
-    function loadSettings() {
-      nameInput.value = localStorage.getItem('userName') || '';
-      intervalInput.value = localStorage.getItem('reminderInterval') || '';
-    }
+.feed-title {
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--text);
+}
 
-    function saveSettings() {
-      const name = nameInput.value.trim();
-      const interval = intervalInput.value.trim();
+#feed {
+  margin-top: 8px;
+}
 
-      if (name) localStorage.setItem('userName', name);
-      else localStorage.removeItem('userName');
+.feed-item {
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 13px;
+  color: var(--text);
+}
 
-      if (interval) localStorage.setItem('reminderInterval', interval);
-      else localStorage.removeItem('reminderInterval');
+.settings {
+  display: inline-block;
+  margin-top: 14px;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
 
-      saveBtn.textContent = 'Gemmet ✓';
-      setTimeout(() => saveBtn.textContent = 'Gem', 1200);
-    }
+/* Settings page */
+form {
+  display: grid;
+  grid-template-columns: 1fr 160px;
+  gap: 12px;
+  align-items: center;
+}
 
-    function resetSettings() {
-      localStorage.removeItem('userName');
-      localStorage.removeItem('reminderInterval');
-      loadSettings();
-      resetBtn.textContent = 'Nulstil ✓';
-      setTimeout(() => resetBtn.textContent = 'Nulstil', 1200);
-    }
+label {
+  font-size: 13px;
+  color: var(--text);
+}
 
-    saveBtn.addEventListener('click', saveSettings);
-    resetBtn.addEventListener('click', resetSettings);
+input[type="text"], input[type="number"] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e6eef8;
+  background: #fbfdff;
+}
 
-    // Indlæs ved start
-    loadSettings();
-  </script>
-</body>
-</html>
+.controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  grid-column: 1 / -1;
+}
+
+.note {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+}
