@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="utf-8" />
+  <title>Break Buddy – Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="css/style.css?v=20260305" />
+</head>
+
+<body>
+  <div class="app-container">
+    <h1>Dashboard</h1>
+    <p class="intro">Overblik over teamets pauser og aktivitet.</p>
+
+    <section id="teamStats">
+      <h2 class="feed-title">Teamstatus:</h2>
+      <div id="teamStatusBox">
+        <p>Indlæser…</p>
+      </div>
+    </section>
+
+    <section id="recentBreaks" style="margin-top:20px">
+      <h2 class="feed-title">Seneste pauser:</h2>
+      <div id="breakList">
+        <p>Indlæser…</p>
+      </div>
+    </section>
+
+    <a class="settings" href="admin.html" style="margin-top:20px">Admin</a>
+  </div>
+
+  <script>
+    // KLAR TIL CLOUDLARE API – statisk fallback indtil backend er klar
+
+    async function loadDashboard() {
+      const teamBox = document.getElementById("teamStatusBox");
+      const breakList = document.getElementById("breakList");
+
+      // Fallback-data (erstattes af API senere)
+      const fallbackTeam = {
+        name: "Sundhed",
+        members: 5,
+        breaksToday: 14
+      };
+
+      const fallbackBreaks = [
+        { name: "Jakob", time: "14:03", text: "Stræk armene over hovedet 🙆‍♂️" },
+        { name: "Ukendt", time: "13:55", text: "10 dybe vejrtrækninger 🌬️" },
+        { name: "Maria", time: "13:40", text: "Ryst hænderne i 10 sekunder 🤲" },
+        { name: "Jonas", time: "13:20", text: "10 tåhævninger 🦶" },
+        { name: "Sofie", time: "13:05", text: "Rul skuldrene 🔄" }
+      ];
+
+      teamBox.innerHTML = `
+        <p><strong>Team:</strong> ${fallbackTeam.name}</p>
+        <p><strong>Medlemmer:</strong> ${fallbackTeam.members}</p>
+        <p><strong>Pauser i dag:</strong> ${fallbackTeam.breaksToday}</p>
+      `;
+
+      breakList.innerHTML = fallbackBreaks
+        .map(b => `
+          <div class="feed-item">
+            <strong>${b.name}</strong> kl. ${b.time}: ${b.text}
+          </div>
+        `)
+        .join("");
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>
