@@ -6,8 +6,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const microFeedback = document.getElementById("microFeedback");
     const greeting = document.getElementById("greeting");
 
-    greeting.textContent = "Hej Jakob 😊";
+    // Hent navn fra settings (fallback: Jakob)
+    const savedName = localStorage.getItem("userName") || "Jakob";
 
+    // Hilsen med smiley
+    greeting.textContent = "Hej " + savedName + " 😊";
+
+    // 15 aktiviteter
     const ideas = [
         "Stræk armene over hovedet 🙆‍♂️",
         "Rul skuldrene 10 gange 🔄",
@@ -26,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "Ryst hele kroppen let i 15 sekunder 🕺"
     ];
 
+    // 24-timers tidsformat
     function getTime() {
         const d = new Date();
         return d.toLocaleTimeString("da-DK", {
@@ -35,13 +41,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Gem aktivitet i feed (med navn)
     function saveBreak(text) {
         const list = JSON.parse(localStorage.getItem("feed") || "[]");
-        list.unshift({ text, time: getTime() });
+        list.unshift({
+            name: savedName,
+            text,
+            time: getTime()
+        });
         localStorage.setItem("feed", JSON.stringify(list));
         renderFeed();
     }
 
+    // Vis feed
     function renderFeed() {
         const list = JSON.parse(localStorage.getItem("feed") || "[]");
 
@@ -51,15 +63,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         feed.innerHTML = list
-            .map(item => `<div class="feed-item">${item.time} — ${item.text}</div>`)
+            .map(item =>
+                `<div class="feed-item"><strong>${item.name}</strong> kl. ${item.time}: ${item.text}</div>`
+            )
             .join("");
     }
 
+    // Få aktivitet
     ideaBtn.addEventListener("click", () => {
         const idea = ideas[Math.floor(Math.random() * ideas.length)];
         currentIdea.textContent = idea;
     });
 
+    // Jeg er færdig
     doneBtn.addEventListener("click", () => {
         if (!currentIdea.textContent) return;
 
@@ -73,5 +89,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 1500);
     });
 
+    // Indlæs feed ved start
     renderFeed();
 });
