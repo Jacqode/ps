@@ -6,6 +6,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const microFeedback = document.getElementById("microFeedback");
     const greeting = document.getElementById("greeting");
 
+    const API_BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
+
     // Sprog
     const lang = localStorage.getItem("lang") || "da";
     const t = {
@@ -55,8 +57,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Gem aktivitet
-    function saveBreak(text) {
+    // Gem lokalt (fallback)
+    function saveLocal(text) {
         const list = JSON.parse(localStorage.getItem("feed") || "[]");
         list.unshift({
             name: savedName,
@@ -65,12 +67,57 @@ document.addEventListener("DOMContentLoaded", () => {
             time: getTime()
         });
         localStorage.setItem("feed", JSON.stringify(list));
+    }
+
+    // Send pause til backend
+    async function saveBreak(text) {
+        const payload = {
+            name: savedName,
+            team: savedTeam,
+            activity: text
+        };
+
+        try {
+            await fetch(`${API_BASE}/api/break`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+        } catch (err) {
+            // fallback til localStorage
+            saveLocal(text);
+        }
+
         renderFeed();
     }
 
+    // Hent feed fra backend
+    async function fetchFeed() {
+        try {
+            const res = await fetch(`${API_BASE}/api/feed`);
+            if (!res.ok) throw new Error("Bad response");
+            const data = await res.json();
+
+            // Konverter backend-data til widget-format
+            return data.map(item => ({
+                name: item.name,
+                team: item.team,
+                text: item.activity,
+                time: new Date(item.created_at).toLocaleTimeString("da-DK", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false
+                })
+            }));
+        } catch (err) {
+            // fallback til localStorage
+            return JSON.parse(localStorage.getItem("feed") || "[]");
+        }
+    }
+
     // Vis feed (seneste 5)
-    function renderFeed() {
-        const list = JSON.parse(localStorage.getItem("feed") || "[]");
+    async function renderFeed() {
+        const list = await fetchFeed();
         const latest = list.slice(0, 5);
 
         if (latest.length === 0) {
