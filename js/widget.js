@@ -6,10 +6,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const microFeedback = document.getElementById("microFeedback");
     const greeting = document.getElementById("greeting");
 
-    // Hilsen med navn + emoji
     greeting.textContent = "Hej Jakob 😊";
 
-    // 15 aktiviteter med korrekte emojis
     const ideas = [
         "Stræk armene over hovedet 🙆‍♂️",
         "Rul skuldrene 10 gange 🔄",
@@ -28,7 +26,6 @@ document.addEventListener("DOMContentLoaded", () => {
         "Ryst hele kroppen let i 15 sekunder 🕺"
     ];
 
-    // 24-timers tidsformat (13:39)
     function getTime() {
         const d = new Date();
         return d.toLocaleTimeString("da-DK", {
@@ -38,7 +35,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Gem aktivitet i feed
     function saveBreak(text) {
         const list = JSON.parse(localStorage.getItem("feed") || "[]");
         list.unshift({ text, time: getTime() });
@@ -46,7 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
         renderFeed();
     }
 
-    // Vis feed
     function renderFeed() {
         const list = JSON.parse(localStorage.getItem("feed") || "[]");
 
@@ -60,13 +55,11 @@ document.addEventListener("DOMContentLoaded", () => {
             .join("");
     }
 
-    // Knap: Få aktivitet
     ideaBtn.addEventListener("click", () => {
         const idea = ideas[Math.floor(Math.random() * ideas.length)];
         currentIdea.textContent = idea;
     });
 
-    // Knap: Jeg er færdig
     doneBtn.addEventListener("click", () => {
         if (!currentIdea.textContent) return;
 
@@ -80,6 +73,5 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 1500);
     });
 
-    // Indlæs feed ved start
     renderFeed();
 });
