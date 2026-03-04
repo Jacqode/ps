@@ -13,23 +13,27 @@
         <h1>Indstillinger</h1>
 
         <p class="intro">
-            Her kan du tilpasse dine påmindelser og din oplevelse af Plug & Pause.
+            Tilpas dit navn og hvor ofte du vil mindes om en pause.
         </p>
 
-        <!-- Påmindelser -->
+        <!-- Navn -->
         <section>
-            <h2>Påmindelser</h2>
+            <h2>Dit navn</h2>
+            <label for="userName">Navn:</label>
+            <input id="userName" type="text" placeholder="Skriv dit navn" />
 
-            <label for="reminderInterval">Hvor ofte vil du mindes om en pause?</label>
-            <select id="reminderInterval">
-                <option value="15">Hver 15. minut</option>
-                <option value="30">Hver 30. minut</option>
-                <option value="45">Hver 45. minut</option>
-                <option value="60">Hver time</option>
-            </select>
+            <button id="saveName">Gem navn</button>
+            <div id="nameFeedback" aria-live="polite"></div>
+        </section>
 
-            <button id="saveSettings">Gem indstillinger</button>
-            <div id="settingsFeedback" aria-live="polite"></div>
+        <!-- Påmindelses-interval -->
+        <section style="margin-top: 30px;">
+            <h2>Påmindelses-interval</h2>
+            <label for="reminderMinutes">Antal minutter mellem påmindelser:</label>
+            <input id="reminderMinutes" type="number" min="1" placeholder="fx 30" />
+
+            <button id="saveInterval">Gem interval</button>
+            <div id="intervalFeedback" aria-live="polite"></div>
         </section>
 
         <!-- Navigation -->
@@ -37,19 +41,39 @@
     </div>
 
     <script>
-        // Hent gemt interval
-        const intervalSelect = document.getElementById("reminderInterval");
-        const saved = localStorage.getItem("reminderInterval");
-        if (saved) intervalSelect.value = saved;
+        // Hent gemt navn
+        const nameInput = document.getElementById("userName");
+        const savedName = localStorage.getItem("userName");
+        if (savedName) nameInput.value = savedName;
 
-        // Gem nyt interval
-        document.getElementById("saveSettings").addEventListener("click", () => {
-            localStorage.setItem("reminderInterval", intervalSelect.value);
+        // Gem navn
+        document.getElementById("saveName").addEventListener("click", () => {
+            const name = nameInput.value.trim();
+            if (!name) return;
 
-            const fb = document.getElementById("settingsFeedback");
-            fb.textContent = "Indstillinger gemt ✔️";
+            localStorage.setItem("userName", name);
+
+            const fb = document.getElementById("nameFeedback");
+            fb.textContent = "Navn gemt ✔️";
             fb.style.opacity = 1;
+            setTimeout(() => fb.style.opacity = 0, 1500);
+        });
 
+        // Hent gemt interval
+        const intervalInput = document.getElementById("reminderMinutes");
+        const savedInterval = localStorage.getItem("reminderInterval");
+        if (savedInterval) intervalInput.value = savedInterval;
+
+        // Gem interval
+        document.getElementById("saveInterval").addEventListener("click", () => {
+            const minutes = intervalInput.value.trim();
+            if (!minutes || isNaN(minutes) || minutes <= 0) return;
+
+            localStorage.setItem("reminderInterval", minutes);
+
+            const fb = document.getElementById("intervalFeedback");
+            fb.textContent = "Interval gemt ✔️";
+            fb.style.opacity = 1;
             setTimeout(() => fb.style.opacity = 0, 1500);
         });
     </script>
