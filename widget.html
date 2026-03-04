@@ -1,41 +1,49 @@
 <!DOCTYPE html>
 <html lang="da">
 <head>
-    <meta charset="utf-8" />
-    <title>Plug & Pause – Widget</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <link rel="stylesheet" href="css/style.css" />
+  <meta charset="utf-8" />
+  <title>Plug & Pause – Widget</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <!-- Kritisk CSS inline (hurtig visuel korrektion) -->
+  <style>
+    :root{--bg:#f6f7fb;--card:#ffffff;--accent:#ff6b6b;--muted:#6b7280}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial}
+    body{background:var(--bg);color:#111;display:flex;align-items:flex-start;justify-content:center;padding:28px}
+    .app-container{width:100%;max-width:420px;background:var(--card);border-radius:12px;padding:20px;box-shadow:0 6px 20px rgba(16,24,40,0.08)}
+    h1{margin:0 0 8px;font-size:20px}
+    .intro{margin:0 0 16px;color:var(--muted);font-size:13px}
+    button{display:inline-block;background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
+    #currentIdea{margin:12px 0;padding:12px;border-radius:8px;background:#f8fafc;color:#0f172a}
+    .feed-title{margin-top:20px;font-size:14px;color:#111}
+    #feed{margin-top:8px}
+    .feed-item{padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:13px;color:#111}
+    a.settings{display:inline-block;margin-top:14px;color:var(--accent);text-decoration:none;font-weight:600}
+    @media (prefers-color-scheme:dark){:root{--bg:#0b1020;--card:#071025;--accent:#ff8b8b;--muted:#9aa4b2} body{color:#e6eef8}}
+  </style>
+
+  <!-- Hovedstylesheet med cache-bust -->
+  <link rel="stylesheet" href="css/style.css?v=20260304" />
 </head>
 
 <body class="page-widget">
-    <div class="app-container">
+  <div class="app-container">
+    <h1 id="greeting">Hej</h1>
+    <p class="intro">20–60 sekunders let aktivitet øger energien.</p>
 
-        <!-- Hilsen -->
-        <h1 id="greeting">Hej</h1>
+    <button id="ideaBtn">Få en aktivitet</button>
+    <div id="currentIdea" aria-live="polite"></div>
+    <button id="doneBtn" style="margin-top:10px">Jeg er færdig</button>
+    <div id="microFeedback" aria-live="polite" style="opacity:0;transition:opacity .2s;margin-top:8px;color:green"></div>
 
-        <p class="intro">20–60 sekunders let aktivitet øger energien.</p>
+    <h2 class="feed-title">Det gør dine buddies</h2>
+    <section id="feed" aria-label="Andres pauser"></section>
 
-        <!-- Knap 1 -->
-        <button id="ideaBtn">Få en aktivitet</button>
+    <a class="settings" href="settings.html">Indstillinger</a>
+  </div>
 
-        <!-- Aktivitet -->
-        <div id="currentIdea" aria-live="polite"></div>
-
-        <!-- Knap 2 -->
-        <button id="doneBtn">Jeg er færdig</button>
-
-        <!-- Micro-feedback -->
-        <div id="microFeedback" aria-live="polite"></div>
-
-        <!-- Feed -->
-        <h2 class="feed-title">Det gør dine buddies</h2>
-        <section id="feed" aria-label="Andres pauser"></section>
-
-        <!-- Indstillinger -->
-        <a class="settings" href="settings.html">Indstillinger</a>
-    </div>
-
-    <script src="/ps/js/widget.js"></script>
-    <script src="/ps/js/reminder.js"></script>
+  <!-- Relativ JS sti + cache-bust -->
+  <script src="js/widget.js?v=20260304"></script>
+  <script src="js/reminder.js?v=20260304"></script>
 </body>
 </html>
