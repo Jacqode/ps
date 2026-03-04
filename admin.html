@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="utf-8" />
+  <title>Break Buddy – Admin</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="css/style.css?v=20260305" />
+</head>
+
+<body>
+  <div class="app-container">
+    <h1>Admin</h1>
+    <p class="intro">Overblik over teams, brugere og pauser.</p>
+
+    <section id="stats">
+      <h2 class="feed-title">Systemstatus:</h2>
+      <div id="systemStats">
+        <p>Indlæser data…</p>
+      </div>
+    </section>
+
+    <section id="teams" style="margin-top:20px">
+      <h2 class="feed-title">Teams:</h2>
+      <div id="teamList">
+        <p>Indlæser teams…</p>
+      </div>
+    </section>
+
+    <a class="settings" href="dashboard.html" style="margin-top:20px">Gå til dashboard</a>
+  </div>
+
+  <script>
+    // KLAR TIL CLOUDLARE API – statisk fallback indtil backend er klar
+
+    async function loadAdminData() {
+      const statsEl = document.getElementById("systemStats");
+      const teamEl = document.getElementById("teamList");
+
+      // Fallback-data (indtil Cloudflare Worker API er klar)
+      const fallback
