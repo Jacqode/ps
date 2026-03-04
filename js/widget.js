@@ -40,4 +40,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Gem aktivitet i feed
     function saveBreak(text) {
-        const list = JSON.parse
+        const list = JSON.parse(localStorage.getItem("feed") || "[]");
+        list.unshift({ text, time: getTime() });
+        localStorage.setItem("feed", JSON.stringify(list));
+        renderFeed();
+    }
+
+    // Vis feed
+    function renderFeed() {
+        const list = JSON.parse(localStorage.getItem("feed") || "[]");
+
+        if (list.length === 0) {
+            feed.innerHTML = "<p>Ingen aktiviteter endnu.</p>";
+            return;
+        }
+
+        feed.innerHTML = list
+            .map(item => `<div class="feed-item">${item.time} — ${item.text}</div>`)
+            .join("");
+    }
+
+    // Knap: Få aktivitet
+    ideaBtn.addEventListener("click", () => {
+        const idea = ideas[Math.floor(Math.random() * ideas.length)];
+        currentIdea.textContent = idea;
+    });
+
+    // Knap: Jeg er færdig
+    doneBtn.addEventListener("click", () => {
+        if (!currentIdea.textContent) return;
+
+        saveBreak(currentIdea.textContent);
+
+        microFeedback.textContent = "Godt gået! 💚";
+        microFeedback.style.opacity = 1;
+
+        setTimeout(() => {
+            microFeedback.style.opacity = 0;
+        }, 1500);
+    });
+
+    // Indlæs feed ved start
+    renderFeed();
+});
