@@ -17,33 +17,26 @@ document.addEventListener("DOMContentLoaded", () => {
   const currentActivityEl = document.getElementById("currentActivity");
   const microFeedbackEl = document.getElementById("microFeedback");
 
-  const required = [
-    nameInput, teamInput, saveBtn, settingsBtn,
-    settingsPanel, activityBtn, doneBtn, feedEl, statsEl, greeting,
-    currentActivityEl, microFeedbackEl
-  ];
-  if (required.some(el => !el)) {
-    console.error("Widget: mangler DOM‑elementer");
-    return;
-  }
-
   const norm = s => (s || "").toString().trim().toLowerCase();
   const escapeHtml = s =>
     String(s || "").replace(/[&<>"']/g, c =>
       ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c])
     );
 
+  // Load saved values
   const savedName = localStorage.getItem("userName") || "";
   const savedTeam = localStorage.getItem("teamName") || "";
   nameInput.value = savedName;
   teamInput.value = savedTeam;
   greeting.textContent = savedName ? `Hej ${savedName}` : "Hej";
 
+  // Toggle settings
   settingsBtn.addEventListener("click", () => {
     const open = settingsPanel.classList.toggle("open");
     settingsPanel.setAttribute("aria-hidden", !open);
   });
 
+  // Save user
   saveBtn.addEventListener("click", async () => {
     const name = nameInput.value.trim();
     const team = norm(teamInput.value);
@@ -94,6 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Vis aktivitet
     currentActivityEl.textContent = activity;
     microFeedbackEl.style.display = "none";
+    doneBtn.style.visibility = "visible";
 
     try {
       await fetch(`${API_BASE}/api/break`, {
@@ -111,16 +105,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Jeg er færdig
   doneBtn.addEventListener("click", () => {
+    // Fjern aktivitet
     currentActivityEl.textContent = "";
 
+    // Vis microfeedback
     microFeedbackEl.textContent = "Godt klaret! Fortsæt den gode vane 💪";
     microFeedbackEl.style.display = "block";
 
+    // Skjul efter 8 sekunder
     setTimeout(() => {
       microFeedbackEl.style.display = "none";
+      doneBtn.style.visibility = "hidden";
     }, 8000);
   });
 
+  // Feed
   async function loadFeed() {
     const team = norm(localStorage.getItem("teamName"));
     if (!team) {
@@ -152,6 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Stats
   async function loadStats() {
     const team = norm(localStorage.getItem("teamName"));
     const user = localStorage.getItem("userName");
