@@ -1,91 +1,65 @@
 <!DOCTYPE html>
 <html lang="da">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Break Buddy – Widget</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Break Buddy – Widget</title>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-
-        .section {
-            background: white;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-        }
-
-        button {
-            padding: 10px 15px;
-            margin: 5px 0;
-            border: none;
-            border-radius: 6px;
-            background: #4CAF50;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        #settingsPanel {
-            display: none;
-            margin-top: 15px;
-        }
-
-        #settingsPanel.open {
-            display: block;
-        }
-
-        input {
-            width: 100%;
-            padding: 10px;
-            margin: 6px 0;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-        }
-
-        #feed div {
-            padding: 6px 0;
-            border-bottom: 1px solid #eee;
-        }
-    </style>
+  <style>
+    :root{--bg:#f4f4f4;--card:#fff;--accent:#4CAF50;--accent-2:#2196F3;--muted:#666}
+    html,body{height:100%;margin:0;font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);color:#222}
+    .wrap{max-width:420px;margin:18px auto;padding:16px}
+    .card{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+    h2{margin:0 0 8px;font-size:18px}
+    p.lead{margin:0 0 12px;color:var(--muted)}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    button{flex:1;padding:10px 12px;border-radius:8px;border:0;background:var(--accent);color:#fff;font-weight:600;cursor:pointer}
+    button.secondary{background:#eee;color:#222}
+    #settingsBtn{background:var(--accent-2)}
+    #saveBtn{background:#FF9800}
+    #settingsPanel{display:none;margin-top:12px}
+    #settingsPanel.open{display:block}
+    label{display:block;font-size:13px;margin-top:8px;color:var(--muted)}
+    input{width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;margin-top:6px}
+    #feed{margin-top:12px;max-height:220px;overflow:auto}
+    .feed-item{padding:8px 0;border-bottom:1px solid #f0f0f0}
+    .small{font-size:13px;color:var(--muted)}
+  </style>
 </head>
-
 <body>
+  <div class="wrap">
+    <div class="card" id="widgetCard">
+      <h2 id="greeting">Hej ukendt</h2>
+      <p class="lead">20–60 sekunders let aktivitet øger energien.</p>
 
-    <div class="section">
-        <h2 id="greeting">Hej</h2>
-        <p>20–60 sekunders let aktivitet øger energien.</p>
-
+      <div class="controls">
         <button id="activityBtn">Få en aktivitet</button>
-        <button id="doneBtn">Jeg er færdig</button>
+        <button id="doneBtn" class="secondary">Jeg er færdig</button>
+      </div>
 
-        <h3>Det gør dine buddies:</h3>
-        <div id="feed">Indlæser...</div>
+      <h3 style="margin:8px 0 6px">Det gør dine buddies:</h3>
+      <div id="feed"><div class="small">Indlæser…</div></div>
 
-        <button id="settingsBtn" style="margin-top:15px; background:#2196F3;">
-            Indstillinger
-        </button>
+      <div style="margin-top:12px">
+        <button id="settingsBtn">Indstillinger</button>
+      </div>
 
-        <div id="settingsPanel">
-            <h3>Indstillinger</h3>
+      <div id="settingsPanel" aria-hidden="true">
+        <h3 style="margin-top:12px">Indstillinger</h3>
 
-            <label>Dit navn</label>
-            <input id="nameInput" placeholder="Dit navn">
+        <label for="nameInput">Dit navn</label>
+        <input id="nameInput" placeholder="Dit navn" />
 
-            <label>Team</label>
-            <input id="teamInput" placeholder="Teamnavn">
+        <label for="teamInput">Team</label>
+        <input id="teamInput" placeholder="Teamnavn" />
 
-            <button id="saveBtn" style="background:#FF9800;">Gem</button>
+        <div style="margin-top:10px">
+          <button id="saveBtn">Gem</button>
         </div>
+      </div>
     </div>
+  </div>
 
-    <script src="js/widget.js"></script>
+  <script src="js/widget.js"></script>
 </body>
 </html>
