@@ -1,4 +1,4 @@
-// Cloudflare Worker URL
+ Cloudflare Worker URL
 const API_BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
 
 document.addEventListener("DOMContentLoaded", () => {
