@@ -1,72 +1,77 @@
- Cloudflare Worker URL
+// Cloudflare Worker backend
 const API_BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const nameInput = document.getElementById("nameInput");
-  const teamInput = document.getElementById("teamInput");
-  const saveBtn = document.getElementById("saveBtn");
-  const settingsBtn = document.getElementById("settingsBtn");
-  const settingsPanel = document.getElementById("settingsPanel");
-  const activityBtn = document.getElementById("activityBtn");
-  const doneBtn = document.getElementById("doneBtn");
-  const feedEl = document.getElementById("feed");
-  const statsEl = document.getElementById("stats");
-  const greeting = document.getElementById("greeting");
 
-  // Nye UI-elementer
-  const currentActivityEl = document.getElementById("currentActivity");
-  const microFeedbackEl = document.getElementById("microFeedback");
+  const $ = id => document.getElementById(id);
 
-  const norm = s => (s || "").toString().trim().toLowerCase();
+  const nameInput = $("nameInput");
+  const teamInput = $("teamInput");
+  const saveBtn = $("saveBtn");
+  const settingsBtn = $("settingsBtn");
+  const settingsPanel = $("settingsPanel");
+  const activityBtn = $("activityBtn");
+  const doneBtn = $("doneBtn");
+  const feedEl = $("feed");
+  const statsEl = $("stats");
+  const greeting = $("greeting");
+  const currentActivityEl = $("currentActivity");
+  const microFeedbackEl = $("microFeedback");
+
+  const norm = s => (s || "").trim().toLowerCase();
   const escapeHtml = s =>
     String(s || "").replace(/[&<>"']/g, c =>
       ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c])
     );
 
-  // Load saved values
-  const savedName = localStorage.getItem("userName") || "";
-  const savedTeam = localStorage.getItem("teamName") || "";
-  nameInput.value = savedName;
-  teamInput.value = savedTeam;
-  greeting.textContent = savedName ? `Hej ${savedName}` : "Hej";
+  const getTeam = () => norm(localStorage.getItem("teamName"));
+  const getName = () => localStorage.getItem("userName") || "Ukendt";
 
-  // Toggle settings
-  settingsBtn.addEventListener("click", () => {
+  async function apiGet(path) {
+    const res = await fetch(`${API_BASE}${path}`);
+    if (!res.ok) throw new Error(res.status);
+    return res.json();
+  }
+
+  async function apiPost(path, body) {
+    await fetch(`${API_BASE}${path}`, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify(body)
+    });
+  }
+
+  // Init
+  doneBtn.style.visibility = "hidden";
+  nameInput.value = getName() === "Ukendt" ? "" : getName();
+  teamInput.value = getTeam();
+  greeting.textContent = nameInput.value ? `Hej ${nameInput.value}` : "Hej";
+
+  settingsBtn.onclick = () => {
     const open = settingsPanel.classList.toggle("open");
     settingsPanel.setAttribute("aria-hidden", !open);
-  });
+  };
 
-  // Save user
-  saveBtn.addEventListener("click", async () => {
+  saveBtn.onclick = async () => {
     const name = nameInput.value.trim();
-    const team = norm(teamInput.value);
+    const team = getTeam() || norm(teamInput.value);
 
-    if (!name || !team) {
-      alert("Udfyld både navn og team");
-      return;
-    }
+    if (!name || !team) return alert("Udfyld både navn og team");
 
     localStorage.setItem("userName", name);
     localStorage.setItem("teamName", team);
     greeting.textContent = `Hej ${name}`;
 
-    try {
-      await fetch(`${API_BASE}/api/user`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, team })
-      });
-    } catch (err) {
-      console.warn("Fejl ved /api/user:", err.message);
-    }
-
+    try { await apiPost("/api/user", { name, team }); } catch {}
     settingsPanel.classList.remove("open");
     loadFeed();
     loadStats();
-  });
+  };
 
-  // Få aktivitet
-  activityBtn.addEventListener("click", async () => {
+  activityBtn.onclick = async () => {
+    const team = getTeam();
+    if (!team) return alert("Vælg et team først");
+
     const activities = [
       "Tag 5 dybe vejrtrækninger 🌬️",
       "Lav 10 langsomme knæbøjninger 🏋️‍♂️",
@@ -75,77 +80,64 @@ document.addEventListener("DOMContentLoaded", () => {
       "Stræk siden ved at række én arm op ↗️"
     ];
 
-    const activity = activities[Math.floor(Math.random() * activities.length)];
-    const name = localStorage.getItem("userName") || "Ukendt";
-    const team = norm(localStorage.getItem("teamName"));
-
-    if (!team) {
-      alert("Vælg et team først");
-      return;
-    }
-
-    // Vis aktivitet
+    const activity = activities[Math.floor(Math.random()*activities.length)];
     currentActivityEl.textContent = activity;
     microFeedbackEl.style.display = "none";
     doneBtn.style.visibility = "visible";
 
     try {
-      await fetch(`${API_BASE}/api/break`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, team, activity })
-      });
-    } catch (err) {
-      console.warn("Fejl ved /api/break:", err.message);
-    }
+      await apiPost("/api/break", { name:getName(), team, activity });
+    } catch {}
 
     loadFeed();
     loadStats();
-  });
+  };
 
-  // Jeg er færdig
-  doneBtn.addEventListener("click", () => {
-    // Fjern aktivitet
+  doneBtn.onclick = () => {
     currentActivityEl.textContent = "";
-
-    // Vis microfeedback
     microFeedbackEl.textContent = "Godt klaret! Fortsæt den gode vane 💪";
     microFeedbackEl.style.display = "block";
 
-    // Skjul efter 8 sekunder
     setTimeout(() => {
       microFeedbackEl.style.display = "none";
       doneBtn.style.visibility = "hidden";
     }, 8000);
-  });
+  };
 
-  // Feed
   async function loadFeed() {
-    const team = norm(localStorage.getItem("teamName"));
-    if (!team) {
-      feedEl.innerHTML = "<div class='small'>Vælg et team.</div>";
-      return;
-    }
+    const team = getTeam();
+    if (!team) return feedEl.innerHTML = "<div class='small'>Vælg et team.</div>";
 
     try {
-      const res = await fetch(`${API_BASE}/api/team/feed?team=${encodeURIComponent(team)}`);
-      const feed = await res.json();
+      const feed = await apiGet(`/api/team/feed?team=${encodeURIComponent(team)}`);
+      if (!feed.length) return feedEl.innerHTML = "<div class='small'>Ingen aktiviteter endnu.</div>";
 
-      if (!Array.isArray(feed) || feed.length === 0) {
-        feedEl.innerHTML = "<div class='small'>Ingen aktiviteter endnu.</div>";
-        return;
-      }
-
-      feedEl.innerHTML = feed.map(item => {
-        const t = item.created_at
-          ? new Date(item.created_at).toLocaleTimeString("da-DK", {
-              hour: "2-digit",
-              minute: "2-digit"
-            })
-          : "";
-        return `<div class="feed-item"><strong>${escapeHtml(item.name)}</strong> kl. ${t}: ${escapeHtml(item.activity)}</div>`;
+      feedEl.innerHTML = feed.map(i => {
+        const t = new Date(i.created_at).toLocaleTimeString("da-DK",{hour:"2-digit",minute:"2-digit"});
+        return `<div class="feed-item"><strong>${escapeHtml(i.name)}</strong> kl. ${t}: ${escapeHtml(i.activity)}</div>`;
       }).join("");
-    } catch (err) {
-      console.warn("Fejl ved hentning af feed:", err.message);
-      feedEl.innerHTML
-    
+    } catch {
+      feedEl.innerHTML = "<div class='small'>Kunne ikke hente feed.</div>";
+    }
+  }
+
+  async function loadStats() {
+    const team = getTeam();
+    if (!team) return statsEl.textContent = "Vælg et team for at se statistik.";
+
+    try {
+      const s = await apiGet(`/api/team/stats?team=${encodeURIComponent(team)}`);
+      let text = `I har taget ${s.total_breaks} pauser sammen 💪`;
+      if (s.breaks_per_user?.length) {
+        const top = s.breaks_per_user[0];
+        text += ` — ${top.name} fører an.`;
+      }
+      statsEl.textContent = text;
+    } catch {
+      statsEl.textContent = "Kunne ikke hente statistik.";
+    }
+  }
+
+  loadFeed();
+  loadStats();
+});
