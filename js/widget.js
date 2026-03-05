@@ -68,4 +68,125 @@ document.addEventListener("DOMContentLoaded", () => {
   // Få aktivitet
   activityBtn.addEventListener("click", async () => {
     const activities = [
-      "Tag 5 dybe vejrtrækninger
+      "Tag 5 dybe vejrtrækninger 🌬️",
+      "Lav 10 langsomme knæbøjninger 🏋️‍♂️",
+      "Massér tindingerne i 20 sekunder 💆‍♀️",
+      "Tag 10 rolige maveåndedrag 🌬️",
+      "Stræk siden ved at række én arm op ↗️"
+    ];
+
+    const activity = activities[Math.floor(Math.random() * activities.length)];
+    const name = localStorage.getItem("userName") || "Ukendt";
+    const team = norm(localStorage.getItem("teamName"));
+
+    if (!team) {
+      alert("Vælg et team først");
+      return;
+    }
+
+    // Vis aktivitet
+    currentActivityEl.textContent = activity;
+    microFeedbackEl.style.display = "none";
+    doneBtn.style.visibility = "visible";
+
+    try {
+      await fetch(`${API_BASE}/api/break`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, team, activity })
+      });
+    } catch (err) {
+      console.warn("Fejl ved /api/break:", err.message);
+    }
+
+    loadFeed();
+    loadStats();
+  });
+
+  // Jeg er færdig
+  doneBtn.addEventListener("click", () => {
+    // Fjern aktivitet
+    currentActivityEl.textContent = "";
+
+    // Vis microfeedback
+    microFeedbackEl.textContent = "Godt klaret! Fortsæt den gode vane 💪";
+    microFeedbackEl.style.display = "block";
+
+    // Skjul efter 8 sekunder
+    setTimeout(() => {
+      microFeedbackEl.style.display = "none";
+      doneBtn.style.visibility = "hidden";
+    }, 8000);
+  });
+
+  // Feed
+  async function loadFeed() {
+    const team = norm(localStorage.getItem("teamName"));
+    if (!team) {
+      feedEl.innerHTML = "<div class='small'>Vælg et team.</div>";
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/team/feed?team=${encodeURIComponent(team)}`);
+      const feed = await res.json();
+
+      if (!Array.isArray(feed) || feed.length === 0) {
+        feedEl.innerHTML = "<div class='small'>Ingen aktiviteter endnu.</div>";
+        return;
+      }
+
+      feedEl.innerHTML = feed.map(item => {
+        const t = item.created_at
+          ? new Date(item.created_at).toLocaleTimeString("da-DK", {
+              hour: "2-digit",
+              minute: "2-digit"
+            })
+          : "";
+        return `<div class="feed-item"><strong>${escapeHtml(item.name)}</strong> kl. ${t}: ${escapeHtml(item.activity)}</div>`;
+      }).join("");
+    } catch (err) {
+      console.warn("Fejl ved hentning af feed:", err.message);
+      feedEl.innerHTML = "<div class='small'>Fejl ved hentning af feed.</div>";
+    }
+  }
+
+  // Stats
+  async function loadStats() {
+    const team = norm(localStorage.getItem("teamName"));
+    const user = localStorage.getItem("userName");
+    if (!team) {
+      statsEl.innerHTML = "";
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/team/stats?team=${encodeURIComponent(team)}`);
+      const stats = await res.json();
+
+      const today = new Date().toISOString().slice(0, 10);
+
+      const teamToday =
+        stats.breaks_per_day.find(d => d.day === today)?.count || 0;
+
+      const userToday =
+        stats.breaks_per_user.find(u => u.name === user)?.count || 0;
+
+      statsEl.innerHTML = `
+        <strong>I dag</strong><br>
+        Team: ${teamToday} breaks<br>
+        Dig: ${userToday} breaks
+      `;
+    } catch (err) {
+      console.warn("Fejl ved hentning af stats:", err.message);
+    }
+  }
+
+  loadFeed();
+  loadStats();
+
+  setInterval(() => {
+    loadFeed();
+    loadStats();
+  }, 15000);
+});
