@@ -1,5 +1,5 @@
 // Sæt din Cloudflare Worker URL her, fx: "https://plugandpause-backend.<subdomain>.workers.dev"
-const API_BASE = "https://your-worker-subdomain.workers.dev";
+const API_BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
 
 document.addEventListener("DOMContentLoaded", () => {
   const nameInput = document.getElementById("nameInput");
