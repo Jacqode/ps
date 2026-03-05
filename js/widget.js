@@ -1,4 +1,4 @@
-// Sæt din Cloudflare Worker URL her, fx: "https://plugandpause-backend.<subdomain>.workers.dev"
+// Cloudflare Worker URL
 const API_BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -10,35 +10,40 @@ document.addEventListener("DOMContentLoaded", () => {
   const activityBtn = document.getElementById("activityBtn");
   const doneBtn = document.getElementById("doneBtn");
   const feedEl = document.getElementById("feed");
+  const statsEl = document.getElementById("stats");
   const greeting = document.getElementById("greeting");
 
-  // Defensive check: stop tidligt hvis DOM ikke er som forventet
-  const required = [nameInput, teamInput, saveBtn, settingsBtn, settingsPanel, activityBtn, doneBtn, feedEl, greeting];
+  // Defensive check
+  const required = [
+    nameInput, teamInput, saveBtn, settingsBtn,
+    settingsPanel, activityBtn, doneBtn, feedEl, statsEl, greeting
+  ];
   if (required.some(el => !el)) {
-    console.error("Widget: mangler DOM-elementer. Tjek widget.html og sti til js/widget.js");
-    document.body.insertAdjacentHTML("afterbegin",
-      "<div style='padding:12px;background:#fee;border:1px solid #fbb'>Widget fejl: mangler elementer. Se Console.</div>");
+    console.error("Widget: mangler DOM‑elementer");
     return;
   }
 
-  // Hjælpefunktioner
+  // Helpers
   const norm = s => (s || "").toString().trim().toLowerCase();
-  const escapeHtml = s => String(s || "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const escapeHtml = s =>
+    String(s || "").replace(/[&<>"']/g, c =>
+      ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c])
+    );
 
   // Load saved values
   const savedName = localStorage.getItem("userName") || "";
   const savedTeam = localStorage.getItem("teamName") || "";
   nameInput.value = savedName;
   teamInput.value = savedTeam;
-  greeting.textContent = savedName ? `Hej ${savedName}` : "Hej ukendt";
+  greeting.textContent = savedName ? `Hej ${savedName}` : "Hej";
 
-  // Toggle settings panel
+  // Toggle settings
   settingsBtn.addEventListener("click", () => {
     const open = settingsPanel.classList.toggle("open");
     settingsPanel.setAttribute("aria-hidden", !open);
   });
 
-  // Save user (normaliser team)
+  // Save user
   saveBtn.addEventListener("click", async () => {
     const name = nameInput.value.trim();
     const team = norm(teamInput.value);
@@ -63,25 +68,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     settingsPanel.classList.remove("open");
-    settingsPanel.setAttribute("aria-hidden", "true");
     loadFeed();
+    loadStats();
   });
 
-  // Post en aktivitet
+  // Post activity
   activityBtn.addEventListener("click", async () => {
     const activities = [
       "Tag 5 dybe vejrtrækninger 🌬️",
       "Lav 10 langsomme knæbøjninger 🏋️‍♂️",
       "Massér tindingerne i 20 sekunder 💆‍♀️",
       "Tag 10 rolige maveåndedrag 🌬️",
-      "Stræk siden ved at række én arm op og over kroppen ↗️"
+      "Stræk siden ved at række én arm op ↗️"
     ];
+
     const activity = activities[Math.floor(Math.random() * activities.length)];
     const name = localStorage.getItem("userName") || "Ukendt";
-    const team = norm(localStorage.getItem("teamName") || "");
+    const team = norm(localStorage.getItem("teamName"));
 
     if (!team) {
-      alert("Vælg et team i Indstillinger først.");
+      alert("Vælg et team først");
       return;
     }
 
@@ -96,32 +102,38 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     loadFeed();
+    loadStats();
   });
 
-  // Done-knap (simpel visuel bekræftelse)
+  // Done
   doneBtn.addEventListener("click", () => {
-    alert("Godt klaret! Fortsæt den gode vane.");
+    alert("Godt klaret!");
   });
 
-  // Hent team feed
+  // Load feed
   async function loadFeed() {
-    const team = norm(localStorage.getItem("teamName") || "");
+    const team = norm(localStorage.getItem("teamName"));
     if (!team) {
-      feedEl.innerHTML = "<div class='small'>Vælg et team i Indstillinger for at se buddies.</div>";
+      feedEl.innerHTML = "<div class='small'>Vælg et team.</div>";
       return;
     }
 
     try {
       const res = await fetch(`${API_BASE}/api/team/feed?team=${encodeURIComponent(team)}`);
-      if (!res.ok) throw new Error(`Status ${res.status}`);
       const feed = await res.json();
+
       if (!Array.isArray(feed) || feed.length === 0) {
         feedEl.innerHTML = "<div class='small'>Ingen aktiviteter endnu.</div>";
         return;
       }
 
       feedEl.innerHTML = feed.map(item => {
-        const t = item.created_at ? new Date(item.created_at).toLocaleTimeString("da-DK", {hour:"2-digit",minute:"2-digit",hour12:false}) : "";
+        const t = item.created_at
+          ? new Date(item.created_at).toLocaleTimeString("da-DK", {
+              hour: "2-digit",
+              minute: "2-digit"
+            })
+          : "";
         return `<div class="feed-item"><strong>${escapeHtml(item.name)}</strong> kl. ${t}: ${escapeHtml(item.activity)}</div>`;
       }).join("");
     } catch (err) {
@@ -130,7 +142,43 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Initial load + auto refresh
+  // Load widget‑stats
+  async function loadStats() {
+    const team = norm(localStorage.getItem("teamName"));
+    const user = localStorage.getItem("userName");
+    if (!team) {
+      statsEl.innerHTML = "";
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/team/stats?team=${encodeURIComponent(team)}`);
+      const stats = await res.json();
+
+      const today = new Date().toISOString().slice(0, 10);
+
+      const teamToday =
+        stats.breaks_per_day.find(d => d.day === today)?.count || 0;
+
+      const userToday =
+        stats.breaks_per_user.find(u => u.name === user)?.count || 0;
+
+      statsEl.innerHTML = `
+        <strong>I dag</strong><br>
+        Team: ${teamToday} breaks<br>
+        Dig: ${userToday} breaks
+      `;
+    } catch (err) {
+      console.warn("Fejl ved hentning af stats:", err.message);
+    }
+  }
+
+  // Initial load + refresh
   loadFeed();
-  setInterval(loadFeed, 15000);
+  loadStats();
+
+  setInterval(() => {
+    loadFeed();
+    loadStats();
+  }, 15000);
 });
