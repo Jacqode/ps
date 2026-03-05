@@ -147,46 +147,5 @@ document.addEventListener("DOMContentLoaded", () => {
       }).join("");
     } catch (err) {
       console.warn("Fejl ved hentning af feed:", err.message);
-      feedEl.innerHTML = "<div class='small'>Fejl ved hentning af feed.</div>";
-    }
-  }
-
-  // Stats
-  async function loadStats() {
-    const team = norm(localStorage.getItem("teamName"));
-    const user = localStorage.getItem("userName");
-    if (!team) {
-      statsEl.innerHTML = "";
-      return;
-    }
-
-    try {
-      const res = await fetch(`${API_BASE}/api/team/stats?team=${encodeURIComponent(team)}`);
-      const stats = await res.json();
-
-      const today = new Date().toISOString().slice(0, 10);
-
-      const teamToday =
-        stats.breaks_per_day.find(d => d.day === today)?.count || 0;
-
-      const userToday =
-        stats.breaks_per_user.find(u => u.name === user)?.count || 0;
-
-      statsEl.innerHTML = `
-        <strong>I dag</strong><br>
-        Team: ${teamToday} breaks<br>
-        Dig: ${userToday} breaks
-      `;
-    } catch (err) {
-      console.warn("Fejl ved hentning af stats:", err.message);
-    }
-  }
-
-  loadFeed();
-  loadStats();
-
-  setInterval(() => {
-    loadFeed();
-    loadStats();
-  }, 15000);
-});
+      feedEl.innerHTML
+    
