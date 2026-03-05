@@ -1,40 +1,127 @@
 <!DOCTYPE html>
 <html lang="da">
 <head>
-  <meta charset="utf-8" />
-  <title>Break Buddy – Admin</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="css/style.css?v=20260305" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plug & Pause – Admin</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 24px;
+      color: #222;
+    }
+
+    h1 {
+      margin-bottom: 24px;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    .section {
+      background: white;
+      padding: 20px;
+      margin-bottom: 24px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .feed-item {
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .stat {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    canvas {
+      margin-top: 16px;
+    }
+  </style>
 </head>
 
 <body>
-  <div class="app-container">
-    <h1>Admin</h1>
-    <p class="intro">Overblik over teams, brugere og pauser.</p>
 
-    <section id="stats">
-      <h2 class="feed-title">Systemstatus:</h2>
-      <div id="systemStats">
-        <p>Indlæser data…</p>
-      </div>
-    </section>
+  <h1>Plug & Pause – Admin</h1>
 
-    <section id="teams" style="margin-top:20px">
-      <h2 class="feed-title">Teams:</h2>
-      <div id="teamList">
-        <p>Indlæser teams…</p>
-      </div>
-    </section>
+  <!-- FEED -->
+  <div class="section">
+    <h2>Live feed</h2>
+    <div id="feed">Indlæser...</div>
+  </div>
 
-    <a class="settings" href="dashboard.html" style="margin-top:20px">Gå til dashboard</a>
+  <!-- STATS -->
+  <div class="section">
+    <h2>Statistik</h2>
+
+    <div class="stat" id="totalBreaks">Total breaks: –</div>
+
+    <canvas id="perUserChart" height="200"></canvas>
+    <canvas id="perDayChart" height="200"></canvas>
   </div>
 
   <script>
-    // KLAR TIL CLOUDLARE API – statisk fallback indtil backend er klar
+    const API_BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
+    const TEAM = "løverne"; // midlertidigt hardcoded
 
-    async function loadAdminData() {
-      const statsEl = document.getElementById("systemStats");
-      const teamEl = document.getElementById("teamList");
+    async function loadFeed() {
+      const res = await fetch(`${API_BASE}/api/team/feed?team=${TEAM}`);
+      const data = await res.json();
 
-      // Fallback-data (indtil Cloudflare Worker API er klar)
-      const fallback
+      const feedEl = document.getElementById("feed");
+      feedEl.innerHTML = data.map(item => {
+        const time = new Date(item.created_at).toLocaleTimeString("da-DK", {
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+        return `<div class="feed-item"><strong>${item.name}</strong> kl. ${time}: ${item.activity}</div>`;
+      }).join("");
+    }
+
+    async function loadStats() {
+      const res = await fetch(`${API_BASE}/api/team/stats?team=${TEAM}`);
+      const stats = await res.json();
+
+      document.getElementById("totalBreaks").textContent =
+        `Total breaks: ${stats.total_breaks}`;
+
+      new Chart(document.getElementById("perUserChart"), {
+        type: "bar",
+        data: {
+          labels: stats.breaks_per_user.map(u => u.name),
+          datasets: [{
+            label: "Breaks pr. bruger",
+            data: stats.breaks_per_user.map(u => u.count),
+            backgroundColor: "#4CAF50"
+          }]
+        }
+      });
+
+      new Chart(document.getElementById("perDayChart"), {
+        type: "line",
+        data: {
+          labels: stats.breaks_per_day.map(d => d.day),
+          datasets: [{
+            label: "Breaks pr. dag",
+            data: stats.breaks_per_day.map(d => d.count),
+            borderColor: "#2196F3",
+            fill: false
+          }]
+        }
+      });
+    }
+
+    loadFeed();
+    loadStats();
+  </script>
+
+</body>
+</html>
