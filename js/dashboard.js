@@ -6,38 +6,51 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const teamMembersEl = document.getElementById("teamMembers");
     const teamFeedEl = document.getElementById("teamFeed");
+    const teamStatsEl = document.getElementById("teamStats");
 
     if (!teamName || !teamId) {
         teamMembersEl.innerHTML = "<p>Intet team valgt.</p>";
         teamFeedEl.innerHTML = "<p>Ingen data.</p>";
+        teamStatsEl.innerHTML = "<p>Ingen statistik.</p>";
         return;
     }
 
-    // ---------- Hent teamets medlemmer ----------
+    // ---------- API calls ----------
     async function fetchTeamMembers() {
         try {
             const res = await fetch(`${API_BASE}/api/team/users?team=${teamName}`);
-            if (!res.ok) throw new Error("Bad response");
+            if (!res.ok) throw new Error();
             return await res.json();
-        } catch (err) {
-            console.warn("Kunne ikke hente team-medlemmer:", err);
+        } catch {
             return [];
         }
     }
 
-    // ---------- Hent teamets feed ----------
     async function fetchTeamFeed() {
         try {
             const res = await fetch(`${API_BASE}/api/team/feed?team=${teamName}`);
-            if (!res.ok) throw new Error("Bad response");
+            if (!res.ok) throw new Error();
             return await res.json();
-        } catch (err) {
-            console.warn("Kunne ikke hente team-feed:", err);
+        } catch {
             return [];
         }
     }
 
-    // ---------- Render medlemmer ----------
+    async function fetchTeamStats() {
+        try {
+            const res = await fetch(`${API_BASE}/api/team/stats?team=${teamName}`);
+            if (!res.ok) throw new Error();
+            return await res.json();
+        } catch {
+            return {
+                total_breaks: 0,
+                breaks_per_user: [],
+                breaks_per_day: []
+            };
+        }
+    }
+
+    // ---------- Render: medlemmer ----------
     async function renderMembers() {
         const members = await fetchTeamMembers();
 
@@ -51,7 +64,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             .join("");
     }
 
-    // ---------- Render feed ----------
+    // ---------- Render: feed ----------
     async function renderFeed() {
         const feed = await fetchTeamFeed();
 
@@ -75,13 +88,39 @@ document.addEventListener("DOMContentLoaded", async () => {
             .join("");
     }
 
+    // ---------- Render: statistik ----------
+    async function renderStats() {
+        const stats = await fetchTeamStats();
+
+        const perUser = stats.breaks_per_user
+            .map(u => `<div>${u.name}: <strong>${u.count}</strong></div>`)
+            .join("");
+
+        const perDay = stats.breaks_per_day
+            .map(d => `<div>${d.day}: <strong>${d.count}</strong></div>`)
+            .join("");
+
+        teamStatsEl.innerHTML = `
+            <h3>Team statistik</h3>
+            <p><strong>Total aktivitet:</strong> ${stats.total_breaks}</p>
+
+            <h4>Aktivitet pr. medlem</h4>
+            ${perUser || "<p>Ingen data.</p>"}
+
+            <h4>Aktivitet pr. dag (seneste 7 dage)</h4>
+            ${perDay || "<p>Ingen data.</p>"}
+        `;
+    }
+
     // ---------- Init ----------
     renderMembers();
     renderFeed();
+    renderStats();
 
-    // Opdater dashboard hvert 20. sekund
+    // Auto-refresh hvert 20 sek.
     setInterval(() => {
         renderMembers();
         renderFeed();
+        renderStats();
     }, 20000);
 });
