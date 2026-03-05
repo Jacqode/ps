@@ -1,96 +1,199 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const API_BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
 
-    const nameInput = document.getElementById("nameInput");
-    const teamInput = document.getElementById("teamInput");
-    const saveBtn = document.getElementById("saveBtn");
-    const settingsBtn = document.getElementById("settingsBtn");
-    const settingsPanel = document.getElementById("settingsPanel");
-    const activityBtn = document.getElementById("activityBtn");
-    const doneBtn = document.getElementById("doneBtn");
-    const feedEl = document.getElementById("feed");
+    // ---------- POST /api/user ----------
+    if (url.pathname === "/api/user" && request.method === "POST") {
+      const body = await request.json();
+      const userName = body.name?.trim();
+      const teamName = body.team?.trim().toLowerCase(); // NORMALISERET
 
-    // Load saved user
-    const savedName = localStorage.getItem("userName");
-    const savedTeam = localStorage.getItem("teamName");
+      if (!userName || !teamName) {
+        return new Response(JSON.stringify({ error: "Missing name or team" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
 
-    if (savedName && savedTeam) {
-        nameInput.value = savedName;
-        teamInput.value = savedTeam;
+      // Find eller opret team
+      let team = await env.DB.prepare(
+        "SELECT id, name FROM teams WHERE name = ?"
+      ).bind(teamName).first();
+
+      if (!team) {
+        const insertTeam = await env.DB.prepare(
+          "INSERT INTO teams (name) VALUES (?)"
+        ).bind(teamName).run();
+
+        team = {
+          id: insertTeam.meta.last_row_id,
+          name: teamName
+        };
+      }
+
+      // Find eller opret bruger
+      let user = await env.DB.prepare(
+        "SELECT id, name FROM users WHERE name = ? AND team_id = ?"
+      ).bind(userName, team.id).first();
+
+      if (!user) {
+        const insertUser = await env.DB.prepare(
+          "INSERT INTO users (name, team_id) VALUES (?, ?)"
+        ).bind(userName, team.id).run();
+
+        user = {
+          id: insertUser.meta.last_row_id,
+          name: userName
+        };
+      }
+
+      return new Response(JSON.stringify({
+        user_id: user.id,
+        team_id: team.id,
+        team_name: team.name
+      }), {
+        headers: { "Content-Type": "application/json" }
+      });
     }
 
-    // Toggle settings
-    settingsBtn.addEventListener("click", () => {
-        settingsPanel.classList.toggle("open");
-    });
+    // ---------- POST /api/break ----------
+    if (url.pathname === "/api/break" && request.method === "POST") {
+      const body = await request.json();
+      const name = body.name?.trim() || "Ukendt";
+      const teamName = body.team?.trim().toLowerCase(); // NORMALISERET
+      const activity = body.activity?.trim();
 
-    // Save user
-    saveBtn.addEventListener("click", async () => {
-        const name = nameInput.value.trim();
-        const team = teamInput.value.trim().toLowerCase(); // NORMALISERET
-
-        if (!name || !team) {
-            alert("Udfyld både navn og team");
-            return;
-        }
-
-        localStorage.setItem("userName", name);
-        localStorage.setItem("teamName", team);
-
-        await fetch(`${API_BASE}/api/user`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, team })
+      if (!teamName || !activity) {
+        return new Response(JSON.stringify({ error: "Missing data" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" }
         });
+      }
 
-        settingsPanel.classList.remove("open");
-        loadFeed();
-    });
+      await env.DB.prepare(
+        "INSERT INTO breaks (name, team, activity) VALUES (?, ?, ?)"
+      ).bind(name, teamName, activity).run();
 
-    // Get random activity
-    activityBtn.addEventListener("click", async () => {
-        const activities = [
-            "Tag 5 dybe vejrtrækninger 🌬️",
-            "Lav 10 langsomme knæbøjninger 🏋️‍♂️",
-            "Massér tindingerne i 20 sekunder 💆‍♀️",
-            "Tag 10 rolige maveåndedrag 🌬️",
-            "Stræk siden ved at række én arm op og over kroppen ↗️"
-        ];
-
-        const activity = activities[Math.floor(Math.random() * activities.length)];
-
-        const name = localStorage.getItem("userName");
-        const team = localStorage.getItem("teamName");
-
-        await fetch(`${API_BASE}/api/break`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, team, activity })
-        });
-
-        loadFeed();
-    });
-
-    // Load feed
-    async function loadFeed() {
-        const team = localStorage.getItem("teamName");
-        if (!team) return;
-
-        const res = await fetch(`${API_BASE}/api/team/feed?team=${team}`);
-        const feed = await res.json();
-
-        feedEl.innerHTML = feed
-            .map(item => {
-                const time = new Date(item.created_at).toLocaleTimeString("da-DK", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: false
-                });
-                return `<div><strong>${item.name}</strong> kl. ${time}: ${item.activity}</div>`;
-            })
-            .join("");
+      return new Response(JSON.stringify({ ok: true }), {
+        headers: { "Content-Type": "application/json" }
+      });
     }
 
-    loadFeed();
-    setInterval(loadFeed, 15000);
-});
+    // ---------- GET /api/feed ----------
+    if (url.pathname === "/api/feed") {
+      const result = await env.DB.prepare(
+        "SELECT name, team, activity, created_at FROM breaks ORDER BY created_at DESC LIMIT 5"
+      ).all();
+
+      return new Response(JSON.stringify(result.results), {
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    // ---------- GET /api/team/feed ----------
+    if (url.pathname === "/api/team/feed") {
+      const teamName = url.searchParams.get("team")?.trim().toLowerCase(); // NORMALISERET
+
+      if (!teamName) {
+        return new Response(JSON.stringify({ error: "Missing team" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+
+      const result = await env.DB.prepare(
+        "SELECT name, team, activity, created_at FROM breaks WHERE team = ? ORDER BY created_at DESC LIMIT 20"
+      ).bind(teamName).all();
+
+      return new Response(JSON.stringify(result.results), {
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    // ---------- GET /api/team/users ----------
+    if (url.pathname === "/api/team/users") {
+      const teamName = url.searchParams.get("team")?.trim().toLowerCase(); // NORMALISERET
+
+      if (!teamName) {
+        return new Response(JSON.stringify({ error: "Missing team" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+
+      const team = await env.DB.prepare(
+        "SELECT id FROM teams WHERE name = ?"
+      ).bind(teamName).first();
+
+      if (!team) {
+        return new Response(JSON.stringify([]), {
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+
+      const users = await env.DB.prepare(
+        "SELECT id, name FROM users WHERE team_id = ? ORDER BY name ASC"
+      ).bind(team.id).all();
+
+      return new Response(JSON.stringify(users.results), {
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    // ---------- GET /api/team/stats ----------
+    if (url.pathname === "/api/team/stats") {
+      const teamName = url.searchParams.get("team")?.trim().toLowerCase(); // NORMALISERET
+
+      if (!teamName) {
+        return new Response(JSON.stringify({ error: "Missing team" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+
+      const team = await env.DB.prepare(
+        "SELECT id FROM teams WHERE name = ?"
+      ).bind(teamName).first();
+
+      if (!team) {
+        return new Response(JSON.stringify({ error: "Team not found" }), {
+          status: 404,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+
+      const total = await env.DB.prepare(
+        "SELECT COUNT(*) AS count FROM breaks WHERE team = ?"
+      ).bind(teamName).first();
+
+      const perUser = await env.DB.prepare(
+        `SELECT users.name, COUNT(breaks.id) AS count
+         FROM users
+         LEFT JOIN breaks ON breaks.name = users.name AND breaks.team = ?
+         WHERE users.team_id = ?
+         GROUP BY users.id
+         ORDER BY count DESC`
+      ).bind(teamName, team.id).all();
+
+      const perDay = await env.DB.prepare(
+        `SELECT DATE(created_at) AS day, COUNT(*) AS count
+         FROM breaks
+         WHERE team = ?
+           AND created_at >= DATE('now', '-7 days')
+         GROUP BY DATE(created_at)
+         ORDER BY day ASC`
+      ).bind(teamName).all();
+
+      return new Response(JSON.stringify({
+        total_breaks: total.count,
+        breaks_per_user: perUser.results,
+        breaks_per_day: perDay.results
+      }), {
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    // ---------- Fallback ----------
+    return new Response("Plug & Pause backend running");
+  }
+};
