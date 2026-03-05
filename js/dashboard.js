@@ -1,51 +1,87 @@
-import { createLineChart, createBarChart } from "./charts.js";
+document.addEventListener("DOMContentLoaded", async () => {
+    const API_BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
 
-document.addEventListener("DOMContentLoaded", () => {
-  const teamBox = document.getElementById("teamStatusBox");
-  const breakList = document.getElementById("breakList");
+    const teamName = localStorage.getItem("teamName");
+    const teamId = localStorage.getItem("teamId");
 
-  async function loadDashboard() {
-    // Fallback-data (erstattes af Cloudflare API senere)
-    const team = {
-      name: "Sundhed",
-      members: 5,
-      breaksToday: 14
-    };
+    const teamMembersEl = document.getElementById("teamMembers");
+    const teamFeedEl = document.getElementById("teamFeed");
 
-    const recent = [
-      { name: "Jakob", time: "14:03", text: "Stræk armene 🙆‍♂️" },
-      { name: "Ukendt", time: "13:55", text: "10 dybe vejrtrækninger 🌬️" },
-      { name: "Maria", time: "13:40", text: "Ryst hænderne 🤲" },
-      { name: "Jonas", time: "13:20", text: "10 tåhævninger 🦶" },
-      { name: "Sofie", time: "13:05", text: "Rul skuldrene 🔄" }
-    ];
-
-    teamBox.innerHTML = `
-      <p><strong>Team:</strong> ${team.name}</p>
-      <p><strong>Medlemmer:</strong> ${team.members}</p>
-      <p><strong>Pauser i dag:</strong> ${team.breaksToday}</p>
-    `;
-
-    breakList.innerHTML = recent
-      .map(b => `
-        <div class="feed-item">
-          <strong>${b.name}</strong> kl. ${b.time}: ${b.text}
-        </div>
-      `)
-      .join("");
-
-    // Eksempel på grafer (kan fjernes hvis du ikke vil bruge dem endnu)
-    const lineCtx = document.getElementById("lineChart");
-    const barCtx = document.getElementById("barChart");
-
-    if (lineCtx) {
-      createLineChart(lineCtx, ["Man", "Tir", "Ons", "Tor", "Fre"], [3, 5, 4, 6, 2]);
+    if (!teamName || !teamId) {
+        teamMembersEl.innerHTML = "<p>Intet team valgt.</p>";
+        teamFeedEl.innerHTML = "<p>Ingen data.</p>";
+        return;
     }
 
-    if (barCtx) {
-      createBarChart(barCtx, ["Jakob", "Maria", "Jonas"], [5, 3, 4]);
+    // ---------- Hent teamets medlemmer ----------
+    async function fetchTeamMembers() {
+        try {
+            const res = await fetch(`${API_BASE}/api/team/users?team=${teamName}`);
+            if (!res.ok) throw new Error("Bad response");
+            return await res.json();
+        } catch (err) {
+            console.warn("Kunne ikke hente team-medlemmer:", err);
+            return [];
+        }
     }
-  }
 
-  loadDashboard();
+    // ---------- Hent teamets feed ----------
+    async function fetchTeamFeed() {
+        try {
+            const res = await fetch(`${API_BASE}/api/team/feed?team=${teamName}`);
+            if (!res.ok) throw new Error("Bad response");
+            return await res.json();
+        } catch (err) {
+            console.warn("Kunne ikke hente team-feed:", err);
+            return [];
+        }
+    }
+
+    // ---------- Render medlemmer ----------
+    async function renderMembers() {
+        const members = await fetchTeamMembers();
+
+        if (members.length === 0) {
+            teamMembersEl.innerHTML = "<p>Ingen medlemmer endnu.</p>";
+            return;
+        }
+
+        teamMembersEl.innerHTML = members
+            .map(m => `<div class="member-item">${m.name}</div>`)
+            .join("");
+    }
+
+    // ---------- Render feed ----------
+    async function renderFeed() {
+        const feed = await fetchTeamFeed();
+
+        if (feed.length === 0) {
+            teamFeedEl.innerHTML = "<p>Ingen aktiviteter endnu.</p>";
+            return;
+        }
+
+        teamFeedEl.innerHTML = feed
+            .map(item => {
+                const time = new Date(item.created_at).toLocaleTimeString("da-DK", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false
+                });
+
+                return `<div class="feed-item">
+                    <strong>${item.name}</strong> kl. ${time}: ${item.activity}
+                </div>`;
+            })
+            .join("");
+    }
+
+    // ---------- Init ----------
+    renderMembers();
+    renderFeed();
+
+    // Opdater dashboard hvert 20. sekund
+    setInterval(() => {
+        renderMembers();
+        renderFeed();
+    }, 20000);
 });
