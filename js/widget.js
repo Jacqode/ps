@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const ideaBtn = document.getElementById("ideaBtn");
     const doneBtn = document.getElementById("doneBtn");
     const currentIdea = document.getElementById("currentIdea");
@@ -57,7 +57,29 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Gem lokalt (fallback)
+    // ---------- Registrér bruger i backend ----------
+    async function registerUser() {
+        if (!savedName || !savedTeam) return;
+
+        try {
+            const res = await fetch(`${API_BASE}/api/user`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: savedName, team: savedTeam })
+            });
+
+            const data = await res.json();
+
+            if (data.user_id) {
+                localStorage.setItem("userId", data.user_id);
+                localStorage.setItem("teamId", data.team_id);
+            }
+        } catch (err) {
+            console.warn("Kunne ikke registrere bruger:", err);
+        }
+    }
+
+    // ---------- Gem lokalt (fallback) ----------
     function saveLocal(text) {
         const list = JSON.parse(localStorage.getItem("feed") || "[]");
         list.unshift({
@@ -69,10 +91,10 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("feed", JSON.stringify(list));
     }
 
-    // Send pause til backend
+    // ---------- Send break til backend ----------
     async function saveBreak(text) {
         const payload = {
-            name: savedName,
+            user_id: localStorage.getItem("userId"),
             team: savedTeam,
             activity: text
         };
@@ -84,21 +106,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify(payload)
             });
         } catch (err) {
-            // fallback til localStorage
             saveLocal(text);
         }
 
         renderFeed();
     }
 
-    // Hent feed fra backend
+    // ---------- Hent team-feed ----------
     async function fetchFeed() {
         try {
-            const res = await fetch(`${API_BASE}/api/feed`);
+            const res = await fetch(`${API_BASE}/api/team/feed?team=${savedTeam}`);
             if (!res.ok) throw new Error("Bad response");
             const data = await res.json();
 
-            // Konverter backend-data til widget-format
             return data.map(item => ({
                 name: item.name,
                 team: item.team,
@@ -110,12 +130,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 })
             }));
         } catch (err) {
-            // fallback til localStorage
             return JSON.parse(localStorage.getItem("feed") || "[]");
         }
     }
 
-    // Vis feed (seneste 5)
+    // ---------- Render feed ----------
     async function renderFeed() {
         const list = await fetchFeed();
         const latest = list.slice(0, 5);
@@ -132,6 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .join("");
     }
 
+    // ---------- UI events ----------
     ideaBtn.addEventListener("click", () => {
         const idea = ideas[Math.floor(Math.random() * ideas.length)];
         currentIdea.style.opacity = 1;
@@ -155,5 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 3000);
     });
 
+    // ---------- Init ----------
+    await registerUser();
     renderFeed();
 });
