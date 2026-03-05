@@ -1,72 +1,83 @@
 <!DOCTYPE html>
 <html lang="da">
 <head>
-  <meta charset="utf-8" />
-  <title>Break Buddy – Dashboard</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="css/style.css?v=20260305" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plug & Pause – Dashboard</title>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        h1, h2, h3, h4 {
+            margin-bottom: 10px;
+        }
+
+        .section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        .member-item, .feed-item {
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        canvas {
+            margin-top: 20px;
+            background: #fff;
+            border-radius: 8px;
+            padding: 10px;
+        }
+    </style>
 </head>
 
 <body>
-  <div class="app-container">
-    <h1>Dashboard</h1>
-    <p class="intro">Overblik over teamets pauser og aktivitet.</p>
 
-    <section id="teamStats">
-      <h2 class="feed-title">Teamstatus:</h2>
-      <div id="teamStatusBox">
-        <p>Indlæser…</p>
-      </div>
-    </section>
+    <h1>Plug & Pause – Team Dashboard</h1>
 
-    <section id="recentBreaks" style="margin-top:20px">
-      <h2 class="feed-title">Seneste pauser:</h2>
-      <div id="breakList">
-        <p>Indlæser…</p>
-      </div>
-    </section>
+    <!-- Team Members -->
+    <div class="section">
+        <h2>Team medlemmer</h2>
+        <div id="teamMembers">Indlæser...</div>
+    </div>
 
-    <a class="settings" href="admin.html" style="margin-top:20px">Admin</a>
-  </div>
+    <!-- Team Feed -->
+    <div class="section">
+        <h2>Seneste aktivitet</h2>
+        <div id="teamFeed">Indlæser...</div>
+    </div>
 
-  <script>
-    // KLAR TIL CLOUDLARE API – statisk fallback indtil backend er klar
+    <!-- Team Stats -->
+    <div class="section">
+        <h2>Statistik</h2>
+        <div id="teamStats">Indlæser...</div>
+    </div>
 
-    async function loadDashboard() {
-      const teamBox = document.getElementById("teamStatusBox");
-      const breakList = document.getElementById("breakList");
+    <!-- Charts -->
+    <div class="section">
+        <h2>Grafer</h2>
 
-      // Fallback-data (erstattes af API senere)
-      const fallbackTeam = {
-        name: "Sundhed",
-        members: 5,
-        breaksToday: 14
-      };
+        <h3>Aktivitet pr. medlem</h3>
+        <canvas id="userChart" width="400" height="200"></canvas>
 
-      const fallbackBreaks = [
-        { name: "Jakob", time: "14:03", text: "Stræk armene over hovedet 🙆‍♂️" },
-        { name: "Ukendt", time: "13:55", text: "10 dybe vejrtrækninger 🌬️" },
-        { name: "Maria", time: "13:40", text: "Ryst hænderne i 10 sekunder 🤲" },
-        { name: "Jonas", time: "13:20", text: "10 tåhævninger 🦶" },
-        { name: "Sofie", time: "13:05", text: "Rul skuldrene 🔄" }
-      ];
+        <h3>Aktivitet pr. dag (seneste 7 dage)</h3>
+        <canvas id="dayChart" width="400" height="200"></canvas>
+    </div>
 
-      teamBox.innerHTML = `
-        <p><strong>Team:</strong> ${fallbackTeam.name}</p>
-        <p><strong>Medlemmer:</strong> ${fallbackTeam.members}</p>
-        <p><strong>Pauser i dag:</strong> ${fallbackTeam.breaksToday}</p>
-      `;
+    <!-- Dashboard Logic -->
+    <script src="js/dashboard.js"></script>
 
-      breakList.innerHTML = fallbackBreaks
-        .map(b => `
-          <div class="feed-item">
-            <strong>${b.name}</strong> kl. ${b.time}: ${b.text}
-          </div>
-        `)
-        .join("");
-    }
-
-    loadDashboard();
-  </script>
 </body>
 </html>
