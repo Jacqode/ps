@@ -104,8 +104,3 @@ input {
   font-size:13px;
   color:var(--muted);
 }
-
-/* VIGTIGT: “Jeg er færdig” er skjult som default */
-#doneBtn {
-  visibility: hidden;
-}
