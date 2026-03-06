@@ -6,6 +6,27 @@
   <title>Plug & Pause</title>
 
   <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    /* Fallback-toast hvis notifications ikke er tilladt */
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #222;
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 6px;
+      font-size: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 9999;
+    }
+    #toast.show {
+      opacity: 1;
+    }
+  </style>
 </head>
 
 <body>
@@ -38,10 +59,95 @@
         <label for="teamInput">Team</label>
         <input id="teamInput" placeholder="Teamnavn" />
 
+        <label for="intervalInput">Minutter mellem påmindelser</label>
+        <input id="intervalInput" type="number" min="1" placeholder="fx 45" />
+
         <button id="saveBtn" style="margin-top:10px">Gem</button>
       </div>
     </div>
   </div>
+
+  <div id="toast"></div>
+
+  <script>
+    // --- NOTIFIKATIONER ---
+
+    function requestNotificationPermission() {
+      if (!("Notification" in window)) return;
+      if (Notification.permission === "default") {
+        Notification.requestPermission();
+      }
+    }
+
+    function showNativeNotification(title, body) {
+      if (!("Notification" in window)) return;
+
+      if (Notification.permission === "granted") {
+        new Notification(title, {
+          body: body,
+          icon: "img/icon.png"
+        });
+      } else {
+        showToast(body);
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 3000);
+    }
+
+    // --- GEM / INDLÆS INDSTILLINGER ---
+
+    document.getElementById("saveBtn").addEventListener("click", () => {
+      const name = document.getElementById("nameInput").value;
+      const team = document.getElementById("teamInput").value;
+      const interval = document.getElementById("intervalInput").value;
+
+      localStorage.setItem("userName", name);
+      localStorage.setItem("teamName", team);
+      localStorage.setItem("reminderInterval", interval);
+
+      showToast("Indstillinger gemt");
+    });
+
+    window.addEventListener("load", () => {
+      const savedName = localStorage.getItem("userName");
+      const savedTeam = localStorage.getItem("teamName");
+      const savedInterval = localStorage.getItem("reminderInterval");
+
+      if (savedName) document.getElementById("nameInput").value = savedName;
+      if (savedTeam) document.getElementById("teamInput").value = savedTeam;
+      if (savedInterval) document.getElementById("intervalInput").value = savedInterval;
+
+      startReminderTimer();
+    });
+
+    // --- PÅMINDELSES-TIMER ---
+
+    function startReminderTimer() {
+      const minutes = Number(localStorage.getItem("reminderInterval") || 45);
+
+      setTimeout(() => {
+        showNativeNotification("Tid til en pause!", "Rejs dig og tag en kort aktivitet.");
+        startReminderTimer(); // start igen
+      }, minutes * 60 * 1000);
+    }
+
+    // --- KNAPPER ---
+
+    document.getElementById("activityBtn").addEventListener("click", () => {
+      showNativeNotification("Ny aktivitet", "Her er en aktivitet til dig.");
+    });
+
+    document.getElementById("doneBtn").addEventListener("click", () => {
+      showNativeNotification("Godt gået!", "Du har gennemført din pause.");
+    });
+
+    requestNotificationPermission();
+  </script>
 
   <script src="js/widget.js"></script>
 </body>
