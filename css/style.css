@@ -118,3 +118,18 @@ input {
   margin-top: 12px;
 }
 
+#microFeedback {
+  font-size: 2rem;          /* samme størrelse som aktivitet */
+  font-weight: 700;
+  line-height: 1.4;
+
+  background: #f5f5f5;      /* samme baggrund */
+  border: 1px solid #ddd;   /* samme ramme */
+  border-radius: 8px;       /* samme afrunding */
+  padding: 14px 16px;       /* samme luft */
+
+  margin-top: 12px;
+  display: none;            /* vises kun når du aktiverer det */
+}
+
+
