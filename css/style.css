@@ -109,4 +109,6 @@ input {
   font-size: 2rem;   /* eller 2rem hvis du vil have den endnu større */
   font-weight: 700;
   line-height: 1.4;
+  margin-top: 12px;
+  color: #111; /* eller en brand-farve */
 }
