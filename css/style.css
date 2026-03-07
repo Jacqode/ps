@@ -106,9 +106,15 @@ input {
 }
 
 #currentActivity {
-  font-size: 2rem;   /* eller 2rem hvis du vil have den endnu større */
+  font-size: 2rem;          /* tydeligst i hele widgeten */
   font-weight: 700;
   line-height: 1.4;
+
+  background: #f5f5f5;      /* let, rolig baggrund */
+  border: 1px solid #ddd;   /* subtil ramme */
+  border-radius: 8px;       /* moderne afrunding */
+  padding: 14px 16px;       /* luft omkring teksten */
+
   margin-top: 12px;
-  color: #111; /* eller en brand-farve */
 }
+
