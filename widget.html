@@ -148,6 +148,18 @@
     // Ingen notifikation her
     });
 
+  document.getElementById("doneBtn").addEventListener("click", () => {
+    const feedback = document.getElementById("microFeedback");
+    feedback.textContent = "Godt klaret! Fortsæt den gode vane 💪";
+    feedback.style.display = "block";
+
+    // Skjul igen efter 8 sekunder (valgfrit)
+    setTimeout(() => {
+      feedback.style.display = "none";
+    }, 8000);
+});
+
+    
   </script>
 
   <script src="js/widget.js"></script>
