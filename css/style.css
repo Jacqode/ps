@@ -104,3 +104,9 @@ input {
   font-size:13px;
   color:var(--muted);
 }
+
+#currentActivity {
+  font-size: 1.6rem;   /* eller 2rem hvis du vil have den endnu større */
+  font-weight: 600;
+  line-height: 1.4;
+}
