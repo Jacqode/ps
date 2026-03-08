@@ -132,4 +132,9 @@ input {
   display: none;            /* vises kun når du aktiverer det */
 }
 
+#upgradeBtn {
+  margin-top: 12px;
+  display: block;
+  text-align: center;
+}
 
