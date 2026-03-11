@@ -1,8 +1,30 @@
-// --- Dummy data (pauser pr. dag) ---
-// Senere kan du hente dette fra backend
-const data = [3, 4, 2, 5, 6, 7, 3, 4, 5, 8, 9, 4, 3, 6, 7];
+// ---------------------------------------------------------
+// Plug & Pause – Admin Dashboard
+// ---------------------------------------------------------
 
-// --- Beregn median ---
+const API_BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
+const TEAM = "løverne"; // midlertidigt hardcoded
+
+// ---------------------------------------------------------
+// LOAD FEED
+// ---------------------------------------------------------
+async function loadFeed() {
+  const res = await fetch(`${API_BASE}/api/team/feed?team=${TEAM}`);
+  const data = await res.json();
+
+  const feedEl = document.getElementById("feed");
+  feedEl.innerHTML = data.map(item => {
+    const time = new Date(item.created_at).toLocaleTimeString("da-DK", {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+    return `<div class="feed-item"><strong>${item.name}</strong> kl. ${time}: ${item.activity}</div>`;
+  }).join("");
+}
+
+// ---------------------------------------------------------
+// HELPER FUNCTIONS FOR ANHØJ SERIES DIAGRAM
+// ---------------------------------------------------------
 function median(values) {
   const sorted = [...values].sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
@@ -11,9 +33,6 @@ function median(values) {
     : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
-const med = median(data);
-
-// --- Beregn kryds over median ---
 function countCrossings(values, med) {
   let crossings = 0;
   for (let i = 1; i < values.length; i++) {
@@ -25,9 +44,6 @@ function countCrossings(values, med) {
   return crossings;
 }
 
-const crossings = countCrossings(data, med);
-
-// --- Beregn længste serie på samme side af median ---
 function longestRun(values, med) {
   let longest = 0;
   let current = 0;
@@ -49,61 +65,110 @@ function longestRun(values, med) {
   return longest;
 }
 
-const runLength = longestRun(data, med);
-
-// --- Anhøj vurdering (meget forsimplet) ---
 function variationAssessment(crossings, n) {
-  // Tommelfingerregel: få kryds → ikke-tilfældig variation
   const expected = Math.floor((n - 1) / 2);
-
   return crossings < expected * 0.5
     ? "Ikke-tilfældig variation (procesændring sandsynlig)"
     : "Tilfældig variation (normal variation)";
 }
 
-const assessment = variationAssessment(crossings, data.length);
+// ---------------------------------------------------------
+// LOAD STATS + ALL CHARTS
+// ---------------------------------------------------------
+async function loadStats() {
+  const res = await fetch(`${API_BASE}/api/team/stats?team=${TEAM}`);
+  const stats = await res.json();
 
-// --- Indsæt vurdering i DOM ---
-document.getElementById("statsOverview").innerHTML = `
-  <p><strong>Median:</strong> ${med}</p>
-  <p><strong>Kryds over median:</strong> ${crossings}</p>
-  <p><strong>Længste serie:</strong> ${runLength}</p>
-  <p><strong>Vurdering:</strong> ${assessment}</p>
-`;
+  // Total breaks
+  document.getElementById("totalBreaks").textContent =
+    `Total breaks: ${stats.total_breaks}`;
 
-// --- Tegn seriediagram med Chart.js ---
-const ctx = document.getElementById("chartDaily");
-
-new Chart(ctx, {
-  type: "line",
-  data: {
-    labels: data.map((_, i) => `Dag ${i + 1}`),
-    datasets: [
-      {
-        label: "Pauser pr. dag",
-        data: data,
-        borderColor: "#007aff",
-        borderWidth: 2,
-        fill: false,
-        tension: 0.1
-      },
-      {
-        label: "Median",
-        data: Array(data.length).fill(med),
-        borderColor: "#ff3b30",
-        borderDash: [5, 5],
-        borderWidth: 2,
-        fill: false
-      }
-    ]
-  },
-  options: {
-    responsive: true,
-    plugins: {
-      legend: { position: "bottom" }
-    },
-    scales: {
-      y: { beginAtZero: true }
+  // -------------------------------------------------------
+  // CHART 1: Breaks per user (bar)
+  // -------------------------------------------------------
+  new Chart(document.getElementById("perUserChart"), {
+    type: "bar",
+    data: {
+      labels: stats.breaks_per_user.map(u => u.name),
+      datasets: [{
+        label: "Breaks pr. bruger",
+        data: stats.breaks_per_user.map(u => u.count),
+        backgroundColor: "#4CAF50"
+      }]
     }
-  }
-});
+  });
+
+  // -------------------------------------------------------
+  // CHART 2: Breaks per day (line)
+  // -------------------------------------------------------
+  new Chart(document.getElementById("perDayChart"), {
+    type: "line",
+    data: {
+      labels: stats.breaks_per_day.map(d => d.day),
+      datasets: [{
+        label: "Breaks pr. dag",
+        data: stats.breaks_per_day.map(d => d.count),
+        borderColor: "#2196F3",
+        fill: false
+      }]
+    }
+  });
+
+  // -------------------------------------------------------
+  // CHART 3: Seriediagram (Anhøj)
+  // -------------------------------------------------------
+  const dailyCounts = stats.breaks_per_day.map(d => d.count);
+  const med = median(dailyCounts);
+  const crossings = countCrossings(dailyCounts, med);
+  const runLength = longestRun(dailyCounts, med);
+  const assessment = variationAssessment(crossings, dailyCounts.length);
+
+  // Write stats to DOM
+  document.getElementById("seriesStats").innerHTML = `
+    <p><strong>Median:</strong> ${med}</p>
+    <p><strong>Kryds over median:</strong> ${crossings}</p>
+    <p><strong>Længste serie:</strong> ${runLength}</p>
+    <p><strong>Vurdering:</strong> ${assessment}</p>
+  `;
+
+  // Draw series chart
+  new Chart(document.getElementById("seriesChart"), {
+    type: "line",
+    data: {
+      labels: stats.breaks_per_day.map(d => d.day),
+      datasets: [
+        {
+          label: "Pauser pr. dag",
+          data: dailyCounts,
+          borderColor: "#673ab7",
+          borderWidth: 2,
+          fill: false,
+          tension: 0.1
+        },
+        {
+          label: "Median",
+          data: Array(dailyCounts.length).fill(med),
+          borderColor: "#ff3b30",
+          borderDash: [5, 5],
+          borderWidth: 2,
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: "bottom" }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+}
+
+// ---------------------------------------------------------
+// INIT
+// ---------------------------------------------------------
+loadFeed();
+loadStats();
