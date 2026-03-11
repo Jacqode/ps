@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Plug & Pause – Admin</title>
 
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="js/admin.js"></script>
+  <!-- Vores egen kode -->
+  <script src="js/admin.js" defer></script>
 
   <style>
     body {
@@ -67,66 +69,11 @@
 
     <canvas id="perUserChart" height="200"></canvas>
     <canvas id="perDayChart" height="200"></canvas>
+
     <h2>Seriediagram (Anhøj)</h2>
     <div id="seriesStats">Indlæser...</div>
     <canvas id="seriesChart" height="200"></canvas>
-
   </div>
-
-  <script>
-    const API_BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
-    const TEAM = "løverne"; // midlertidigt hardcoded
-
-    async function loadFeed() {
-      const res = await fetch(`${API_BASE}/api/team/feed?team=${TEAM}`);
-      const data = await res.json();
-
-      const feedEl = document.getElementById("feed");
-      feedEl.innerHTML = data.map(item => {
-        const time = new Date(item.created_at).toLocaleTimeString("da-DK", {
-          hour: "2-digit",
-          minute: "2-digit"
-        });
-        return `<div class="feed-item"><strong>${item.name}</strong> kl. ${time}: ${item.activity}</div>`;
-      }).join("");
-    }
-
-    async function loadStats() {
-      const res = await fetch(`${API_BASE}/api/team/stats?team=${TEAM}`);
-      const stats = await res.json();
-
-      document.getElementById("totalBreaks").textContent =
-        `Total breaks: ${stats.total_breaks}`;
-
-      new Chart(document.getElementById("perUserChart"), {
-        type: "bar",
-        data: {
-          labels: stats.breaks_per_user.map(u => u.name),
-          datasets: [{
-            label: "Breaks pr. bruger",
-            data: stats.breaks_per_user.map(u => u.count),
-            backgroundColor: "#4CAF50"
-          }]
-        }
-      });
-
-      new Chart(document.getElementById("perDayChart"), {
-        type: "line",
-        data: {
-          labels: stats.breaks_per_day.map(d => d.day),
-          datasets: [{
-            label: "Breaks pr. dag",
-            data: stats.breaks_per_day.map(d => d.count),
-            borderColor: "#2196F3",
-            fill: false
-          }]
-        }
-      });
-    }
-
-    loadFeed();
-    loadStats();
-  </script>
 
 </body>
 </html>
