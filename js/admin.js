@@ -1,31 +1,52 @@
 // ---------------------------------------------------------
-// Plug & Pause – Admin Dashboard
+// Plug & Pause – Admin Dashboard (robust version)
 // ---------------------------------------------------------
 
 const API_BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
 const TEAM = "løverne"; // midlertidigt hardcoded
 
 // ---------------------------------------------------------
+// LOGGING HELPER
+// ---------------------------------------------------------
+function safeLog(...args) {
+  if (window.console && console.log) console.log(...args);
+}
+
+// ---------------------------------------------------------
 // LOAD FEED
 // ---------------------------------------------------------
 async function loadFeed() {
-  const res = await fetch(`${API_BASE}/api/team/feed?team=${TEAM}`);
-  const data = await res.json();
+  try {
+    const res = await fetch(`${API_BASE}/api/team/feed?team=${TEAM}`);
+    if (!res.ok) throw new Error(`Feed fetch failed: ${res.status}`);
+    const data = await res.json();
+    safeLog("feed response:", data);
 
-  const feedEl = document.getElementById("feed");
-  feedEl.innerHTML = data.map(item => {
-    const time = new Date(item.created_at).toLocaleTimeString("da-DK", {
-      hour: "2-digit",
-      minute: "2-digit"
-    });
-    return `<div class="feed-item"><strong>${item.name}</strong> kl. ${time}: ${item.activity}</div>`;
-  }).join("");
+    const feedEl = document.getElementById("feed");
+    if (!Array.isArray(data) || data.length === 0) {
+      feedEl.textContent = "Ingen feed‑data.";
+      return;
+    }
+
+    feedEl.innerHTML = data.map(item => {
+      const time = new Date(item.created_at).toLocaleTimeString("da-DK", {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+      return `<div class="feed-item"><strong>${item.name}</strong> kl. ${time}: ${item.activity}</div>`;
+    }).join("");
+  } catch (err) {
+    safeLog("loadFeed error:", err);
+    const feedEl = document.getElementById("feed");
+    feedEl.textContent = "Fejl ved indlæsning af feed.";
+  }
 }
 
 // ---------------------------------------------------------
 // HELPER FUNCTIONS FOR ANHØJ SERIES DIAGRAM
 // ---------------------------------------------------------
 function median(values) {
+  if (!Array.isArray(values) || values.length === 0) return 0;
   const sorted = [...values].sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
   return sorted.length % 2 !== 0
@@ -34,6 +55,7 @@ function median(values) {
 }
 
 function countCrossings(values, med) {
+  if (!Array.isArray(values) || values.length < 2) return 0;
   let crossings = 0;
   for (let i = 1; i < values.length; i++) {
     if ((values[i - 1] < med && values[i] > med) ||
@@ -45,6 +67,7 @@ function countCrossings(values, med) {
 }
 
 function longestRun(values, med) {
+  if (!Array.isArray(values) || values.length === 0) return 0;
   let longest = 0;
   let current = 0;
   let lastSide = null;
@@ -66,6 +89,7 @@ function longestRun(values, med) {
 }
 
 function variationAssessment(crossings, n) {
+  if (!n || n < 2) return "Ikke nok data til vurdering";
   const expected = Math.floor((n - 1) / 2);
   return crossings < expected * 0.5
     ? "Ikke-tilfældig variation (procesændring sandsynlig)"
@@ -73,102 +97,135 @@ function variationAssessment(crossings, n) {
 }
 
 // ---------------------------------------------------------
-// LOAD STATS + ALL CHARTS
+// SAFE CHART CREATION (destroy existing if present)
 // ---------------------------------------------------------
-async function loadStats() {
-  const res = await fetch(`${API_BASE}/api/team/stats?team=${TEAM}`);
-  const stats = await res.json();
-
-  // Total breaks
-  document.getElementById("totalBreaks").textContent =
-    `Total breaks: ${stats.total_breaks}`;
-
-  // -------------------------------------------------------
-  // CHART 1: Breaks per user (bar)
-  // -------------------------------------------------------
-  new Chart(document.getElementById("perUserChart"), {
-    type: "bar",
-    data: {
-      labels: stats.breaks_per_user.map(u => u.name),
-      datasets: [{
-        label: "Breaks pr. bruger",
-        data: stats.breaks_per_user.map(u => u.count),
-        backgroundColor: "#4CAF50"
-      }]
-    }
-  });
-
-  // -------------------------------------------------------
-  // CHART 2: Breaks per day (line)
-  // -------------------------------------------------------
-  new Chart(document.getElementById("perDayChart"), {
-    type: "line",
-    data: {
-      labels: stats.breaks_per_day.map(d => d.day),
-      datasets: [{
-        label: "Breaks pr. dag",
-        data: stats.breaks_per_day.map(d => d.count),
-        borderColor: "#2196F3",
-        fill: false
-      }]
-    }
-  });
-
-  // -------------------------------------------------------
-  // CHART 3: Seriediagram (Anhøj)
-  // -------------------------------------------------------
-  const dailyCounts = stats.breaks_per_day.map(d => d.count);
-  const med = median(dailyCounts);
-  const crossings = countCrossings(dailyCounts, med);
-  const runLength = longestRun(dailyCounts, med);
-  const assessment = variationAssessment(crossings, dailyCounts.length);
-
-  // Write stats to DOM
-  document.getElementById("seriesStats").innerHTML = `
-    <p><strong>Median:</strong> ${med}</p>
-    <p><strong>Kryds over median:</strong> ${crossings}</p>
-    <p><strong>Længste serie:</strong> ${runLength}</p>
-    <p><strong>Vurdering:</strong> ${assessment}</p>
-  `;
-
-  // Draw series chart
-  new Chart(document.getElementById("seriesChart"), {
-    type: "line",
-    data: {
-      labels: stats.breaks_per_day.map(d => d.day),
-      datasets: [
-        {
-          label: "Pauser pr. dag",
-          data: dailyCounts,
-          borderColor: "#673ab7",
-          borderWidth: 2,
-          fill: false,
-          tension: 0.1
-        },
-        {
-          label: "Median",
-          data: Array(dailyCounts.length).fill(med),
-          borderColor: "#ff3b30",
-          borderDash: [5, 5],
-          borderWidth: 2,
-          fill: false
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { position: "bottom" }
-      },
-      scales: {
-        y: { beginAtZero: true }
-      }
-    }
-  });
+function createOrUpdateChart(canvasEl, config) {
+  if (!canvasEl) return null;
+  // Chart.js stores instance on canvasEl.__chartInstance (custom)
+  if (canvasEl.__chartInstance) {
+    try { canvasEl.__chartInstance.destroy(); } catch (e) { safeLog("destroy chart error", e); }
+    canvasEl.__chartInstance = null;
+  }
+  const ctx = canvasEl.getContext("2d");
+  const chart = new Chart(ctx, config);
+  canvasEl.__chartInstance = chart;
+  return chart;
 }
 
 // ---------------------------------------------------------
-// INIT
+// LOAD STATS + ALL CHARTS
 // ---------------------------------------------------------
-loadFeed();
-loadStats();
+async function loadStats() {
+  try {
+    const res = await fetch(`${API_BASE}/api/team/stats?team=${TEAM}`);
+    if (!res.ok) throw new Error(`Stats fetch failed: ${res.status}`);
+    const stats = await res.json();
+    safeLog("stats response:", stats);
+
+    // Defensive defaults
+    const breaksPerUser = Array.isArray(stats?.breaks_per_user) ? stats.breaks_per_user : [];
+    const breaksPerDay = Array.isArray(stats?.breaks_per_day) ? stats.breaks_per_day : [];
+
+    // Update total
+    const totalText = typeof stats?.total_breaks !== "undefined" ? stats.total_breaks : "–";
+    document.getElementById("totalBreaks").textContent = `Total breaks: ${totalText}`;
+
+    // CHART 1: Breaks per user (bar)
+    createOrUpdateChart(document.getElementById("perUserChart"), {
+      type: "bar",
+      data: {
+        labels: breaksPerUser.map(u => u.name || "Ukendt"),
+        datasets: [{
+          label: "Breaks pr. bruger",
+          data: breaksPerUser.map(u => Number(u.count) || 0),
+          backgroundColor: "#4CAF50"
+        }]
+      },
+      options: { responsive: true }
+    });
+
+    // CHART 2: Breaks per day (line)
+    createOrUpdateChart(document.getElementById("perDayChart"), {
+      type: "line",
+      data: {
+        labels: breaksPerDay.map(d => d.day || ""),
+        datasets: [{
+          label: "Breaks pr. dag",
+          data: breaksPerDay.map(d => Number(d.count) || 0),
+          borderColor: "#2196F3",
+          fill: false
+        }]
+      },
+      options: { responsive: true }
+    });
+
+    // CHART 3: Seriediagram (Anhøj)
+    const dailyCounts = breaksPerDay.map(d => Number(d.count) || 0);
+    if (dailyCounts.length === 0) {
+      document.getElementById("seriesStats").innerHTML = "<p>Ingen daglige data til seriediagram.</p>";
+      // clear seriesChart if exists
+      createOrUpdateChart(document.getElementById("seriesChart"), {
+        type: "line",
+        data: { labels: [], datasets: [] },
+        options: {}
+      });
+      return;
+    }
+
+    const med = median(dailyCounts);
+    const crossings = countCrossings(dailyCounts, med);
+    const runLength = longestRun(dailyCounts, med);
+    const assessment = variationAssessment(crossings, dailyCounts.length);
+
+    document.getElementById("seriesStats").innerHTML = `
+      <p><strong>Median:</strong> ${med}</p>
+      <p><strong>Kryds over median:</strong> ${crossings}</p>
+      <p><strong>Længste serie:</strong> ${runLength}</p>
+      <p><strong>Vurdering:</strong> ${assessment}</p>
+    `;
+
+    createOrUpdateChart(document.getElementById("seriesChart"), {
+      type: "line",
+      data: {
+        labels: breaksPerDay.map(d => d.day || ""),
+        datasets: [
+          {
+            label: "Pauser pr. dag",
+            data: dailyCounts,
+            borderColor: "#673ab7",
+            borderWidth: 2,
+            fill: false,
+            tension: 0.1
+          },
+          {
+            label: "Median",
+            data: Array(dailyCounts.length).fill(med),
+            borderColor: "#ff3b30",
+            borderDash: [5, 5],
+            borderWidth: 2,
+            fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: "bottom" } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+
+  } catch (err) {
+    safeLog("loadStats error:", err);
+    document.getElementById("totalBreaks").textContent = "Total breaks: fejl";
+    document.getElementById("seriesStats").textContent = "Fejl ved indlæsning af statistik.";
+  }
+}
+
+// ---------------------------------------------------------
+// INIT when DOM ready
+// ---------------------------------------------------------
+window.addEventListener("DOMContentLoaded", () => {
+  safeLog("DOM ready — starting loadFeed/loadStats");
+  loadFeed();
+  loadStats();
+});
