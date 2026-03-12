@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="css/style.css">
 
   <style>
-    /* Fallback-toast hvis notifications ikke er tilladt */
     #toast {
       position: fixed;
       bottom: 20px;
@@ -24,12 +23,12 @@
       z-index: 9999;
     }
     #toast.show { opacity: 1; }
+
+    .wrap { max-width:420px; margin:40px auto; padding:16px; }
+    .card { background:#fff; padding:18px; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.06); }
     .controls { display:flex; gap:8px; margin-top:12px; }
     .small { font-size:14px; color:#444; }
     .secondary { background:#eee; border:1px solid #ddd; padding:8px 12px; cursor:pointer; }
-    .wrap { max-width:420px; margin:40px auto; padding:16px; }
-    .card { background:#fff; padding:18px; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.06); }
-    .lead { color:#666; margin-top:6px; }
   </style>
 </head>
 
@@ -37,57 +36,27 @@
   <div class="wrap">
     <div class="card">
 
-      <h2 id="greeting">Hej</h2>
+      <h2>Hej 👋</h2>
       <p class="lead">20–60 sekunders let aktivitet øger energien.</p>
 
-      <!-- KNAPPER -->
       <div class="controls">
         <button id="getActivityBtn">Få en aktivitet</button>
         <button id="doneBtn" class="secondary" style="display:none;">Jeg er færdig</button>
       </div>
 
-      <!-- AKTIVITETSBOKS -->
       <div id="activityBox" class="small" style="margin-top:10px; display:none;">
         <div id="activityText"></div>
       </div>
 
-      <!-- FEEDBACK -->
       <div id="feedbackBox" class="small" style="margin-top:10px; display:none;"></div>
 
-      <!-- FEED -->
       <h3 style="margin-top:18px;">Det gør dine buddies:</h3>
       <div id="feed">
         <div class="small">Indlæser…</div>
       </div>
 
-      <!-- STATS -->
       <div id="stats" class="small" style="margin-top:10px">
         Indlæser statistik…
-      </div>
-
-      <!-- INDSTILLINGER -->
-      <button id="settingsBtn" style="margin-top:12px;">Indstillinger</button>
-
-      <div id="settingsPanel" aria-hidden="true" style="display:none; margin-top:10px;">
-        <label for="nameInput">Dit navn</label>
-        <input id="nameInput" placeholder="Dit navn" />
-
-        <label for="teamInput">Team</label>
-        <input id="teamInput" placeholder="Teamnavn" />
-
-        <label for="intervalInput">Minutter mellem påmindelser</label>
-        <input id="intervalInput" type="number" min="1" placeholder="fx 45" />
-
-        <button id="saveBtn" style="margin-top:10px">Gem</button>
-
-        <!-- Stripe -->
-        <a href="https://buy.stripe.com/test_3cIfZhf4b0jL3hX4AZ67S00"
-           target="_blank"
-           id="upgradeBtn"
-           class="secondary"
-           style="margin-top:12px; display:block; text-align:center;">
-          Opgradér til Pro
-        </a>
       </div>
 
     </div>
@@ -95,77 +64,6 @@
 
   <div id="toast"></div>
 
-  <!-- NOTIFIKATIONER + SETTINGS -->
-  <script>
-    function requestNotificationPermission() {
-      if (!("Notification" in window)) return;
-      if (Notification.permission === "default") Notification.requestPermission();
-    }
-
-    function showNativeNotification(title, body) {
-      if (!("Notification" in window)) return;
-      if (Notification.permission === "granted") {
-        new Notification(title, { body: body, icon: "img/icon.png" });
-      } else {
-        showToast(body);
-      }
-    }
-
-    function showToast(message) {
-      const toast = document.getElementById("toast");
-      toast.textContent = message;
-      toast.classList.add("show");
-      setTimeout(() => toast.classList.remove("show"), 3000);
-    }
-
-    // GEM / INDLÆS INDSTILLINGER
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("saveBtn").addEventListener("click", () => {
-        const name = document.getElementById("nameInput").value;
-        const team = document.getElementById("teamInput").value;
-        const interval = document.getElementById("intervalInput").value;
-
-        localStorage.setItem("userName", name);
-        localStorage.setItem("teamName", team);
-        localStorage.setItem("reminderInterval", interval);
-
-        showToast("Indstillinger gemt");
-      });
-
-      const savedName = localStorage.getItem("userName");
-      const savedTeam = localStorage.getItem("teamName");
-      const savedInterval = localStorage.getItem("reminderInterval");
-
-      if (savedName) document.getElementById("nameInput").value = savedName;
-      if (savedTeam) document.getElementById("teamInput").value = savedTeam;
-      if (savedInterval) document.getElementById("intervalInput").value = savedInterval;
-
-      startReminderTimer();
-
-      // settings toggle
-      document.getElementById("settingsBtn").addEventListener("click", () => {
-        const panel = document.getElementById("settingsPanel");
-        const hidden = panel.getAttribute("aria-hidden") === "true";
-        panel.setAttribute("aria-hidden", String(!hidden));
-        panel.style.display = hidden ? "block" : "none";
-      });
-
-      // request notifications once
-      requestNotificationPermission();
-    });
-
-    // PÅMINDELSES-TIMER
-    function startReminderTimer() {
-      const minutes = Number(localStorage.getItem("reminderInterval") || 45);
-      setTimeout(() => {
-        showNativeNotification("Tid til en pause!", "Rejs dig og tag en kort aktivitet.");
-        startReminderTimer();
-      }, minutes * 60 * 1000);
-    }
-  </script>
-
-  <!-- Widget logic -->
-  <script src="/ps/js/widget.js"></script>
-
+  <script src="js/widget.js"></script>
 </body>
 </html>
