@@ -1,7 +1,7 @@
 // -------------------------
 // Konfiguration
 // -------------------------
-const API_BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev"; 
+const API_BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
 let TEAM = null;
 
 // Hent team fra URL
@@ -67,7 +67,7 @@ async function loadStats() {
 }
 
 // -------------------------
-// RANDOM ACTIVITY (ny metode)
+// RANDOM ACTIVITY
 // -------------------------
 async function fetchRandomActivity() {
   try {
