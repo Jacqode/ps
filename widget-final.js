@@ -1,0 +1,31 @@
+// ---------------------------------------------
+// Plug & Pause – FINAL VERSION (no backend)
+// ---------------------------------------------
+
+const activities = [
+  "Stræk armene over hovedet 🙆‍♂️",
+  "Tag 10 dybe vejrtrækninger 🌬️",
+  "Gå en hurtig tur 🚶‍♂️",
+  "Lav 15 squats 🏋️‍♂️",
+  "Drik et glas vand 💧",
+  "Ryst kroppen i 20 sekunder 🕺",
+  "Kig ud af vinduet i 30 sekunder 🌤️",
+  "Lav 10 armstrækninger 💪",
+  "Skriv én ting du er taknemmelig for ✨",
+  "Rul skuldrene 10 gange 🔄",
+  "Tag en mental pause i 30 sekunder 🧘‍♂️",
+  "Stræk nakken forsigtigt 🙇‍♂️",
+  "Lav 20 jumping jacks 🤸‍♂️",
+  "Luk øjnene og slap af i 10 sekunder 😌",
+  "Smil til dig selv i skærmen 😄"
+];
+
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("activity-btn");
+  const box = document.getElementById("activity-box");
+
+  btn.addEventListener("click", () => {
+    const random = activities[Math.floor(Math.random() * activities.length)];
+    box.textContent = random;
+  });
+});
