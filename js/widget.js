@@ -1,24 +1,31 @@
-const API_BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
-const TEAM = "kk";
+// ---------------------------------------------
+// Plug & Pause – Hardcoded aktiviteter (offline)
+// ---------------------------------------------
+
+const activities = [
+  "Stræk armene over hovedet 🙆‍♂️",
+  "Tag 10 dybe vejrtrækninger 🌬️",
+  "Gå en hurtig tur 🚶‍♂️",
+  "Lav 15 squats 🏋️‍♂️",
+  "Drik et glas vand 💧",
+  "Ryst kroppen i 20 sekunder 🕺",
+  "Kig ud af vinduet i 30 sekunder 🌤️",
+  "Lav 10 armstrækninger 💪",
+  "Skriv én ting du er taknemmelig for ✨",
+  "Rul skuldrene 10 gange 🔄",
+  "Tag en mental pause i 30 sekunder 🧘‍♂️",
+  "Stræk nakken forsigtigt 🙇‍♂️",
+  "Lav 20 jumping jacks 🤸‍♂️",
+  "Luk øjnene og slap af i 10 sekunder 😌",
+  "Smil til dig selv i skærmen 😄"
+];
 
 const activityBtn = document.getElementById("activity-btn");
 const activityBox = document.getElementById("activity-box");
 
-async function getRandomActivity() {
-  try {
-    const res = await fetch(`${API_BASE}/api/team/feed?team=${TEAM}`);
-    const data = await res.json();
-
-    if (!Array.isArray(data) || data.length === 0) {
-      activityBox.textContent = "Ingen aktivitet.";
-      return;
-    }
-
-    const random = data[Math.floor(Math.random() * data.length)];
-    activityBox.textContent = random.activity;
-  } catch {
-    activityBox.textContent = "Fejl ved hentning.";
-  }
+function getRandomActivity() {
+  const random = activities[Math.floor(Math.random() * activities.length)];
+  activityBox.textContent = random;
 }
 
 activityBtn.addEventListener("click", getRandomActivity);
