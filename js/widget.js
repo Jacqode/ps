@@ -8,10 +8,12 @@ async function getRandomActivity() {
   try {
     const res = await fetch(`${API_BASE}/api/team/feed?team=${TEAM}`);
     const data = await res.json();
+
     if (!Array.isArray(data) || data.length === 0) {
       activityBox.textContent = "Ingen aktivitet.";
       return;
     }
+
     const random = data[Math.floor(Math.random() * data.length)];
     activityBox.textContent = random.activity;
   } catch {
