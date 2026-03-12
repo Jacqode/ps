@@ -2,12 +2,13 @@
 // Konfiguration
 // -------------------------
 const API_BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
-let TEAM = null;
+const DEFAULT_TEAM = "kk"; // fallback hvis ingen team i URL
 
-// Hent team fra URL
+// Hent team fra URL eller brug default
 function getTeamFromURL() {
   const params = new URLSearchParams(window.location.search);
-  return (params.get("team") || "").trim().toLowerCase();
+  const t = (params.get("team") || "").trim().toLowerCase();
+  return t || DEFAULT_TEAM;
 }
 
 // -------------------------
@@ -20,36 +21,49 @@ const activityBox = document.getElementById("activity-box");
 const activityBtn = document.getElementById("activity-btn");
 
 // -------------------------
+// Hjælpere
+// -------------------------
+function safeText(s) {
+  return (s === null || s === undefined) ? "" : String(s);
+}
+
+// -------------------------
 // FEED
 // -------------------------
-async function loadFeed() {
+async function loadFeed(team) {
   try {
-    const res = await fetch(`${API_BASE}/api/team/feed?team=${TEAM}`);
+    const res = await fetch(`${API_BASE}/api/team/feed?team=${encodeURIComponent(team)}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
 
     feedList.innerHTML = "";
 
-    if (!data.length) {
+    if (!Array.isArray(data) || data.length === 0) {
       feedList.innerHTML = "<li>Ingen aktivitet endnu.</li>";
-      return;
+      return data;
     }
 
     data.forEach(item => {
       const li = document.createElement("li");
-      li.textContent = `${item.name}: ${item.activity}`;
+      li.textContent = `${safeText(item.name)}: ${safeText(item.activity)}`;
       feedList.appendChild(li);
     });
+
+    return data;
   } catch (err) {
+    console.error("loadFeed error:", err);
     feedList.innerHTML = "<li>Fejl ved hentning af feed.</li>";
+    return [];
   }
 }
 
 // -------------------------
 // STATS
 // -------------------------
-async function loadStats() {
+async function loadStats(team) {
   try {
-    const res = await fetch(`${API_BASE}/api/team/stats?team=${TEAM}`);
+    const res = await fetch(`${API_BASE}/api/team/stats?team=${encodeURIComponent(team)}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
 
     statsTotal.textContent = data.total_breaks ?? 0;
@@ -57,31 +71,31 @@ async function loadStats() {
     statsUsers.innerHTML = "";
     (data.breaks_per_user || []).forEach(u => {
       const li = document.createElement("li");
-      li.textContent = `${u.name}: ${u.count}`;
+      li.textContent = `${safeText(u.name)}: ${safeText(u.count)}`;
       statsUsers.appendChild(li);
     });
   } catch (err) {
+    console.error("loadStats error:", err);
     statsTotal.textContent = "0";
     statsUsers.innerHTML = "<li>Fejl ved hentning af statistik.</li>";
   }
 }
 
 // -------------------------
-// RANDOM ACTIVITY
+// RANDOM ACTIVITY (fra feed)
 // -------------------------
-async function fetchRandomActivity() {
+async function fetchRandomActivity(team) {
+  activityBox.textContent = "Henter…";
   try {
-    const res = await fetch(`${API_BASE}/api/team/feed?team=${TEAM}`);
-    const data = await res.json();
-
-    if (!data.length) {
+    const data = await loadFeed(team); // genbrug feed-kald (cache ikke håndteres her)
+    if (!data || data.length === 0) {
       activityBox.textContent = "Ingen aktivitet tilgængelig.";
       return;
     }
-
     const random = data[Math.floor(Math.random() * data.length)];
     activityBox.textContent = random.activity || "Ingen aktivitet.";
   } catch (err) {
+    console.error("fetchRandomActivity error:", err);
     activityBox.textContent = "Fejl ved hentning af aktivitet.";
   }
 }
@@ -90,16 +104,14 @@ async function fetchRandomActivity() {
 // INIT
 // -------------------------
 async function init() {
-  TEAM = getTeamFromURL();
-  if (!TEAM) {
-    alert("Team mangler i URL. Brug ?team=kk");
-    return;
-  }
+  const TEAM = getTeamFromURL();
 
-  await loadFeed();
-  await loadStats();
+  // Bind knap tidligt, så den virker selvom loadFeed fejler
+  activityBtn.addEventListener("click", () => fetchRandomActivity(TEAM));
 
-  activityBtn.addEventListener("click", fetchRandomActivity);
+  // Indlæs feed og stats (vis initial state)
+  await Promise.all([loadFeed(TEAM), loadStats(TEAM)]);
 }
 
-init();
+// Start
+document.addEventListener("DOMContentLoaded", init);
