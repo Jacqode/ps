@@ -1,171 +1,105 @@
-// ---------------------------------------------------------
-// Plug & Pause – Widget (URL‑styret team, ingen indstillinger)
-// ---------------------------------------------------------
+// -------------------------
+// Konfiguration
+// -------------------------
+const API_BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev"; 
+let TEAM = null;
 
-const API_BASE = "https://plugandpause-backend.jakobhelkjaer.workers.dev";
-
-// TEAM fra URL → fallback til "kk"
-const urlParams = new URLSearchParams(window.location.search);
-let TEAM = urlParams.get("team") || "kk";
-
-// Brugeren kan ikke ændre navn, så vi bruger en simpel default
-let USER = "buddy";
-
-// DOM refs
-let getBtn, doneBtn, activityText, activityBox, feedbackBox, feedEl, statsEl;
-
-function safeLog(...args) {
-  if (console && console.log) console.log(...args);
+// Hent team fra URL
+function getTeamFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  return (params.get("team") || "").trim().toLowerCase();
 }
 
-async function fetchJSON(url, opts) {
-  try {
-    const res = await fetch(url, opts);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
-  } catch (err) {
-    safeLog("fetchJSON error:", err, url);
-    throw err;
-  }
-}
+// -------------------------
+// DOM referencer
+// -------------------------
+const feedList = document.getElementById("feed-list");
+const statsTotal = document.getElementById("stats-total");
+const statsUsers = document.getElementById("stats-users");
+const activityBox = document.getElementById("activity-box");
+const activityBtn = document.getElementById("activity-btn");
 
-// ---------------------------------------------------------
-// Hent aktivitet
-// ---------------------------------------------------------
-async function getActivity() {
-  try {
-    const res = await fetchJSON(
-      `${API_BASE}/api/activity/random?team=${encodeURIComponent(TEAM)}&user=${encodeURIComponent(USER)}`
-    );
-
-    const activity =
-      res?.activity ||
-      res?.data?.activity ||
-      (typeof res === "string" ? res : null);
-
-    if (!activity) {
-      activityText.textContent = "Ingen aktivitet tilgængelig.";
-      activityBox.style.display = "block";
-      return;
-    }
-
-    activityText.textContent = activity;
-    activityBox.style.display = "block";
-    doneBtn.style.display = "inline-block";
-    feedbackBox.style.display = "none";
-
-    loadFeed();
-    loadStats();
-  } catch (err) {
-    activityText.textContent = "Fejl ved hentning af aktivitet.";
-    activityBox.style.display = "block";
-  }
-}
-
-// ---------------------------------------------------------
-// Markér aktivitet som færdig
-// ---------------------------------------------------------
-async function completeActivity() {
-  try {
-    await fetchJSON(`${API_BASE}/api/activity/complete`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ team: TEAM, user: USER })
-    });
-
-    activityBox.style.display = "none";
-    feedbackBox.textContent = "Godt klaret! 💪";
-    feedbackBox.style.display = "block";
-
-    setTimeout(() => (feedbackBox.style.display = "none"), 6000);
-
-    loadFeed();
-    loadStats();
-  } catch (err) {
-    safeLog("completeActivity error:", err);
-    showToast("Fejl ved registrering af aktivitet.");
-  }
-}
-
-// ---------------------------------------------------------
-// Feed
-// ---------------------------------------------------------
+// -------------------------
+// FEED
+// -------------------------
 async function loadFeed() {
   try {
-    feedEl.innerHTML = "<div class='small'>Indlæser…</div>";
+    const res = await fetch(`${API_BASE}/api/team/feed?team=${TEAM}`);
+    const data = await res.json();
 
-    const res = await fetchJSON(
-      `${API_BASE}/api/team/feed?team=${encodeURIComponent(TEAM)}`
-    );
+    feedList.innerHTML = "";
 
-    if (!Array.isArray(res) || res.length === 0) {
-      feedEl.innerHTML = "<div class='small'>Ingen feed‑data.</div>";
+    if (!data.length) {
+      feedList.innerHTML = "<li>Ingen aktivitet endnu.</li>";
       return;
     }
 
-    feedEl.innerHTML = res
-      .map((item) => {
-        const time = item?.created_at
-          ? new Date(item.created_at).toLocaleTimeString("da-DK", {
-              hour: "2-digit",
-              minute: "2-digit"
-            })
-          : "ukendt tid";
-
-        return `<div class="small"><strong>${item.name || "Ukendt"}</strong> kl. ${time}: ${item.activity || ""}</div>`;
-      })
-      .join("");
+    data.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = `${item.name}: ${item.activity}`;
+      feedList.appendChild(li);
+    });
   } catch (err) {
-    feedEl.innerHTML = "<div class='small'>Fejl ved indlæsning af feed.</div>";
+    feedList.innerHTML = "<li>Fejl ved hentning af feed.</li>";
   }
 }
 
-// ---------------------------------------------------------
-// Stats
-// ---------------------------------------------------------
+// -------------------------
+// STATS
+// -------------------------
 async function loadStats() {
   try {
-    statsEl.textContent = "Indlæser statistik…";
+    const res = await fetch(`${API_BASE}/api/team/stats?team=${TEAM}`);
+    const data = await res.json();
 
-    const raw = await fetchJSON(
-      `${API_BASE}/api/team/stats?team=${encodeURIComponent(TEAM)}`
-    );
+    statsTotal.textContent = data.total_breaks ?? 0;
 
-    const payload = raw?.data || raw || {};
-    const total = payload.total_breaks ?? payload.totalBreaks ?? "–";
-
-    statsEl.textContent = `Total breaks: ${total}`;
+    statsUsers.innerHTML = "";
+    (data.breaks_per_user || []).forEach(u => {
+      const li = document.createElement("li");
+      li.textContent = `${u.name}: ${u.count}`;
+      statsUsers.appendChild(li);
+    });
   } catch (err) {
-    statsEl.textContent = "Fejl ved indlæsning af statistik.";
+    statsTotal.textContent = "0";
+    statsUsers.innerHTML = "<li>Fejl ved hentning af statistik.</li>";
   }
 }
 
-// ---------------------------------------------------------
-// Toast
-// ---------------------------------------------------------
-function showToast(message) {
-  const toast = document.getElementById("toast");
-  if (!toast) return;
-  toast.textContent = message;
-  toast.classList.add("show");
-  setTimeout(() => toast.classList.remove("show"), 3000);
+// -------------------------
+// RANDOM ACTIVITY (ny metode)
+// -------------------------
+async function fetchRandomActivity() {
+  try {
+    const res = await fetch(`${API_BASE}/api/team/feed?team=${TEAM}`);
+    const data = await res.json();
+
+    if (!data.length) {
+      activityBox.textContent = "Ingen aktivitet tilgængelig.";
+      return;
+    }
+
+    const random = data[Math.floor(Math.random() * data.length)];
+    activityBox.textContent = random.activity || "Ingen aktivitet.";
+  } catch (err) {
+    activityBox.textContent = "Fejl ved hentning af aktivitet.";
+  }
 }
 
-// ---------------------------------------------------------
-// Init
-// ---------------------------------------------------------
-document.addEventListener("DOMContentLoaded", () => {
-  getBtn = document.getElementById("getActivityBtn");
-  doneBtn = document.getElementById("doneBtn");
-  activityText = document.getElementById("activityText");
-  activityBox = document.getElementById("activityBox");
-  feedbackBox = document.getElementById("feedbackBox");
-  feedEl = document.getElementById("feed");
-  statsEl = document.getElementById("stats");
+// -------------------------
+// INIT
+// -------------------------
+async function init() {
+  TEAM = getTeamFromURL();
+  if (!TEAM) {
+    alert("Team mangler i URL. Brug ?team=kk");
+    return;
+  }
 
-  getBtn.addEventListener("click", getActivity);
-  doneBtn.addEventListener("click", completeActivity);
+  await loadFeed();
+  await loadStats();
 
-  loadFeed();
-  loadStats();
-});
+  activityBtn.addEventListener("click", fetchRandomActivity);
+}
+
+init();
