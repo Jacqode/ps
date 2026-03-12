@@ -23,9 +23,13 @@
       transition: opacity 0.3s ease;
       z-index: 9999;
     }
-    #toast.show {
-      opacity: 1;
-    }
+    #toast.show { opacity: 1; }
+    .controls { display:flex; gap:8px; margin-top:12px; }
+    .small { font-size:14px; color:#444; }
+    .secondary { background:#eee; border:1px solid #ddd; padding:8px 12px; cursor:pointer; }
+    .wrap { max-width:420px; margin:40px auto; padding:16px; }
+    .card { background:#fff; padding:18px; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.06); }
+    .lead { color:#666; margin-top:6px; }
   </style>
 </head>
 
@@ -39,7 +43,7 @@
       <!-- KNAPPER -->
       <div class="controls">
         <button id="getActivityBtn">Få en aktivitet</button>
-        <button id="doneBtn" class="secondary">Jeg er færdig</button>
+        <button id="doneBtn" class="secondary" style="display:none;">Jeg er færdig</button>
       </div>
 
       <!-- AKTIVITETSBOKS -->
@@ -51,7 +55,7 @@
       <div id="feedbackBox" class="small" style="margin-top:10px; display:none;"></div>
 
       <!-- FEED -->
-      <h3>Det gør dine buddies:</h3>
+      <h3 style="margin-top:18px;">Det gør dine buddies:</h3>
       <div id="feed">
         <div class="small">Indlæser…</div>
       </div>
@@ -62,9 +66,9 @@
       </div>
 
       <!-- INDSTILLINGER -->
-      <button id="settingsBtn">Indstillinger</button>
+      <button id="settingsBtn" style="margin-top:12px;">Indstillinger</button>
 
-      <div id="settingsPanel" aria-hidden="true">
+      <div id="settingsPanel" aria-hidden="true" style="display:none; margin-top:10px;">
         <label for="nameInput">Dit navn</label>
         <input id="nameInput" placeholder="Dit navn" />
 
@@ -95,19 +99,13 @@
   <script>
     function requestNotificationPermission() {
       if (!("Notification" in window)) return;
-      if (Notification.permission === "default") {
-        Notification.requestPermission();
-      }
+      if (Notification.permission === "default") Notification.requestPermission();
     }
 
     function showNativeNotification(title, body) {
       if (!("Notification" in window)) return;
-
       if (Notification.permission === "granted") {
-        new Notification(title, {
-          body: body,
-          icon: "img/icon.png"
-        });
+        new Notification(title, { body: body, icon: "img/icon.png" });
       } else {
         showToast(body);
       }
@@ -121,19 +119,19 @@
     }
 
     // GEM / INDLÆS INDSTILLINGER
-    document.getElementById("saveBtn").addEventListener("click", () => {
-      const name = document.getElementById("nameInput").value;
-      const team = document.getElementById("teamInput").value;
-      const interval = document.getElementById("intervalInput").value;
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("saveBtn").addEventListener("click", () => {
+        const name = document.getElementById("nameInput").value;
+        const team = document.getElementById("teamInput").value;
+        const interval = document.getElementById("intervalInput").value;
 
-      localStorage.setItem("userName", name);
-      localStorage.setItem("teamName", team);
-      localStorage.setItem("reminderInterval", interval);
+        localStorage.setItem("userName", name);
+        localStorage.setItem("teamName", team);
+        localStorage.setItem("reminderInterval", interval);
 
-      showToast("Indstillinger gemt");
-    });
+        showToast("Indstillinger gemt");
+      });
 
-    window.addEventListener("load", () => {
       const savedName = localStorage.getItem("userName");
       const savedTeam = localStorage.getItem("teamName");
       const savedInterval = localStorage.getItem("reminderInterval");
@@ -143,12 +141,22 @@
       if (savedInterval) document.getElementById("intervalInput").value = savedInterval;
 
       startReminderTimer();
+
+      // settings toggle
+      document.getElementById("settingsBtn").addEventListener("click", () => {
+        const panel = document.getElementById("settingsPanel");
+        const hidden = panel.getAttribute("aria-hidden") === "true";
+        panel.setAttribute("aria-hidden", String(!hidden));
+        panel.style.display = hidden ? "block" : "none";
+      });
+
+      // request notifications once
+      requestNotificationPermission();
     });
 
     // PÅMINDELSES-TIMER
     function startReminderTimer() {
       const minutes = Number(localStorage.getItem("reminderInterval") || 45);
-
       setTimeout(() => {
         showNativeNotification("Tid til en pause!", "Rejs dig og tag en kort aktivitet.");
         startReminderTimer();
@@ -156,7 +164,7 @@
     }
   </script>
 
-  <!-- DIN FUNGERENDE WIDGET.JS -->
+  <!-- Widget logic -->
   <script src="js/widget.js"></script>
 
 </body>
