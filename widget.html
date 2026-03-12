@@ -1,68 +1,30 @@
 <!DOCTYPE html>
 <html lang="da">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8">
   <title>Plug & Pause</title>
-
-  <link rel="stylesheet" href="css/style.css">
-
-  <style>
-    #toast {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #222;
-      color: #fff;
-      padding: 12px 18px;
-      border-radius: 6px;
-      font-size: 14px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-      z-index: 9999;
-    }
-    #toast.show { opacity: 1; }
-
-    .wrap { max-width:420px; margin:40px auto; padding:16px; }
-    .card { background:#fff; padding:18px; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.06); }
-    .controls { display:flex; gap:8px; margin-top:12px; }
-    .small { font-size:14px; color:#444; }
-    .secondary { background:#eee; border:1px solid #ddd; padding:8px 12px; cursor:pointer; }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-  <div class="wrap">
-    <div class="card">
 
-      <h2>Hej 👋</h2>
-      <p class="lead">20–60 sekunders let aktivitet øger energien.</p>
+  <h1>Plug & Pause</h1>
 
-      <div class="controls">
-        <button id="getActivityBtn">Få en aktivitet</button>
-        <button id="doneBtn" class="secondary" style="display:none;">Jeg er færdig</button>
-      </div>
+  <section>
+    <h2>Seneste aktiviteter</h2>
+    <ul id="feed-list"></ul>
+  </section>
 
-      <div id="activityBox" class="small" style="margin-top:10px; display:none;">
-        <div id="activityText"></div>
-      </div>
+  <section>
+    <h2>Statistik</h2>
+    <p>Total: <span id="stats-total">0</span></p>
+    <ul id="stats-users"></ul>
+  </section>
 
-      <div id="feedbackBox" class="small" style="margin-top:10px; display:none;"></div>
-
-      <h3 style="margin-top:18px;">Det gør dine buddies:</h3>
-      <div id="feed">
-        <div class="small">Indlæser…</div>
-      </div>
-
-      <div id="stats" class="small" style="margin-top:10px">
-        Indlæser statistik…
-      </div>
-
-    </div>
-  </div>
-
-  <div id="toast"></div>
+  <section>
+    <h2>Få en aktivitet</h2>
+    <button id="activity-btn">Få aktivitet</button>
+    <p id="activity-box">Tryk på knappen…</p>
+  </section>
 
   <script src="js/widget.js"></script>
 </body>
